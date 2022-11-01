@@ -1,0 +1,102 @@
+===============================================================
+ Instruction for the 5PN O(e^{10}) data files for Mathematica
+ Created on Aug. 26 2020
+ (These files have been converted from Maple files.)
+========================================================
+
+This directory contains the post-Newtonian (PN) formulas for 
+the adiabatic change of the constants of motion and the orbital 
+parameters due to gravitational waves radiated from a compact 
+star of mass $\mu$ in eccentric and inclined orbits around a Kerr 
+black hole (BH) of mass $M$ to the 5PN order and the tenth order 
+in eccentricity. These formulas are derived in Ref.[1] and 
+are extensions of Ref.[2].
+
+========
+Notation
+========
+We use the following notation in the data files.
+For details please see Ref.[2].
+
+q : dimensionless spin parameter of the Kerr BH
+p : semi-latus rectum
+e : orbital eccentricity
+iota : orbital inclination angle
+
+v = sqrt(1/p) : typical orbital velocity
+Y = cos(iota) : cosine of the inclination angle
+kappa = sqrt(1-q^2)
+
+Pi = 3.1415926...
+gamma = 0.57721... : Euler's constant
+
+=================
+ dIdt_5PN_e10.mx
+=================
+This file gives the adiabatic change of the constants of motion, 
+dI/dt where I=(E,L,C), at 5PN and O(e^{10}). The list of the included 
+data is as follows:
+
+* dEdtN, dLdtN, dCdtN :
+These variables are the leading order expressions of the adiabatic 
+change of (E,L,C). 
+
+* dEdt8corr, dLdt8corr, dCdt8corr :
+These variables are the corrections of dI/dt from the leading order
+expressions associated with the gravitational waves emitted to the
+infinity. For example, one obtains the formula of dE/dt^\infty as
+
+dE/dt^\infty = dEdtN * dEdt8corr.
+
+* dEdtHcorr, dLdtHcorr, dCdtHcorr :
+These variables are the corrections of dI/dt from the leading order 
+expressions associated with the gravitational waves absorbed into
+the central black hole. For example, one obtains the formula of
+dE/dt^H as
+
+dE/dt^H = dEdtN * dEdtHcorr.
+
+=================
+ dJdt_5PN_e10.mx
+=================
+This file gives the adiabatic change of the orbital parameters, 
+dJ/dt where J=(v,e,Y), at 5PN and O(e^{10}). It should be noted 
+that the relative orders of the accuracy in de/dt and dY/dt are 
+reduced due to the cancellations in calculating them from dE/dt, 
+dL/dt and dC/dt, as explained in Ref.[1]. In the current results, 
+the relative order of the accuracy in de/dt with respect to 
+the eccentricity becomes O(e^8) effectively. The relative PN order 
+in dY/dt is redueced to 3.5PN. The list of the included data is as follows:
+
+* dvdtN, dedtN, dYdtN :
+These variables are the leading order expressions of the adiabatic 
+change of (v,e,Y). 
+
+* dvdt8corr, dedt8corr, dYdt8corr :
+These variables are the corrections of dJ/dt from the leading order
+expressions associated with the gravitational waves emitted to 
+the infinity. For example, one obtains the formula of dv/dt^\infty as
+
+dv/dt^\infty = dvdtN * dvdt8corr.
+
+* dvdtHcorr, dedtHcorr, dYdtHcorr :
+These variables are the corrections of dJ/dt from the leading order
+expressions associated with the gravitational waves absorbed 
+into the central black hole. For example, one obtains the formula 
+of dv/dt^H as
+
+dv/dt^H = dvdtN * dvdtHcorr.
+
+===============
+Acknowledgments
+===============
+We would like to thank Priti Gupta and Soichiro Isoya for checking 
+our data files are consistent with those obtained by using MapleCoverter 
+0.95 at https://library.wolfram.com/infocenter/MathSource/188/.
+
+==========
+References
+==========
+[1] R. Fujita and M. Shibata, Extreme mass ratio inspirals on the equatorial plane in the adiabatic order, PRD accepted, arXiv:2008.xxxxx [gr-qc].
+
+[2] N. Sago and R. Fujita, Calculation of radiation reaction effect on orbital parameters in Kerr spacetime, Progress of Theoretical and Experimental Physics 2015, 073E03 (2015), arXiv:1505.01600 [gr-qc].
