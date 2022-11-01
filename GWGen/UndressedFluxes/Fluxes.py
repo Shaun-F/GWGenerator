@@ -9,3 +9,5 @@ def import_numerical_data(spin=0.9):
     nearest_spin=available_spins[(np.abs(spin-available_spins).argmin())];
     import_string = numericaldatapath+'/../../numerical_flux/dIdt_q'+str(nearest_spin)+'0inc0.dat';
     return pd.read_csv(import_string,delimiter=' ', header=None, names=colnames)
+
+def numerical_data_interpolation():
