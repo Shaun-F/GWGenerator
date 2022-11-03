@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import os
-numericaldatapath = os.path.abspath(os.path.dirname(__file__));
+numericaldatapath = os.path.abspath(os.path.dirname(__file__))+'../../numerical_flux';
 
 def import_numerical_data(spin=0.9):
     available_spins=np.asarray([-0.9,-0.7,-0.5,-0.3,-0.1,0,0.1,0.3,0.5,0.7,0.9])
