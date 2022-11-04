@@ -8,10 +8,6 @@ from few.utils.baseclasses import Pn5AAK, ParallelModuleBase
 from few.waveform import AAKWaveformBase
 from few.summation.aakwave import AAKSummation
 
-#hard values
-####### make user inputs
-a=0.2
-
 
 def Power(x,n):
 	return x**n
@@ -22,8 +18,9 @@ def Sign(x):
 	return x/abs(x)
 
 class PN:
-	def __init__(self, epsilon): #epsilon is mass ratio
-		self.epsilon=epsilon
+	def __init__(self, massratio, bhspin=0.9): #epsilon is mass ratio
+		self.epsilon=massratio
+		self.a = bhspin
 
 	def __call__(self, t, y):
 		"""
@@ -47,10 +44,10 @@ class PN:
 			return [0.0, 0.0,0.0,0.0]
 
 		# Azimuthal Frequency. Calculated using KerrGeodesics package from BlackHolePerturbationToolkit, KerrGeoFrequencies[a, p, 0, 1]
-		Omega_phi = 1 / (a + p**(3/2))
+		Omega_phi = 0;
 
 		# Radial Frequency. Calculated using KerrGeodesics package from BlackHolePerturbationToolkit, KerrGeoFrequencies[a, p, 0, 1]
-		Omega_r = (Sqrt(2*a + (-3 + p)*Sqrt(p))*Sqrt((-2*Power(a,2) + 6*a*Sqrt(p) + (-5 + p)*p +  Power(a - Sqrt(p),2)*Sign(Power(a,2) - 4*a*Sqrt(p) - (-4 + p)*p))/(2*a*Sqrt(p) + (-3 + p)*p)))/(Power(p,0.75)*(a + Power(p,1.5)))
+		Omega_r = (Sqrt(2*self.a + (-3 + p)*Sqrt(p))*Sqrt((-2*Power(self.a,2) + 6*self.a*Sqrt(p) + (-5 + p)*p +  Power(self.a - Sqrt(p),2)*Sign(Power(self.a,2) - 4*self.a*Sqrt(p) - (-4 + p)*p))/(2*self.a*Sqrt(p) + (-3 + p)*p)))/(Power(p,0.75)*(self.a + Power(p,1.5)))
 
 		Edotcorr = 1.0  ############# CHANGE TO CORRECT PN VALUE
 		EdotN = -32./5. * 1/(p**2) * v**6
@@ -66,8 +63,10 @@ class PN:
 
 		edot = 0.0 #Circular orbit
 
+		#rate of change of azimuthal phase
 		Phi_phi_dot = Omega_phi
 
+		#rate of change of radial phase
 		Phi_r_dot =  Omega_r
 
 		dydt = [pdot, edot, Phi_phi_dot, Phi_r_dot]

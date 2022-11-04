@@ -9,3 +9,12 @@ def stringtocomplex(string):
     realpart = float(re.search(r'\S+\d+.\d+', string).group())
 
     return complex(realpart, complexpart)
+
+def Sqrt(x):
+    return x**(1/2)
+
+def Power(x,y):
+    return x**y
+
+def Abs(x):
+    return abs(x)
