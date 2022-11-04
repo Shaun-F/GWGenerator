@@ -1,6 +1,7 @@
-from mpmath import *
 from scipy.integrate import DOP853
 import numpy as np
+from .Kerr import *
+from GWGen.UndressedFluxes import *
 
 from few.utils.baseclasses import TrajectoryBase
 from few.utils.constants import MTSUN_SI, YRSID_SI, Pi
@@ -17,10 +18,16 @@ def Sqrt(x):
 def Sign(x):
 	return x/abs(x)
 
-class PN:
+class PN(Kerr):
 	def __init__(self, massratio, bhspin=0.9): #epsilon is mass ratio
 		self.epsilon=massratio
 		self.a = bhspin
+		super().__init__(BHSpin=self.a)
+		self.RadialFrequency = self.OmegaR()
+		self.AzimuthalFrequency = self.OmegaPhi()
+		self.PolarFrequency = self.OmegaTheta()
+		self.UndressedFlux = lambda e,p: Analytic5PNFlux(e,p,self.a)
+
 
 	def __call__(self, t, y):
 		"""
@@ -36,32 +43,27 @@ class PN:
 		#extract parameters to evolve
 		p, e, Phi_phi, Phi_r = y
 
-		#define velocity
-		v = 1/(p**(1/2))
 
 		#setup guard for bad integration steps
 		if e>=1.0 or e<1e-2 or p<6.0 or (p - 6 - 2* e) < 0.1:
 			return [0.0, 0.0,0.0,0.0]
 
-		# Azimuthal Frequency. Calculated using KerrGeodesics package from BlackHolePerturbationToolkit, KerrGeoFrequencies[a, p, 0, 1]
-		Omega_phi = 0;
+		# Azimuthal Frequency
+		Omega_phi = self.AzimuthalFrequency(e,p);
 
-		# Radial Frequency. Calculated using KerrGeodesics package from BlackHolePerturbationToolkit, KerrGeoFrequencies[a, p, 0, 1]
-		Omega_r = (Sqrt(2*self.a + (-3 + p)*Sqrt(p))*Sqrt((-2*Power(self.a,2) + 6*self.a*Sqrt(p) + (-5 + p)*p +  Power(self.a - Sqrt(p),2)*Sign(Power(self.a,2) - 4*self.a*Sqrt(p) - (-4 + p)*p))/(2*self.a*Sqrt(p) + (-3 + p)*p)))/(Power(p,0.75)*(self.a + Power(p,1.5)))
+		# Radial Frequency
+		Omega_r = self.RadialFrequency(e,p)
 
-		Edotcorr = 1.0  ############# CHANGE TO CORRECT PN VALUE
-		EdotN = -32./5. * 1/(p**2) * v**6
+		#Energy flux
+		EdotN = self.UndressedFlux(e,p);
 
 		#include mass ratio
-		Edot = epsilon*EdotN*Edotcorr
+		Edot = epsilon*EdotN
 		Ldot = Edot/Omega_phi ########### Check this expression. Note it holds for circular orbits
 
-		dEdp = (-3*Power(a,2) + 8*a*Sqrt(p) + (-6 + p)*p)/(2.*Power(2*a + (-3 + p)*Sqrt(p),1.5)*Power(p,1.75)) ########### Input correct values
-		dLdp = -0.5*((3*Power(a,2) - 8*a*Sqrt(p) - (-6 + p)*p)*(a + Power(p,1.5)))/(Power(2*a + (-3 + p)*Sqrt(p),1.5)*Power(p,1.75)) ########### Input correct values
+		pdot = Edot/(self.dEdp()(e,p)) + Ldot/(self.dLdp()(e,p))
 
-		pdot = Edot/(dEdp) + Ldot/(dLdp)
-
-		edot = 0.0 #Circular orbit
+		edot = Edot/(self.dEde()(e,p)) + Ldot/(self.dLde()(e,p))
 
 		#rate of change of azimuthal phase
 		Phi_phi_dot = Omega_phi

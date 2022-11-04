@@ -1,4 +1,5 @@
 import re
+import mpmath
 
 def stringtocomplex(string):
     exponentpiece = re.search(r'\^-\d+', string).group()
@@ -10,6 +11,9 @@ def stringtocomplex(string):
 
     return complex(realpart, complexpart)
 
+
+###mathematica namespace converter
+
 def Sqrt(x):
     return x**(1/2)
 
@@ -18,3 +22,16 @@ def Power(x,y):
 
 def Abs(x):
     return abs(x)
+
+
+#complete elliptic integral of the 1st kind
+def EllipticK(m):
+    return(float(mpmath.ellipk(m)))
+
+#complete elliptic integral of the 2nd kind
+def EllipticE(m):
+    return(float(mpmath.ellipe(m)))
+
+#complete elliptic integral of the 3rd kind
+def EllipticPi(n,m):
+    return(float(mpmath.ellippi(n,m)))
