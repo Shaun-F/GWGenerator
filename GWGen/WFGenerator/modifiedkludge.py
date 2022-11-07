@@ -45,7 +45,7 @@ class PN(Kerr):
 
 
 		#setup guard for bad integration steps
-		if e>=1.0 or e<1e-3 or p<6.0 or (p - 6 - 2* e) < 0.1:
+		if e>=1.0 or p<6.0 or (p - 6 - 2* e) < 0.1:
 			return [0.0, 0.0,0.0,0.0]
 
 		# Azimuthal Frequency
@@ -63,7 +63,10 @@ class PN(Kerr):
 
 		pdot = Edot/(self.dEdp()(e,p)) + Ldot/(self.dLdp()(e,p))
 
-		edot = Edot/(self.dEde()(e,p)) + Ldot/(self.dLde()(e,p))
+		if e<10**(-9):
+			edot=0
+		else:
+			edot = Edot/(self.dEde()(e,p)) + Ldot/(self.dLde()(e,p))
 
 		#rate of change of azimuthal phase
 		Phi_phi_dot = Omega_phi
@@ -100,8 +103,11 @@ class PnTraj(TrajectoryBase):
 
 		Msec = M*MTSUN_SI
 
+		#PN evaluator
 		epsilon = mu/M
-		integrator = DOP853(PN(epsilon), 0.0, y0, T) #Explicit Runge-Kutta of order 8
+		self.PNEvaluator = PN(epsilon)
+
+		integrator = DOP853(self.PNEvaluator, 0.0, y0, T) #Explicit Runge-Kutta of order 8
 
 		#arrays to hold output values from integrator
 		t_out, p_out, e_out = [], [], []
@@ -153,7 +159,7 @@ class NewPn5AAKWaveform(AAKWaveformBase, Pn5AAK):
         AAKWaveformBase.__init__(
             self,
             PnTraj,  # trajectory class  EMRIInspiral
-            AAKSummation,
+            AAKSummation, #Summation module for combining amplitude and phase information
             inspiral_kwargs=inspiral_kwargs,
             sum_kwargs=sum_kwargs,
             use_gpu=use_gpu,
