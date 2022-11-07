@@ -63,7 +63,7 @@ class PN(Kerr):
 
 		pdot = Edot/(self.dEdp()(e,p)) + Ldot/(self.dLdp()(e,p))
 
-		if e<10**(-9):
+		if e<10**(-5):
 			edot=0
 		else:
 			edot = Edot/(self.dEde()(e,p)) + Ldot/(self.dLde()(e,p))
