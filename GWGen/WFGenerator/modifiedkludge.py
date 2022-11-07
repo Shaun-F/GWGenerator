@@ -45,7 +45,7 @@ class PN(Kerr):
 
 
 		#setup guard for bad integration steps
-		if e>=1.0 or e<1e-2 or p<6.0 or (p - 6 - 2* e) < 0.1:
+		if e>=1.0 or e<1e-3 or p<6.0 or (p - 6 - 2* e) < 0.1:
 			return [0.0, 0.0,0.0,0.0]
 
 		# Azimuthal Frequency
