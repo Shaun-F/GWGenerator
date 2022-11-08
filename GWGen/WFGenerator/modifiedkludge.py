@@ -4,9 +4,11 @@ import numpy as np
 from GWGen.Utils import *
 from GWGen.UndressedFluxes import *
 
+from few.trajectory.inspiral import EMRIInspiral
 from few.utils.baseclasses import TrajectoryBase
 from few.utils.constants import MTSUN_SI, YRSID_SI, Pi
 from few.utils.baseclasses import Pn5AAK, ParallelModuleBase
+from few.utils.utility import *
 from few.waveform import AAKWaveformBase
 from few.summation.aakwave import AAKSummation
 
@@ -45,22 +47,25 @@ class PN(Kerr):
 		#extract parameters to evolve
 		p, e, Phi_phi, Phi_r = y
 
-
+		print(p)
+		print(e)
 		#setup guard for bad integration steps
-		if e>=1.0 or p<6.0 or (p - 6 - 2* e) < 0.1:
+		if e>=1.0  or (p-get_separatrix(self.a, e,1.)) < 0.1 or e<0:
 			return [0.0, 0.0,0.0,0.0]
+		try:
+			# Azimuthal Frequency
+			Omega_phi = self.AzimuthalFrequency(e,p);
 
-		# Azimuthal Frequency
-		Omega_phi = self.AzimuthalFrequency(e,p);
+			# Radial Frequency
+			Omega_r = self.RadialFrequency(e,p)
 
-		# Radial Frequency
-		Omega_r = self.RadialFrequency(e,p)
+			#Energy flux
+			EdotN = self.UndressedEFlux(e,p);
 
-		#Energy flux
-		EdotN = self.UndressedEFlux(e,p);
-
-		#Angular momentum
-		LdotN = self.UndressedLFlux(e,p)
+			#Angular momentum
+			LdotN = self.UndressedLFlux(e,p)
+		except TypeError:
+			print("ERROR: type error in frequency and flux generation as (e,p)=({0},{1})".format(e,p))
 
 		#include mass ratio
 		Edot = epsilon*EdotN
@@ -82,7 +87,7 @@ class PN(Kerr):
 		Phi_r_dot =  Omega_r
 
 		dydt = [pdot, edot, Phi_phi_dot, Phi_r_dot]
-
+		print(dydt)
 		return dydt
 
 class PnTraj(TrajectoryBase):
@@ -101,7 +106,7 @@ class PnTraj(TrajectoryBase):
 		T: integration time (years)
 		"""
 		#boundary values
-		y0 = [p0, e0, 0.0, 0.0] #zero mean anomaly initially
+		y0 = [float(p0), float(e0), 0.0, 0.0] #zero mean anomaly initially
 
 
 		#MTSUN_SI converts solar masses to seconds and is equal to G/(c^3)
@@ -111,19 +116,14 @@ class PnTraj(TrajectoryBase):
 		Msec = M*MTSUN_SI
 
 		#PN evaluator
-		epsilon = mu/M
-		self.PNEvaluator = PN(epsilon)
+		epsilon = float(mu/M)
+		self.PNEvaluator = PN(epsilon,bhspin=float(a))
 
 		integrator = DOP853(self.PNEvaluator, 0.0, y0, T) #Explicit Runge-Kutta of order 8
 
 		#arrays to hold output values from integrator
-		t_out, p_out, e_out = [], [], []
-		Phi_phi_out, Phi_r_out = [], []
-		t_out.append(0.0)
-		p_out.append(p0)
-		e_out.append(e0)
-		Phi_phi_out.append(0.0)
-		Phi_r_out.append(0.0)
+		t_out, p_out, e_out = [0.], [p0], [e0]
+		Phi_phi_out, Phi_r_out = [0.], [0.]
 
 		# run integrator down to T or separatrix
 		run=True
@@ -137,7 +137,9 @@ class PnTraj(TrajectoryBase):
 			Phi_r_out.append(Phi_r)
 
 			#catch separatrix crossing and halt integration
-			if (p - 6 - 2*e)<0.1:
+			if (p - get_separatrix(a,e,1.))<0.1:
+				run=False
+			if e<0 or e>=1:
 				run=False
 
 		#read data

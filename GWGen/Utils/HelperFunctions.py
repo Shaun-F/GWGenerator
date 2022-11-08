@@ -28,12 +28,20 @@ def Abs(x):
 
 #complete elliptic integral of the 1st kind
 def EllipticK(m):
-    return(float(ellipk(m)))
-
+    try:
+        return(float(ellipk(m)))
+    except TypeError:
+        print("ERROR: input {0} returns imaginary result".format(m))
 #complete elliptic integral of the 2nd kind
 def EllipticE(m):
-    return(float(ellipe(m)))
+    try:
+        return(float(ellipe(m)))
+    except TypeError:
+        print("ERROR: input {0} returns imaginary result".format(m))
 
 #complete elliptic integral of the 3rd kind
 def EllipticPi(n,m):
-    return(float(ellippi(n,m)))
+    try:
+        return(float(ellippi(n,m)))
+    except TypeError:
+        print("ERROR: input {0},{1} returns imaginary result".format(n,m))
