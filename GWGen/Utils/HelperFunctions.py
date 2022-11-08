@@ -1,5 +1,7 @@
 import re
-import mpmath
+from mpmath import *
+mp.dps=25
+mp.pretty=True
 
 def stringtocomplex(string):
     exponentpiece = re.search(r'\^-\d+', string).group()
@@ -26,12 +28,12 @@ def Abs(x):
 
 #complete elliptic integral of the 1st kind
 def EllipticK(m):
-    return(float(mpmath.ellipk(m)))
+    return(float(ellipk(m)))
 
 #complete elliptic integral of the 2nd kind
 def EllipticE(m):
-    return(float(mpmath.ellipe(m)))
+    return(float(ellipe(m)))
 
 #complete elliptic integral of the 3rd kind
 def EllipticPi(n,m):
-    return(float(mpmath.ellippi(n,m)))
+    return(float(ellippi(n,m)))

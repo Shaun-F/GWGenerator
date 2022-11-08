@@ -1,6 +1,7 @@
 from scipy.integrate import DOP853
+
 import numpy as np
-from .Kerr import *
+from GWGen.Utils import *
 from GWGen.UndressedFluxes import *
 
 from few.utils.baseclasses import TrajectoryBase
@@ -26,7 +27,8 @@ class PN(Kerr):
 		self.RadialFrequency = self.OmegaR()
 		self.AzimuthalFrequency = self.OmegaPhi()
 		self.PolarFrequency = self.OmegaTheta()
-		self.UndressedFlux = lambda e,p: Analytic5PNFlux(e,p,self.a)
+		self.UndressedEFlux = lambda e,p: Analytic5PNEFlux(e,p,self.a)
+		self.UndressedLFlux = lambda e,p: Analytic5PNLFlux(e,p,self.a)
 
 
 	def __call__(self, t, y):
@@ -55,18 +57,23 @@ class PN(Kerr):
 		Omega_r = self.RadialFrequency(e,p)
 
 		#Energy flux
-		EdotN = self.UndressedFlux(e,p);
+		EdotN = self.UndressedEFlux(e,p);
+
+		#Angular momentum
+		LdotN = self.UndressedLFlux(e,p)
 
 		#include mass ratio
 		Edot = epsilon*EdotN
-		Ldot = Edot/Omega_phi ########### Check this expression. Note it holds for circular orbits
+		Ldot = epsilon*LdotN
 
-		pdot = Edot/(self.dEdp()(e,p)) + Ldot/(self.dLdp()(e,p))
+		norm = self.dLdp()(e,p)*self.dEde()(e,p) - self.dLde()(e,p)*self.dEdp()(e,p)
+
+		pdot = (self.dEde()(e,p)*Ldot - self.dLde()(e,p)*Edot)/norm
 
 		if e<10**(-5):
 			edot=0
 		else:
-			edot = Edot/(self.dEde()(e,p)) + Ldot/(self.dLde()(e,p))
+			edot = (self.dLdp()(e,p)*Edot - self.dEdp()(e,p)*Ldot)/norm
 
 		#rate of change of azimuthal phase
 		Phi_phi_dot = Omega_phi
