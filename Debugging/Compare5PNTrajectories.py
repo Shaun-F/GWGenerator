@@ -17,7 +17,7 @@ import GWGen
 from GWGen.WFGenerator import *
 
 # set initial parameters
-M = 1e5
+M = 1e6
 mu = 1e0
 a = 1e-6
 p0 = 14.0
@@ -39,11 +39,11 @@ fewtraj = EMRIInspiral(func="pn5", enforce_schwarz_sep=False)
 
 # run trajectory
 tf, pf, ef, Yf, Phi_phif, Phi_rf, Phi_thetaf = fewtraj(M, mu, a, p0, e0, Y0, T=T)
-                                             
-                                             
+
+
 ########### My Trajectory
 traj = PNTraj(bhspin=1e-2)
-t,p,e,x,phiphi,phitheta,phir = traj(M,mu,a, p0,e0,Y0,T=2,npoints=50)
+t,p,e,x,phiphi,phitheta,phir = traj(M,mu,a, p0,e0,Y0,T=T,npoints=100)
 
 
 fig,axes=plt.subplots(2,2)
@@ -78,17 +78,3 @@ axes[1,1].plot(t,phiphi, label="Mine")
 axes[1,1].legend()
 
 plt.show()
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -25,8 +25,10 @@ def Sign(x):
 	return x/abs(x)
 
 class PN(Kerr):
-	def __init__(self, massratio, bhspin=0.9): #epsilon is mass ratio
-		self.epsilon=massratio
+	def __init__(self, M,m, bhspin=0.9, DeltaEFlux=0.0, DeltaLFlux=0.0): #epsilon is mass ratio
+		self.epsilon=m/M
+		self.SMBHMass = M
+		self.SecondaryMass = m
 		self.a = bhspin
 		super().__init__(BHSpin=self.a)
 		self.RadialFrequency = self.OmegaR()
@@ -34,6 +36,8 @@ class PN(Kerr):
 		self.PolarFrequency = self.OmegaTheta()
 		self.UndressedEFlux = lambda e,p: Analytic5PNEFlux(e,p,self.a)
 		self.UndressedLFlux = lambda e,p: Analytic5PNLFlux(e,p,self.a)
+		self.EFluxModification = DeltaEFlux
+		self.LFluxModification = DeltaLFlux
 
 
 	def __call__(self, t, y):
@@ -71,8 +75,8 @@ class PN(Kerr):
 			print("ERROR: type error in frequency and flux generation as (e,p)=({0},{1})".format(ecc,semimaj))
 
 		#include mass ratio
-		Edot = epsilon*EdotN
-		Ldot = epsilon*LdotN
+		Edot = epsilon*EdotN + self.EFluxModification
+		Ldot = epsilon*LdotN + self.LFluxModification
 
 		norm = self.dLdp()(ecc,semimaj)*self.dEde()(ecc,semimaj) - self.dLde()(ecc,semimaj)*self.dEdp()(ecc,semimaj)
 
@@ -121,7 +125,7 @@ class PNTraj(TrajectoryBase):
 
 		#PN evaluator
 		epsilon = float(mu/M)
-		self.PNEvaluator = PN(epsilon,bhspin=a)
+		self.PNEvaluator = PN(M,mu,bhspin=a)
 		integrator = DOP853(self.PNEvaluator, 0.0, y0, T, max_step=T/npoints) #Explicit Runge-Kutta of order 8
 
 		#arrays to hold output values from integrator
