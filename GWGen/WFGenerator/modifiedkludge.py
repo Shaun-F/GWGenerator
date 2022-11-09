@@ -224,7 +224,6 @@ class testPnTrajectory(TrajectoryBase):
             Phi_phi_out.append(Phi_phi)
             Phi_r_out.append(Phi_r)
 
-            print(p)
            #catch separatrix crossing and halt integration
             if (p - get_separatrix(a,e,1.))<0.1:
                 run=False
