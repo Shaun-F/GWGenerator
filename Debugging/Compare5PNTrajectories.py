@@ -43,7 +43,7 @@ tf, pf, ef, Yf, Phi_phif, Phi_rf, Phi_thetaf = fewtraj(M, mu, a, p0, e0, Y0, T=T
 
 
 ########### My Trajectory ###########
-traj = PNTraj(bhspin=1e-2)
+traj = PNTraj(bhspin=1e-2, DeltaEFlux=-8e-12)
 t,p,e,x,phiphi,phitheta,phir = traj(M,mu,a, p0,e0,Y0,T=T,npoints=100)
 
 

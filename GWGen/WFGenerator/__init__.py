@@ -1,1 +1,2 @@
-from .modifiedkludge import *
+from .Kludge import *
+from .ModifiedKludge import *

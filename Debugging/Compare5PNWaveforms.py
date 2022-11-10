@@ -44,6 +44,7 @@ use_gpu = False
 inspiral_kwargs = {
     "DENSE_STEPPING": 0,  # we want a sparsely sampled trajectory
     "max_init_len": int(1e3),  # all of the trajectories will be well under len = 1000
+    "DeltaEFlux":0
 }
 
 # keyword arguments for summation generator (AAKSummation)
@@ -111,26 +112,3 @@ axes[1,1].text(0.5,0.5, "Mismatch = {0}".format(get_mismatch(FEWwaveform, mywf))
 axes[1,1].axis("off")
 
 plt.show()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

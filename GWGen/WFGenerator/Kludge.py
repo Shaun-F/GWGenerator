@@ -67,10 +67,10 @@ class PN(Kerr):
 			Omega_r = self.RadialFrequency(ecc,semimaj)
 
 			#Energy flux
-			EdotN = self.UndressedEFlux(ecc,semimaj)
+			EdotN = self.UndressedEFlux(ecc,semimaj) #this is negative
 
 			#Angular momentum
-			LdotN = self.UndressedLFlux(ecc,semimaj)
+			LdotN = self.UndressedLFlux(ecc,semimaj) #this is negative
 		except TypeError:
 			print("ERROR: type error in frequency and flux generation as (e,p)=({0},{1})".format(ecc,semimaj))
 
@@ -100,6 +100,8 @@ class PN(Kerr):
 class PNTraj(TrajectoryBase):
 
 	def __init__(self, *args, **kwargs):
+		self.DeltaEFlux = kwargs.get("DeltaEFlux", 0)
+		self.DeltaLFlux = kwargs.get("DeltaLFlux", 0)
 		pass
 
 	def get_inspiral(self, M, mu, a, p0, e0, x0, T=1.0,npoints=10, **kwargs):
@@ -125,9 +127,8 @@ class PNTraj(TrajectoryBase):
 
 		#PN evaluator
 		epsilon = float(mu/M)
-		self.PNEvaluator = PN(M,mu,bhspin=a)
+		self.PNEvaluator = PN(M,mu,bhspin=a, DeltaEFlux = self.DeltaEFlux, DeltaLFlux = self.DeltaLFlux)
 		integrator = DOP853(self.PNEvaluator, 0.0, y0, T, max_step=T/npoints) #Explicit Runge-Kutta of order 8
-
 		#arrays to hold output values from integrator
 		t_out, p_out, e_out = [0.], [p0], [e0]
 		Phi_phi_out, Phi_r_out = [0.], [0.]
@@ -151,7 +152,7 @@ class PNTraj(TrajectoryBase):
 			if e<0 or e>=1:
 				run=False
 				exit_reason="Ecccentricity exceeded bounds"
-
+		print("done")
 		#read data
 		t = np.asarray(t_out)
 		p = np.asarray(p_out)
@@ -173,12 +174,10 @@ class NewPn5AAKWaveform(AAKWaveformBase, Pn5AAK):
         self, inspiral_kwargs={}, sum_kwargs={}, use_gpu=False, num_threads=None
     ):
 
-        inspiral_kwargs["func"] = "pn5"
-
         AAKWaveformBase.__init__(
             self,
-            PNTraj,  # trajectory class  EMRIInspiral
-            AAKSummation, #Summation module for combining amplitude and phase information
+            PNTraj,  #Trajectory class
+            AAKSummation, #Summation module for combining amplitude and phase information. This generates the waveform. See: https://bhptoolkit.org/FastEMRIWaveforms/html/user/sum.html#module-few.summation.aakwave
             inspiral_kwargs=inspiral_kwargs,
             sum_kwargs=sum_kwargs,
             use_gpu=use_gpu,

@@ -9,21 +9,24 @@ import astropy.units as unit
 pathToSolutionSet = os.path.abspath(os.path.dirname(__file__))+'/../../ProcaSolutions/';
 
 class ProcaSolution():
-	def __init__(self, BHMass, BHSpin, ProcaMass, units="physical"):
-	    	if units=="natural":
-	    		raise NotImplementedError("natural units not yet implemented. Use physical units. See https://bitbucket.org/weast/superrad/src/master/ for definitions")
-	    	self.units = units
-    		self.BosonCloud = SR.ultralight_boson.UltralightBoson(spin=1, model="relativistic")
-	        self.BosonWaveform = self.BosonCloud.make_waveform(BHMass, BHSpin, ProcaMass, units=units)
-        
-        def GWFlux(self,t=0):
-        	#Convert units!!!! 
-		DimensionfullPower = self.BosonWaveform.power_gw(t)*unit.watt
-		conversion = cons.G/(cons.c**5)
-        	res = (conversion*DimensionfullPower).decompose()
-        	return res
+	def __init__(self, BHMass, BHSpin, ProcaMass, BosonSpin=1,CloudModel = "relativistic",units="physical"):
+			if units=="natural":
+				raise NotImplementedError("natural units not yet implemented. Use physical units. See https://bitbucket.org/weast/superrad/src/master/ for definitions")
+			self.units = units
+			self.BosonSpin = BosonSpin
+			self.CloudModel = CloudModel
+			self.BosonCloud = SR.ultralight_boson.UltralightBoson(spin=self.BosonSpin, model=self.CloudModel)
+			self.BosonWaveform = self.BosonCloud.make_waveform(BHMass, BHSpin, ProcaMass, units=units)
 
-    	def GWTimescale(self):
+	def GWFlux(self,t=0):
+			#Must divide by mass ratio mu/M to get actual dimensionless power
+			## See definition of dimenionless energy and dimensionless time
+			DimensionfullPower = self.BosonWaveform.power_gw(t)*unit.watt
+			conversion = cons.G/(cons.c**5)
+			res = (conversion*DimensionfullPower).decompose()
+			return res
+
+	def GWTimescale(self):
         	return self.BosonWaveform.gw_time()
 
 
