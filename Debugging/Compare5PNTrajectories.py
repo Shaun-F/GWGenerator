@@ -17,9 +17,9 @@ import GWGen
 from GWGen.WFGenerator import *
 
 # set initial parameters
-M = 1e6
+M = 1e5
 mu = 1e0
-a = 1e-6
+a = .5
 p0 = 14.0
 e0 = 0.3
 iota0 = 0.
@@ -33,7 +33,7 @@ Phi_r0 = 0.0
 
 
 
-########### Few Trajectory
+########### Few Trajectory###########
 # initialize trajectory class
 fewtraj = EMRIInspiral(func="pn5", enforce_schwarz_sep=False)
 
@@ -41,7 +41,8 @@ fewtraj = EMRIInspiral(func="pn5", enforce_schwarz_sep=False)
 tf, pf, ef, Yf, Phi_phif, Phi_rf, Phi_thetaf = fewtraj(M, mu, a, p0, e0, Y0, T=T)
 
 
-########### My Trajectory
+
+########### My Trajectory ###########
 traj = PNTraj(bhspin=1e-2)
 t,p,e,x,phiphi,phitheta,phir = traj(M,mu,a, p0,e0,Y0,T=T,npoints=100)
 

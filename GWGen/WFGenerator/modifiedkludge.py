@@ -74,7 +74,7 @@ class PN(Kerr):
 		except TypeError:
 			print("ERROR: type error in frequency and flux generation as (e,p)=({0},{1})".format(ecc,semimaj))
 
-		#include mass ratio
+		#factor of epsilon ensures correct scaling of pdot and edot in mass ratio (see: http://arxiv.org/abs/gr-qc/0702054, eq 4.3)
 		Edot = epsilon*EdotN + self.EFluxModification
 		Ldot = epsilon*LdotN + self.LFluxModification
 

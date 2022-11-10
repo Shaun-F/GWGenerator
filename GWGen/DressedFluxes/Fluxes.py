@@ -3,20 +3,28 @@ import pandas as pd
 import scipy as sp
 import os
 import superrad as SR
+import astropy.constants as cons
+import astropy.units as unit
 
 pathToSolutionSet = os.path.abspath(os.path.dirname(__file__))+'/../../ProcaSolutions/';
 
 class ProcaSolution():
-    def __init__(self, BHMass, BHSpin, ProcaMass, units="natural"):
-        self.BosonCloud = SR.ultralight_boson.UltralightBoson(spin=1, model="relativistic")
-        self.BosonWaveform = self.BosonCloud.make_waveform(BHMass, BHSpin, ProcaMass, units=units)
+	def __init__(self, BHMass, BHSpin, ProcaMass, units="physical"):
+	    	if units=="natural":
+	    		raise NotImplementedError("natural units not yet implemented. Use physical units. See https://bitbucket.org/weast/superrad/src/master/ for definitions")
+	    	self.units = units
+    		self.BosonCloud = SR.ultralight_boson.UltralightBoson(spin=1, model="relativistic")
+	        self.BosonWaveform = self.BosonCloud.make_waveform(BHMass, BHSpin, ProcaMass, units=units)
+        
+        def GWFlux(self,t=0):
+        	#Convert units!!!! 
+		DimensionfullPower = self.BosonWaveform.power_gw(t)*unit.watt
+		conversion = cons.G/(cons.c**5)
+        	res = (conversion*DimensionfullPower).decompose()
+        	return res
 
-    def GWFlux(self,t=0)
-        #Convert units!!!! 
-        return self.BosonWaveform.power_gw(t)
-
-    def GWTimescale(self):
-        return self.BosonWaveform.gw_time()
+    	def GWTimescale(self):
+        	return self.BosonWaveform.gw_time()
 
 
 
