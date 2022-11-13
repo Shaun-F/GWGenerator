@@ -35,3 +35,11 @@ class ModifiedKludgeWaveform(ProcaSolution,AAKWaveformBase, Kerr):
         self.inspiralkwargs["DeltaEFlux"] = asymptoticBosonCloudEFlux
         self.inspiralkwargs["DeltaLFlux"] = asymptoticBosonCloudLFlux
         self.inspiralkwargs["FluxName"] = FluxName
+
+        aakwaveform = AAKWaveformBase(PNTraj,
+                                        AAKSummation,
+                                        inspiral_kwargs=self.inspiralkwargs,
+                                        sum_kwargs = self.sumkwargs,
+                                        use_gpu=self.use_gpu
+                                        num_threads=self.num_threads)
+        
