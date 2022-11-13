@@ -3,6 +3,10 @@ from mpmath import *
 mp.dps=25
 mp.pretty=True
 
+
+
+
+
 def stringtocomplex(string):
     exponentpiece = re.search(r'\^-\d+', string).group()
     exponent = float(re.search('-\d+', exponentpiece).group())

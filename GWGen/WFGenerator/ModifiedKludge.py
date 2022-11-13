@@ -2,21 +2,20 @@ from .Kludge import *
 from .. import NumericalData, DressedFluxes
 from ..NumericalData import *
 from ..DressedFluxes import *
+from ..UndressedFluxes import FluxFunction
 
+class ModifiedKludgeWaveform(ProcaSolution):
+    def __init__(self,
+                    inspiralfunction_kwargs={},
+                    summationfunction_kwargs={},
+                    use_gpu=False,
+                    num_threads=None
+                ):
+        self.inspiralkwargs = inspiralfunction_kwargs
+        self.sumkwargs = summationfunction_kwargs
+        self.use_gpu = use_gpu
+        self.num_threads = num_threads
 
-
-class FluxFunction():
-    def __init__(self,name="analytic"):
-        if name=="analytic":
-            self.EFlux = Analytic5PNEFlux
-            self.LFlux = Analytic5PNLFlux
-        elif name=="numerical":
-            self.EFlux = GenerateNumericalEInterpolation()
-            self.LFlux = GenerateNumericalLInterpolation()
-
-    def __call__(self,q,e,p):
-        return {"EFlux":self.EFlux(q,e,p),"LFlux":self.LFlux(q,e,p)}
-
-class ModifiedKludgeWaveform():
-    def __init__(self):
-        pass
+    def __call__(self, SMBHMass, SecondaryMass, ProcaMass, BHSpin, p0, e0, x0, T=1, npoints=10, BosonSpin=1, CloudModel="relativistic", units="physical"):
+        super().__init__(SMBHMass, BHSpin, ProcaMass, BosonSpin=BosonSpin, CloudModel=CloudModel, units=units)
+        asymptoticBosonCloudFlux = self.GWFlux()

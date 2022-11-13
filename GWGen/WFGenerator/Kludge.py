@@ -24,18 +24,21 @@ def Sqrt(x):
 def Sign(x):
 	return x/abs(x)
 
-class PN(Kerr):
-	def __init__(self, M,m, bhspin=0.9, DeltaEFlux=0.0, DeltaLFlux=0.0): #epsilon is mass ratio
+class PN(Kerr, FluxFunction):
+	def __init__(self, M,m, bhspin=0.9, DeltaEFlux=0.0, DeltaLFlux=0.0, FluxName="analytic"):
+		Kerr.__init__(self,BHSpin=bhspin) ###better to use super? How with multiple inheritance and multilpe arguments to inits?
+		FluxFunction.__init__(self, name=FluxName)
+
 		self.epsilon=m/M
 		self.SMBHMass = M
 		self.SecondaryMass = m
 		self.a = bhspin
-		super().__init__(BHSpin=self.a)
 		self.RadialFrequency = self.OmegaR()
 		self.AzimuthalFrequency = self.OmegaPhi()
 		self.PolarFrequency = self.OmegaTheta()
-		self.UndressedEFlux = lambda e,p: Analytic5PNEFlux(e,p,self.a)
-		self.UndressedLFlux = lambda e,p: Analytic5PNLFlux(e,p,self.a)
+		self.FluxName = FluxName
+		self.UndressedEFlux = lambda e,p: self.EFlux(self.a,e,p)
+		self.UndressedLFlux = lambda e,p: self.LFlux(self.a,e,p)
 		self.EFluxModification = DeltaEFlux
 		self.LFluxModification = DeltaLFlux
 
@@ -102,6 +105,7 @@ class PNTraj(TrajectoryBase):
 	def __init__(self, *args, **kwargs):
 		self.DeltaEFlux = kwargs.get("DeltaEFlux", 0)
 		self.DeltaLFlux = kwargs.get("DeltaLFlux", 0)
+		self.FluxName = kwargs.get("FluxName","analytic")
 		pass
 
 	def get_inspiral(self, M, mu, a, p0, e0, x0, T=1.0,npoints=10, **kwargs):
@@ -127,7 +131,7 @@ class PNTraj(TrajectoryBase):
 
 		#PN evaluator
 		epsilon = float(mu/M)
-		self.PNEvaluator = PN(M,mu,bhspin=a, DeltaEFlux = self.DeltaEFlux, DeltaLFlux = self.DeltaLFlux)
+		self.PNEvaluator = PN(M,mu,bhspin=a, DeltaEFlux = self.DeltaEFlux, DeltaLFlux = self.DeltaLFlux, FluxName=self.FluxName)
 		integrator = DOP853(self.PNEvaluator, 0.0, y0, T, max_step=T/npoints) #Explicit Runge-Kutta of order 8
 		#arrays to hold output values from integrator
 		t_out, p_out, e_out = [0.], [p0], [e0]

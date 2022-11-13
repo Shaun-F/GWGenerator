@@ -15,7 +15,7 @@ def GenerateNumericalEInterpolation():
     coords = UnifiedDataFrame[{"q", "e", "p"}].values
     dat = UnifiedDataFrame["Einf"].values
     interpFUN = sp.interpolate.RBFInterpolator(coords, dat, neighbors=100, kernel="linear",smoothing=0, epsilon=6)
-    return lambda q,e,p: interpFUN([[q,e,p]])
+    return lambda q,e,p: interpFUN([[e,q,p]])
 
 def GenerateNumericalLInterpolation():
     path = os.path.dirname(__file__);
@@ -25,4 +25,4 @@ def GenerateNumericalLInterpolation():
     coords = UnifiedDataFrame[{"q", "e", "p"}].values
     dat = UnifiedDataFrame["LzInf"].values
     interpFUN = sp.interpolate.RBFInterpolator(coords, dat, neighbors=100, kernel="linear",smoothing=0, epsilon=6)
-    return lambda q,e,p: interpFUN([[q,e,p]])
+    return lambda q,e,p: interpFUN([[e,q,p]])
