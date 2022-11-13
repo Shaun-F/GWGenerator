@@ -19,8 +19,20 @@ class ModifiedKludgeWaveform(ProcaSolution,AAKWaveformBase, Kerr):
         self.use_gpu = use_gpu
         self.num_threads = num_threads
 
-    def __call__(self, SMBHMass, SecondaryMass, ProcaMass, BHSpin, p0, e0, x0, T=1, npoints=10, BosonSpin=1, CloudModel="relativistic", units="physical", FluxName="analytic"):
+    def __call__(self, SMBHMass, SecondaryMass, ProcaMass, BHSpin, p0, e0, x0, T=1, npoints=10, BosonSpin=1, CloudModel="relativistic", units="physical", FluxName="analytic", **kwargs):
         massRatio = SecondaryMass/SMBHMass
+        qs = kwargs.get("qS", 0)
+        phis = kwargs.get("phiS", 0)
+        qk = kwargs.get("qK", 0)
+        phiK = kwargs.get("phiK", 0)
+        dist = kwargs.get("dist", 1)
+        Phi_phi0 = kwargs.get("Phi_phi0", 0)
+        Phi_theta0 = kwargs.get("Phi_theta0",0)
+        Phi_r0 = kwargs.get("Phi_r0", 0)
+        mich = kwargs.get("mich", False)
+        dt = kwargs.get("dt", 15)
+        T = kwargs.get("T",1)
+        
         ProcaSolution.__init__(self,SMBHMass, BHSpin, ProcaMass, BosonSpin=BosonSpin, CloudModel=CloudModel, units=units)
         Kerr.__init__(self,BHSpin=BHSpin)
 
@@ -42,4 +54,5 @@ class ModifiedKludgeWaveform(ProcaSolution,AAKWaveformBase, Kerr):
                                         sum_kwargs = self.sumkwargs,
                                         use_gpu=self.use_gpu
                                         num_threads=self.num_threads)
-        return aakwaveform(SMBHMass, )
+
+        return aakwaveform(SMBHMass, SecondaryMass, BHSpin, p0, e0, x0, qs,phis,qk,phik, Phi_phi0=Phi_phi0, Phi_theta0=Phi_theta0, Phi_r0=Phi_r0, mich=mich, dt=dt, T=T)
