@@ -42,4 +42,4 @@ class ModifiedKludgeWaveform(ProcaSolution,AAKWaveformBase, Kerr):
                                         sum_kwargs = self.sumkwargs,
                                         use_gpu=self.use_gpu
                                         num_threads=self.num_threads)
-        
+        return aakwaveform(SMBHMass, )
