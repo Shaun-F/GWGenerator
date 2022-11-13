@@ -62,6 +62,10 @@ class PN(Kerr, FluxFunction):
 		#setup guard for bad integration steps
 		if ecc>=1.0  or (semimaj-get_separatrix(self.a, ecc,1.)) < 0.1 or ecc<0:
 			return [0.0, 0.0,0.0,0.0]
+
+		if ecc==0.0:
+			#if eccentricity is zero, replace it by small number to guard against poles in integrals of motion
+			ecc=1e-16
 		try:
 			# Azimuthal Frequency
 			Omega_phi = self.AzimuthalFrequency(ecc,semimaj);
@@ -118,6 +122,7 @@ class PNTraj(TrajectoryBase):
 		x0: initial inclination of orbital plane (NOTE: currently only considering equatorial orbits)
 		T: integration time (years)
 		"""
+
 		#boundary values
 		y0 = [p0, e0, 0.0, 0.0] #zero mean anomaly initially
 
@@ -173,7 +178,7 @@ class PNTraj(TrajectoryBase):
 
 
 
-class NewPn5AAKWaveform(AAKWaveformBase):
+class NewPN5AAKWaveform(AAKWaveformBase):
     def __init__(
         self, inspiral_kwargs={}, sum_kwargs={}, use_gpu=False, num_threads=None
     ):
