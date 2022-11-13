@@ -173,7 +173,7 @@ class PNTraj(TrajectoryBase):
 
 
 
-class NewPn5AAKWaveform(AAKWaveformBase, Pn5AAK):
+class NewPn5AAKWaveform(AAKWaveformBase):
     def __init__(
         self, inspiral_kwargs={}, sum_kwargs={}, use_gpu=False, num_threads=None
     ):

@@ -3,8 +3,10 @@ from .. import NumericalData, DressedFluxes
 from ..NumericalData import *
 from ..DressedFluxes import *
 from ..UndressedFluxes import FluxFunction
+from few.waveform import AAKWaveformBase
 
-class ModifiedKludgeWaveform(ProcaSolution):
+
+class ModifiedKludgeWaveform(ProcaSolution,AAKWaveformBase):
     def __init__(self,
                     inspiralfunction_kwargs={},
                     summationfunction_kwargs={},
