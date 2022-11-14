@@ -22,11 +22,11 @@ class ProcaSolution():
 			self.BosonWaveform = self.BosonCloud.make_waveform(BHMass, BHSpin, ProcaMass, units=units)
 
 	def BosonCloudGWEFlux(self,t=0):
-			#Must divide by mass ratio Mc/M to get actual dimensionless power, where Mc is the mass of the cloud
+			#Must divide by mass ratio m/M to get actual dimensionless power, where m is the mass of the secondary
 			## See definition of dimenionless energy and dimensionless time
 			DimensionfullPower = self.BosonWaveform.power_gw(t)*unit.watt
-			MassOfCloud = self.BosonWaveform.mass_cloud(t)*unit.Msun
-			MassOfSMBH = self.SMBHMass * unit.Msun
+			MassOfCloud = self.BosonCloudMass*unit.Msun #convert energy of cloud in units of cloud mass
+			MassOfSMBH = self.SMBHMass * unit.Msun #express time in units of SMBH mass
 			conversion = (MassOfSMBH/MassOfCloud)*(cons.G/(cons.c**5))
 			res = (conversion*DimensionfullPower).decompose()
 			return res
@@ -39,6 +39,8 @@ class ProcaSolution():
 	def BosonCloudGWTimescale(self):
         	return self.BosonWaveform.gw_time()
 
+	def BosonCloudMass(self,t=0):
+			return self.BosonWaveform.mass_cloud(t)
 
 
 

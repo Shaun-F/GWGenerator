@@ -4,6 +4,7 @@ from ..NumericalData import *
 from ..DressedFluxes import *
 from ..UndressedFluxes import FluxFunction
 from few.waveform import AAKWaveformBase
+import warnings
 
 
 class EMRIWithProcaWaveform(ProcaSolution,AAKWaveformBase, Kerr):
@@ -37,12 +38,13 @@ class EMRIWithProcaWaveform(ProcaSolution,AAKWaveformBase, Kerr):
         Kerr.__init__(self,BHSpin=BHSpin)
 
 
-        if e0>1e-6:
-            raise NotImplementedError("Non-circular orbits not implemented for modified kludge")
-        if e0==0:
+        if e0<1e-6:
+            warnings.warn("Eccentricity below safe threshold for FEW. Functions behave poorly for e<1e-6")
             e0=1e-6 #Certain functions in FEW are not well-behaved below this value
-        asymptoticBosonCloudEFlux = self.BosonCloudGWFlux()
-        asymptoticBosonCloudLFlux = "ToFILL !!!!!!!!!!" 
+
+        ConvertToBBHUnits = self.BosonCloudMass()/SecondaryMass #Convert boson cloud energy flux from units of boson cloud mass to units of secondary BBH mass
+        asymptoticBosonCloudEFlux = self.BosonCloudGWEFlux()*ConvertToBBHUnits
+        asymptoticBosonCloudLFlux = self.BosonCloudGWLFlux()*ConvertToBBHUnits
 
         self.inspiralkwargs["DeltaEFlux"] = asymptoticBosonCloudEFlux
         self.inspiralkwargs["DeltaLFlux"] = asymptoticBosonCloudLFlux
