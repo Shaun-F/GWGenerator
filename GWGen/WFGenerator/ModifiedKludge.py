@@ -1,8 +1,7 @@
 from .Kludge import *
-from .. import NumericalData, DressedFluxes
 from ..NumericalData import *
 from ..DressedFluxes import *
-from ..UndressedFluxes import FluxFunction
+from ..UndressedFluxes import *
 from few.waveform import AAKWaveformBase
 import warnings
 
