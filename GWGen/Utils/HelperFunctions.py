@@ -1,5 +1,7 @@
 import re
 from mpmath import *
+import astropy.constants as cons
+import astropy.units as unit
 mp.dps=25
 mp.pretty=True
 
@@ -49,3 +51,13 @@ def EllipticPi(n,m):
         return(float(ellippi(n,m)))
     except TypeError:
         print("ERROR: input {0},{1} returns imaginary result".format(n,m))
+
+
+
+
+def alphavalue(BHMass, procamass):
+    if procamass>1e-10:
+        print("Is proca mass in units of eV?")
+    if BHMass<1:
+        print("Is Black hole mass in units of solar masses?")
+    return (procamass*unit.eV*BHMass*unit.Msun*cons.G/(cons.hbar*cons.c**3)).decompose()

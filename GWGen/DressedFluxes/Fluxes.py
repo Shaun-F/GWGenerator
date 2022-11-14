@@ -25,7 +25,7 @@ class ProcaSolution():
 			#Must divide by mass ratio m/M to get actual dimensionless power, where m is the mass of the secondary
 			## See definition of dimenionless energy and dimensionless time
 			DimensionfullPower = self.BosonWaveform.power_gw(t)*unit.watt
-			MassOfCloud = self.BosonCloudMass*unit.Msun #convert energy of cloud in units of cloud mass
+			MassOfCloud = self.BosonCloudMass(t)*unit.Msun #convert energy of cloud in units of cloud mass
 			MassOfSMBH = self.SMBHMass * unit.Msun #express time in units of SMBH mass
 			conversion = (MassOfSMBH/MassOfCloud)*(cons.G/(cons.c**5))
 			res = (conversion*DimensionfullPower).decompose()

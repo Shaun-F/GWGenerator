@@ -11,6 +11,7 @@ from few.utils.constants import MTSUN_SI, YRSID_SI, Pi
 from few.utils.utility import *
 from few.waveform import AAKWaveformBase
 from few.summation.aakwave import AAKSummation
+from few.utils.baseclasses import TrajectoryBase
 
 
 def Power(x,n):
@@ -104,9 +105,7 @@ class PN(Kerr, FluxFunction):
 class PNTraj(TrajectoryBase):
 
 	def __init__(self, *args, **kwargs):
-		self.DeltaEFlux = kwargs.get("DeltaEFlux", 0)
-		self.DeltaLFlux = kwargs.get("DeltaLFlux", 0)
-		self.FluxName = kwargs.get("FluxName","analytic")
+
 		pass
 
 	def get_inspiral(self, M, mu, a, p0, e0, x0, T=1.0,npoints=10, **kwargs):
@@ -119,7 +118,9 @@ class PNTraj(TrajectoryBase):
 		x0: initial inclination of orbital plane (NOTE: currently only considering equatorial orbits)
 		T: integration time (years)
 		"""
-
+		self.DeltaEFlux = kwargs.get("DeltaEFlux", 0)
+		self.DeltaLFlux = kwargs.get("DeltaLFlux", 0)
+		self.FluxName = kwargs.get("FluxName","analytic")
 		#boundary values
 		y0 = [p0, e0, 0.0, 0.0] #zero mean anomaly initially
 
@@ -151,7 +152,7 @@ class PNTraj(TrajectoryBase):
 			Phi_r_out.append(Phi_r)
 
 			#catch separatrix crossing and halt integration
-			if (p - get_separatrix(a,e,x0))<0.1:
+			if (p - get_separatrix(float(a),float(e),float(x0)))<0.1:
 				run=False
 				exit_reason="Passed separatrix"
 
@@ -167,7 +168,7 @@ class PNTraj(TrajectoryBase):
 		Phi_r = np.asarray(Phi_r_out)
 
 		#add polar data
-		Phi_theta = Phi_phi.copy()
+		Phi_theta = (np.pi/2)*np.ones_like(Phi_phi)
 		x = np.ones_like(Phi_theta)
 
 		return (t, p, e, x, Phi_phi, Phi_theta, Phi_r)
@@ -179,6 +180,9 @@ class EMRIWaveform(AAKWaveformBase):
     def __init__(
         self, inspiral_kwargs={}, sum_kwargs={}, use_gpu=False, num_threads=None
     ):
+
+		#added a class method __call__ with should be run with
+		## EMRIWaveform()(SMBHMass, SecondaryMass, BHSpin, p0, e0, x0, qs,phis,qk,phik, dist, Phi_phi0=Phi_phi0, Phi_theta0=Phi_theta0, Phi_r0=Phi_r0, mich=mich, dt=dt, T=T)
 
         AAKWaveformBase.__init__(
             self,
