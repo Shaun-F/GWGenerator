@@ -34,7 +34,7 @@ class ProcaSolution():
 			Eflux = self.BosonCloudGWEFlux(t)
 			azimuthalnumber = self.BosonWaveform.azimuthal_num()
 			frequency = self.BosonWaveform.freq_gw(t)
-			return azimuthalnumber*Eflux/frequency
+			return azimuthalnumber*Eflux/frequency #all power emitted in single proca mode
 
 	def BosonCloudGWTimescale(self):
         	return self.BosonWaveform.gw_time()
