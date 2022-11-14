@@ -41,8 +41,8 @@ class EMRIWithProcaWaveform(ProcaSolution,AAKWaveformBase, Kerr):
             raise NotImplementedError("Non-circular orbits not implemented for modified kludge")
         if e0==0:
             e0=1e-6 #Certain functions in FEW are not well-behaved below this value
-        asymptoticBosonCloudEFlux = 1/massRatio * self.GWFlux()
-        asymptoticBosonCloudLFlux = asymptoticBosonCloudEFlux/self.OmegaPhi()(e0, p0)
+        asymptoticBosonCloudEFlux = self.BosonCloudGWFlux()
+        asymptoticBosonCloudLFlux = "ToFILL !!!!!!!!!!" 
 
         self.inspiralkwargs["DeltaEFlux"] = asymptoticBosonCloudEFlux
         self.inspiralkwargs["DeltaLFlux"] = asymptoticBosonCloudLFlux

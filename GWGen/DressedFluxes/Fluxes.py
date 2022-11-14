@@ -13,21 +13,30 @@ class ProcaSolution():
 	def __init__(self, BHMass, BHSpin, ProcaMass, BosonSpin=1,CloudModel = "relativistic",units="physical"):
 			if units=="natural":
 				raise NotImplementedError("natural units not yet implemented. Use physical units. See https://bitbucket.org/weast/superrad/src/master/ for definitions")
+			self.SMBHMass = BHMass
+			self.SMBHSpin = BHSpin
 			self.units = units
 			self.BosonSpin = BosonSpin
 			self.CloudModel = CloudModel
 			self.BosonCloud = SR.ultralight_boson.UltralightBoson(spin=self.BosonSpin, model=self.CloudModel)
 			self.BosonWaveform = self.BosonCloud.make_waveform(BHMass, BHSpin, ProcaMass, units=units)
 
-	def GWFlux(self,t=0):
-			#Must divide by mass ratio mu/M to get actual dimensionless power
+	def BosonCloudGWEFlux(self,t=0):
+			#Must divide by mass ratio Mc/M to get actual dimensionless power, where Mc is the mass of the cloud
 			## See definition of dimenionless energy and dimensionless time
 			DimensionfullPower = self.BosonWaveform.power_gw(t)*unit.watt
-			conversion = cons.G/(cons.c**5)
+			MassOfCloud = self.BosonWaveform.mass_cloud(t)*unit.Msun
+			MassOfSMBH = self.SMBHMass * unit.Msun
+			conversion = (MassOfSMBH/MassOfCloud)*(cons.G/(cons.c**5))
 			res = (conversion*DimensionfullPower).decompose()
 			return res
+	def BosonCloudGWLFlux(self,t=0):
+			Eflux = self.BosonCloudGWEFlux(t)
+			azimuthalnumber = self.BosonWaveform.azimuthal_num()
+			frequency = self.BosonWaveform.freq_gw(t)
+			return azimuthalnumber*Eflux/frequency
 
-	def GWTimescale(self):
+	def BosonCloudGWTimescale(self):
         	return self.BosonWaveform.gw_time()
 
 
