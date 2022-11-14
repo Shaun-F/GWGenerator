@@ -3,6 +3,7 @@ import pandas as pd
 import scipy as sp
 import os
 import superrad as SR
+from superrad import ultralight_boson
 import astropy.constants as cons
 import astropy.units as unit
 

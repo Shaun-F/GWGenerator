@@ -6,7 +6,7 @@ from ..UndressedFluxes import FluxFunction
 from few.waveform import AAKWaveformBase
 
 
-class ModifiedKludgeWaveform(ProcaSolution,AAKWaveformBase, Kerr):
+class EMRIWithProcaWaveform(ProcaSolution,AAKWaveformBase, Kerr):
     def __init__(self,
                     inspiralfunction_kwargs={},
                     summationfunction_kwargs={},
@@ -24,7 +24,7 @@ class ModifiedKludgeWaveform(ProcaSolution,AAKWaveformBase, Kerr):
         qs = kwargs.get("qS", 0)
         phis = kwargs.get("phiS", 0)
         qk = kwargs.get("qK", 0)
-        phiK = kwargs.get("phiK", 0)
+        phik = kwargs.get("phiK", 0)
         dist = kwargs.get("dist", 1)
         Phi_phi0 = kwargs.get("Phi_phi0", 0)
         Phi_theta0 = kwargs.get("Phi_theta0",0)
@@ -32,17 +32,17 @@ class ModifiedKludgeWaveform(ProcaSolution,AAKWaveformBase, Kerr):
         mich = kwargs.get("mich", False)
         dt = kwargs.get("dt", 15)
         T = kwargs.get("T",1)
-        
-        ProcaSolution.__init__(self,SMBHMass, BHSpin, ProcaMass, BosonSpin=BosonSpin, CloudModel=CloudModel, units=units)
+
+        ProcaSolution.__init__(self,SMBHMass, BHSpin, ProcaMass, BosonSpin=BosonSpin, CloudModel=CloudModel, units=units) #How to use super() with multiple inheritance with different positional arguments for each __init__?
         Kerr.__init__(self,BHSpin=BHSpin)
 
 
-        if e0>1e-16:
+        if e0>1e-6:
             raise NotImplementedError("Non-circular orbits not implemented for modified kludge")
         if e0==0:
-            e0=1e-16
+            e0=1e-6 #Certain functions in FEW are not well-behaved below this value
         asymptoticBosonCloudEFlux = 1/massRatio * self.GWFlux()
-        asymptoticBosonCloudLFlux = asymptoticBosonCloudEFlux/self.OmegaPhi(e, p)
+        asymptoticBosonCloudLFlux = asymptoticBosonCloudEFlux/self.OmegaPhi()(e0, p0)
 
         self.inspiralkwargs["DeltaEFlux"] = asymptoticBosonCloudEFlux
         self.inspiralkwargs["DeltaLFlux"] = asymptoticBosonCloudLFlux
@@ -52,7 +52,7 @@ class ModifiedKludgeWaveform(ProcaSolution,AAKWaveformBase, Kerr):
                                         AAKSummation,
                                         inspiral_kwargs=self.inspiralkwargs,
                                         sum_kwargs = self.sumkwargs,
-                                        use_gpu=self.use_gpu
+                                        use_gpu=self.use_gpu,
                                         num_threads=self.num_threads)
 
-        return aakwaveform(SMBHMass, SecondaryMass, BHSpin, p0, e0, x0, qs,phis,qk,phik, Phi_phi0=Phi_phi0, Phi_theta0=Phi_theta0, Phi_r0=Phi_r0, mich=mich, dt=dt, T=T)
+        return aakwaveform(SMBHMass, SecondaryMass, BHSpin, p0, e0, x0, qs,phis,qk,phik, dist, Phi_phi0=Phi_phi0, Phi_theta0=Phi_theta0, Phi_r0=Phi_r0, mich=mich, dt=dt, T=T)
