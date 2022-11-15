@@ -17,14 +17,14 @@ import GWGen
 from GWGen.WFGenerator import *
 
 # set initial parameters
-M = 1e5
+M = 1e6
 mu = 1e0
 a = .5
 p0 = 14.0
 e0 = 0.3
 iota0 = 0.
 Y0 = np.cos(iota0)
-T = 2.0
+T = 10.0
 Phi_phi0 = 0.
 Phi_theta0 = 0.0
 Phi_r0 = 0.0

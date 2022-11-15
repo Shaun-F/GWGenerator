@@ -1,5 +1,6 @@
 import sys
 import os
+import time
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -17,15 +18,15 @@ import GWGen
 from GWGen.WFGenerator import *
 
 # set initial parameters
-M = 1e5
+M = 1e7
 mu = 1e1
-a = 0.9
-p0 = 10.0
-e0 = 1e-6
-iota0 = 0.0
+a = .9
+p0 = 14.0
+e0 = 0.2
+iota0 = 0.
 Y0 = np.cos(iota0)
 Phi_phi0 = 0.
-Phi_theta0 =0.
+Phi_theta0 = 0.
 Phi_r0 = 0.
 
 
@@ -35,8 +36,8 @@ qK = 0.8
 phiK = 0.8
 dist = 1.0
 mich = False
-dt = 15.0
-T = 2.0
+dt = 15
+T = 10.0
 
 use_gpu = False
 
@@ -59,16 +60,18 @@ sum_kwargs = {
 
 ############### FEW Waveform with AAK ###############
 
-
-#wave_generator = Pn5AAKWaveform(inspiral_kwargs=inspiral_kwargs, sum_kwargs=sum_kwargs, use_gpu=False)
-#FEWwaveform = wave_generator(M, mu, a, p0, e0, Y0, qS, phiS, qK, phiK, dist,Phi_phi0=Phi_phi0, Phi_theta0=Phi_theta0, Phi_r0=Phi_r0, mich=mich, dt=dt, T=T)
-
+aa = time.time()
+wave_generator = Pn5AAKWaveform(inspiral_kwargs=inspiral_kwargs, sum_kwargs=sum_kwargs, use_gpu=False)
+FEWwaveform = wave_generator(M, mu, a, p0, e0, Y0, qS, phiS, qK, phiK, dist,Phi_phi0=Phi_phi0, Phi_theta0=Phi_theta0, Phi_r0=Phi_r0, mich=mich, dt=dt, T=T)
+bb=time.time()
+print("time to generate FEW waveform: {}".format(bb-aa))
 
 ############### My Waveform ###############
 
-wfgenerator = NewPN5AAKWaveform(inspiral_kwargs=inspiral_kwargs, sum_kwargs=sum_kwargs, use_gpu=False)
-
+wfgenerator = EMRIWaveform(inspiral_kwargs=inspiral_kwargs, sum_kwargs=sum_kwargs, use_gpu=False)
 mywf = wfgenerator(M, mu, a, p0, e0, Y0, qS, phiS, qK, phiK, dist,Phi_phi0=Phi_phi0, Phi_theta0=Phi_theta0, Phi_r0=Phi_r0, mich=mich, dt=dt, T=T)
+cc=time.time()
+print("time to generate my waveform: {}".format(cc-bb))
 
 
 
@@ -87,7 +90,7 @@ axes[0,0].set_xticks(xticks, [int(i)/100 for i in (xticks*100/(60*60*24*365))]);
 axes[0,0].set_xlabel("years");
 axes[0,0].set_ylabel("strain");
 
-"""
+
 tf =np.arange(len(FEWwaveform)) * dt;
 axes[0,1].set_title("FEW Model")
 axes[0,1].plot(tf, FEWwaveform.real);
@@ -108,5 +111,5 @@ axes[1,0].set_ylabel("strain");
 
 axes[1,1].text(0.5,0.5, "Mismatch = {0}".format(get_mismatch(FEWwaveform, mywf)))
 axes[1,1].axis("off")
-"""
+
 plt.show()

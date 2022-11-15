@@ -31,7 +31,6 @@ class EMRIWithProcaWaveform(ProcaSolution,AAKWaveformBase, Kerr):
         Phi_r0 = kwargs.get("Phi_r0", 0)
         mich = kwargs.get("mich", False)
         dt = kwargs.get("dt", 15)
-        T = kwargs.get("T",1)
 
         ProcaSolution.__init__(self,SMBHMass, BHSpin, ProcaMass, BosonSpin=BosonSpin, CloudModel=CloudModel, units=units) #How to use super() with multiple inheritance with different positional arguments for each __init__?
         Kerr.__init__(self,BHSpin=BHSpin)
@@ -49,7 +48,7 @@ class EMRIWithProcaWaveform(ProcaSolution,AAKWaveformBase, Kerr):
         self.inspiralkwargs["DeltaLFlux"] = asymptoticBosonCloudLFlux
         self.inspiralkwargs["FluxName"] = FluxName
 
-        """
+
         aakwaveform = AAKWaveformBase(PNTraj,
                                         AAKSummation,
                                         inspiral_kwargs=self.inspiralkwargs,
@@ -58,5 +57,3 @@ class EMRIWithProcaWaveform(ProcaSolution,AAKWaveformBase, Kerr):
                                         num_threads=self.num_threads)
 
         return aakwaveform(SMBHMass, SecondaryMass, BHSpin, p0, e0, x0, qs,phis,qk,phik, dist, Phi_phi0=Phi_phi0, Phi_theta0=Phi_theta0, Phi_r0=Phi_r0, mich=mich, dt=dt, T=T)
-        """
-        return 0
