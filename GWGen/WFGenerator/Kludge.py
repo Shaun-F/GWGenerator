@@ -13,7 +13,11 @@ from few.waveform import AAKWaveformBase
 from few.summation.aakwave import AAKSummation
 from few.utils.baseclasses import TrajectoryBase
 
+import astropy.units as unit
+import astropy.constants as cons
 
+
+"""
 def Power(x,n):
 	return x**n
 
@@ -21,6 +25,7 @@ def Sqrt(x):
 	return x**(1/2)
 def Sign(x):
 	return x/abs(x)
+"""
 
 class PN(Kerr, FluxFunction):
 	def __init__(self, M,m, bhspin=0.9, DeltaEFlux=0.0, DeltaLFlux=0.0, FluxName="analytic"):
@@ -35,8 +40,8 @@ class PN(Kerr, FluxFunction):
 		self.AzimuthalFrequency = self.OmegaPhi()
 		self.PolarFrequency = self.OmegaTheta()
 		self.FluxName = FluxName
-		self.UndressedEFlux = lambda e,p: self.EFlux(self.a,e,p)
-		self.UndressedLFlux = lambda e,p: self.LFlux(self.a,e,p)
+		self.UndressedEFlux = lambda e,p: self.EFlux(self.a,e,p)*self.epsilon**2*(cons.c**5)/cons.G #dimensionfull
+		self.UndressedLFlux = lambda e,p: (self.LFlux(self.a,e,p)*self.epsilon * self.SecondaryMass * unit.Msun * cons.c**2).decompose() #dimensionfull
 		self.EFluxModification = DeltaEFlux
 		self.LFluxModification = DeltaLFlux
 
@@ -79,18 +84,27 @@ class PN(Kerr, FluxFunction):
 		except TypeError:
 			print("ERROR: type error in frequency and flux generation as (e,p)=({0},{1})".format(ecc,semimaj))
 
-		#factor of epsilon ensures correct scaling of pdot and edot in mass ratio (see: http://arxiv.org/abs/gr-qc/0702054, eq 4.3)
-		Edot = epsilon*EdotN + self.EFluxModification
-		Ldot = epsilon*LdotN + self.LFluxModification
+		#(see: http://arxiv.org/abs/gr-qc/0702054, eq 4.3)
+		Edot = (EdotN + self.EFluxModification).decompose()
+		Ldot = (LdotN + self.LFluxModification).decompose()
+		dldp = (self.dLdp()(ecc,semimaj)*self.SecondaryMass*unit.Msun*cons.c).decompose()
+		dlde = (self.dLde()(ecc,semimaj)*self.SecondaryMass*unit.Msun*cons.G*self.SMBHMass*unit.Msun/cons.c).decompose()
+		dedp = (self.dEdp()(ecc,semimaj)*self.epsilon*cons.c**4/cons.G).decompose()
+		dede = (self.dEde()(ecc,semimaj)*self.SecondaryMass*unit.Msun*cons.c**2).decompose()
 
-		norm = self.dLdp()(ecc,semimaj)*self.dEde()(ecc,semimaj) - self.dLde()(ecc,semimaj)*self.dEdp()(ecc,semimaj)
 
-		pdot = (self.dEde()(ecc,semimaj)*Ldot - self.dLde()(ecc,semimaj)*Edot)/norm
+		norm = (dldp*dede - dlde*dedp)
+
+		pdot = (dede*Ldot - dlde*Edot)/norm
 
 		if ecc<10**(-5):
 			edot=0
 		else:
-			edot = (self.dLdp()(ecc,semimaj)*Edot - self.dEdp()(ecc,semimaj)*Ldot)/norm
+			edot = (dldp*Edot - dedp*Ldot)/norm
+
+		#adimensionlize
+		pdot = (pdot/cons.c).decompose().value
+		edot = (edot*cons.G*self.SMBHMass*unit.Msun/(cons.c**3)).decompose().value
 
 		#rate of change of azimuthal phase
 		Phi_phi_dot = Omega_phi

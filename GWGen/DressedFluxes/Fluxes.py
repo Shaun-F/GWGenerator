@@ -28,13 +28,14 @@ class ProcaSolution():
 			MassOfCloud = self.BosonCloudMass(t)*unit.Msun #convert energy of cloud in units of cloud mass
 			MassOfSMBH = self.SMBHMass * unit.Msun #express time in units of SMBH mass
 			conversion = (MassOfSMBH/MassOfCloud)*(cons.G/(cons.c**5))
-			res = (conversion*DimensionfullPower).decompose()
-			return res
+			res = (DimensionfullPower).decompose() # dimensionfull power
+			return -res
 	def BosonCloudGWLFlux(self,t=0):
-			Eflux = self.BosonCloudGWEFlux(t)
+			Eflux = self.BosonCloudGWEFlux(t) #dimensionless power
 			azimuthalnumber = self.BosonWaveform.azimuthal_num()
-			frequency = self.BosonWaveform.freq_gw(t)
-			return azimuthalnumber*Eflux/frequency #all power emitted in single proca mode
+			frequency = self.BosonWaveform.freq_gw(t)*unit.Hz
+			dimlessfrequency = (cons.G*self.SMBHMass*unit.Msun/(cons.c**3))*frequency*unit.Hz #in units of SMBH frequency
+			return -(azimuthalnumber*Eflux/frequency).decompose() #all power emitted in single proca mode. In units of cloud energy Mc * c^2
 
 	def BosonCloudGWTimescale(self):
         	return self.BosonWaveform.gw_time()

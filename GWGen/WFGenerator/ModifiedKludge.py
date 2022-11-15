@@ -41,14 +41,15 @@ class EMRIWithProcaWaveform(ProcaSolution,AAKWaveformBase, Kerr):
             warnings.warn("Eccentricity below safe threshold for FEW. Functions behave poorly for e<1e-6")
             e0=1e-6 #Certain functions in FEW are not well-behaved below this value
 
-        ConvertToBBHUnits = self.BosonCloudMass()/SecondaryMass #Convert boson cloud energy flux from units of boson cloud mass to units of secondary BBH mass
-        asymptoticBosonCloudEFlux = self.BosonCloudGWEFlux()*ConvertToBBHUnits
-        asymptoticBosonCloudLFlux = self.BosonCloudGWLFlux()*ConvertToBBHUnits
+        ConvertToBBHUnits = SecondaryMass/self.BosonCloudMass() #Convert boson cloud energy flux from units of boson cloud mass to units of secondary BBH mass
+        asymptoticBosonCloudEFlux = self.BosonCloudGWEFlux()*ConvertToBBHUnits #dimenionsless flux in units of secondary mass over time
+        asymptoticBosonCloudLFlux = self.BosonCloudGWLFlux()*ConvertToBBHUnits*self.BosonCloudMass() #dimensionless angular momentum in units of secondary's energy times mass of cloud
 
         self.inspiralkwargs["DeltaEFlux"] = asymptoticBosonCloudEFlux
         self.inspiralkwargs["DeltaLFlux"] = asymptoticBosonCloudLFlux
         self.inspiralkwargs["FluxName"] = FluxName
 
+        """
         aakwaveform = AAKWaveformBase(PNTraj,
                                         AAKSummation,
                                         inspiral_kwargs=self.inspiralkwargs,
@@ -57,3 +58,5 @@ class EMRIWithProcaWaveform(ProcaSolution,AAKWaveformBase, Kerr):
                                         num_threads=self.num_threads)
 
         return aakwaveform(SMBHMass, SecondaryMass, BHSpin, p0, e0, x0, qs,phis,qk,phik, dist, Phi_phi0=Phi_phi0, Phi_theta0=Phi_theta0, Phi_r0=Phi_r0, mich=mich, dt=dt, T=T)
+        """
+        return 0
