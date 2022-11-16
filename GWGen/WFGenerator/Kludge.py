@@ -163,6 +163,11 @@ class PNTraj(TrajectoryBase):
 			if e<0 or e>=1:
 				run=False
 				exit_reason="Ecccentricity exceeded bounds"
+			if p_out[-1]>p_out[-2]:
+				print("Error: semi-latus rectum increased! Breaking")
+				run=False
+				exit_reason="Semi-latus rectum increased. Possibly beyond validity of PN expressions for fluxes"
+
 
 		if exit_reason!="":
 			print("Integration halted before ending time. Reasons: {0}".format(exit_reason))

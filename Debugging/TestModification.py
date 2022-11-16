@@ -36,19 +36,18 @@ qK = 0.8
 phiK = 0.8
 dist = 1.0
 mich = False
-dt = 50.0
+dt = 15.0
 T = 5.0
 
 alphaval = alphavalue(M,mu)
 print(r"alpha = {0}".format(alphaval))
 
 
-########## without proca #############
 use_gpu = False
 
 # keyword arguments for inspiral generator (RunKerrGenericPn5Inspiral)
 inspiral_kwargs = {
-    "DENSE_STEPPING": 1,  # we want a densely sampled trajectory
+    "npoints": 50,  # we want a densely sampled trajectory
     "max_init_len": int(1e3),  # all of the trajectories will be well under len = 1000
 }
 
@@ -57,6 +56,8 @@ sum_kwargs = {
     "use_gpu": use_gpu,  # GPU is availabel for this type of summation
     "pad_output": False,
 }
+
+########## without proca #############
 
 wfgenerator = EMRIWaveform(inspiral_kwargs=inspiral_kwargs, sum_kwargs=sum_kwargs, use_gpu=False)
 withoutproca = wfgenerator(M, m, a, p0, e0, Y0, qS, phiS, qK, phiK, dist,Phi_phi0=Phi_phi0, Phi_theta0=Phi_theta0, Phi_r0=Phi_r0, mich=mich, dt=dt, T=T)
@@ -65,19 +66,6 @@ withoutproca = wfgenerator(M, m, a, p0, e0, Y0, qS, phiS, qK, phiK, dist,Phi_phi
 
 
 ############# with proca ##############
-use_gpu = False
-
-# keyword arguments for inspiral generator (RunKerrGenericPn5Inspiral)
-inspiral_kwargs = {
-    "DENSE_STEPPING": 1,  # we want a densely sampled trajectory
-    "max_init_len": int(1e3),  # all of the trajectories will be well under len = 1000
-}
-
-# keyword arguments for summation generator (AAKSummation)
-sum_kwargs = {
-    "use_gpu": use_gpu,  # GPU is availabel for this type of summation
-    "pad_output": False,
-}
 
 wfgen = EMRIWithProcaWaveform()
 withproca = wfgen(M,m,mu,a,p0,e0,Y0,T=T,qS=qS,phiS=phiS,qK=qK,phiK=phiK,dist=dist,mich=mich)
@@ -100,7 +88,7 @@ mismatch = get_mismatch(withoutproca, withproca)
 tp = np.arange(len(withproca)) * dt;
 twp = np.arange(len(withoutproca)) * dt
 
-fig,ax = plt.subplots(4,2, figsize=(24,8))
+fig,ax = plt.subplots(5,2, figsize=(24,8))
 plt.subplots_adjust(hspace=1, wspace=0.5)
 ax[0,0].plot(tp, withproca.real)
 ax[0,0].set_title("With proca")
@@ -182,5 +170,18 @@ ax[3,1].set_title(" configuration space trajectory")
 ax[3,1].legend()
 ax[3,1].set_xlabel("e");
 ax[3,1].set_ylabel("p");
+
+
+minsize = min([len(tp), len(twp)])
+dom = tp[0:minsize-1]
+ax[4,0].plot(wfgen.Trajectory["t"], wfgen.Trajectory["e"], label="withproca")
+ax[4,0].plot(wfgenerator.Trajectory["t"], wfgenerator.Trajectory["e"], label="withoutproca")
+ax[4,0].set_title(" eccentricity evolution")
+ax[4,0].legend()
+ticks = ax[4,0].get_xticks()[1:-1];
+newlabs = [int(i)/100 for i in (ticks*100/(60*60*24*365))];
+ax[4,0].set_xticks(ticks, newlabs);
+ax[4,0].set_xlabel("years");
+ax[4,0].set_ylabel("e");
 
 plt.show()
