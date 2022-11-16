@@ -19,7 +19,7 @@ from GWGen.WFGenerator import *
 # set initial parameters
 M = 1e6
 m = 1e1
-mu = 6e-18
+mu = 5.8e-18
 a = 0.9
 p0 = 14.0
 e0 = 0.2
@@ -37,7 +37,7 @@ phiK = 0.8
 dist = 1.0
 mich = False
 dt = 50.0
-T = 10.0
+T = 5.0
 
 alphaval = alphavalue(M,mu)
 print(r"alpha = {0}".format(alphaval))
@@ -139,7 +139,7 @@ ticks = ax[1,1].get_xticks()[1:-1];
 newlabs = [int(i)/100 for i in (ticks*100/(60*60*24*365))];
 ax[1,1].set_xticks(ticks, newlabs);
 ax[1,1].set_xlabel("years");
-ax[1,1].set_ylabel("strain");
+ax[1,1].set_ylabel("phase");
 
 
 ax[2,0].plot(wfgen.Trajectory["t"], wfgen.Trajectory["p"], label="with proca")
@@ -149,7 +149,7 @@ ticks = ax[2,0].get_xticks()[1:-1];
 newlabs = [int(i)/100 for i in (ticks*100/(60*60*24*365))];
 ax[2,0].set_xticks(ticks, newlabs);
 ax[2,0].set_xlabel("years");
-ax[2,0].set_ylabel("strain");
+ax[2,0].set_ylabel("p");
 
 ax[2,1].plot(wfgenerator.Trajectory["t"], wfgenerator.Trajectory["p"], label="without proca")
 ax[2,1].set_title(" semi-latus rectum evolution")
@@ -158,7 +158,7 @@ ticks = ax[2,1].get_xticks()[1:-1];
 newlabs = [int(i)/100 for i in (ticks*100/(60*60*24*365))];
 ax[2,1].set_xticks(ticks, newlabs);
 ax[2,1].set_xlabel("years");
-ax[2,1].set_ylabel("strain");
+ax[2,1].set_ylabel("p");
 
 
 minsize = min([len(tp), len(twp)])
@@ -171,7 +171,16 @@ ticks = ax[3,0].get_xticks()[1:-1];
 newlabs = [int(i)/100 for i in (ticks*100/(60*60*24*365))];
 ax[3,0].set_xticks(ticks, newlabs);
 ax[3,0].set_xlabel("years");
-ax[3,0].set_ylabel("strain");
+ax[3,0].set_ylabel("p");
 
+
+minsize = min([len(tp), len(twp)])
+dom = tp[0:minsize-1]
+ax[3,1].plot(wfgen.Trajectory["p"], wfgen.Trajectory["e"], label="withproca")
+ax[3,1].plot(wfgenerator.Trajectory["p"], wfgenerator.Trajectory["e"], label="withoutproca")
+ax[3,1].set_title(" configuration space trajectory")
+ax[3,1].legend()
+ax[3,1].set_xlabel("e");
+ax[3,1].set_ylabel("p");
 
 plt.show()
