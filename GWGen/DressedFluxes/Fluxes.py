@@ -35,7 +35,7 @@ class ProcaSolution():
 			azimuthalnumber = self.BosonWaveform.azimuthal_num()
 			frequency = self.BosonWaveform.freq_gw(t)*unit.Hz
 			dimlessfrequency = (cons.G*self.SMBHMass*unit.Msun/(cons.c**3))*frequency*unit.Hz #in units of SMBH frequency
-			return -(azimuthalnumber*Eflux/frequency).decompose() #all power emitted in single proca mode. In units of cloud energy Mc * c^2
+			return (azimuthalnumber*Eflux/frequency).decompose() #all power emitted in single proca mode. In units of cloud energy Mc * c^2
 
 	def BosonCloudGWTimescale(self):
         	return self.BosonWaveform.gw_time()

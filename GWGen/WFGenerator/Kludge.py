@@ -16,16 +16,7 @@ from few.utils.baseclasses import TrajectoryBase
 import astropy.units as unit
 import astropy.constants as cons
 
-
-"""
-def Power(x,n):
-	return x**n
-
-def Sqrt(x):
-	return x**(1/2)
-def Sign(x):
-	return x/abs(x)
-"""
+SEPARATRIXCUTOFF=0.1;
 
 class PN(Kerr, FluxFunction):
 	def __init__(self, M,m, bhspin=0.9, DeltaEFlux=0.0, DeltaLFlux=0.0, FluxName="analytic"):
@@ -63,7 +54,7 @@ class PN(Kerr, FluxFunction):
 		phi_phase = float(y[2])
 		radial_phase = float(y[3])
 		#setup guard for bad integration steps
-		if ecc>=1.0  or (semimaj-get_separatrix(self.a, ecc,1.)) < 0.1 or ecc<0:
+		if ecc>=1.0  or (semimaj-get_separatrix(self.a, ecc,1.)) < SEPARATRIXCUTOFF or ecc<0:
 			return [0.0, 0.0,0.0,0.0]
 
 		if ecc==0.0:
@@ -92,9 +83,7 @@ class PN(Kerr, FluxFunction):
 		dedp = (self.dEdp()(ecc,semimaj)*self.epsilon*cons.c**4/cons.G).decompose()
 		dede = (self.dEde()(ecc,semimaj)*self.SecondaryMass*unit.Msun*cons.c**2).decompose()
 
-
 		norm = (dldp*dede - dlde*dedp)
-
 		pdot = (dede*Ldot - dlde*Edot)/norm
 
 		if ecc<10**(-5):
@@ -156,6 +145,7 @@ class PNTraj(TrajectoryBase):
 
 		# run integrator down to T or separatrix
 		run=True
+		exit_reason=""
 		while integrator.t < T and run:
 			integrator.step()
 			p, e, Phi_phi, Phi_r = integrator.y
@@ -166,13 +156,16 @@ class PNTraj(TrajectoryBase):
 			Phi_r_out.append(Phi_r)
 
 			#catch separatrix crossing and halt integration
-			if (p - get_separatrix(float(a),float(e),float(x0)))<0.1:
+			if (p - get_separatrix(float(a),float(e),float(x0)))<SEPARATRIXCUTOFF:
 				run=False
 				exit_reason="Passed separatrix"
 
 			if e<0 or e>=1:
 				run=False
 				exit_reason="Ecccentricity exceeded bounds"
+
+		if exit_reason!="":
+			print("Integration halted before ending time. Reasons: {0}".format(exit_reason))
 
 		#read data
 		t = np.asarray(t_out)

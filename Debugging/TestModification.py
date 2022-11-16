@@ -2,7 +2,6 @@ import sys
 import os
 
 import matplotlib.pyplot as plt
-%matplotlib inline
 import numpy as np
 
 from few.trajectory.inspiral import EMRIInspiral
@@ -20,7 +19,7 @@ from GWGen.WFGenerator import *
 # set initial parameters
 M = 1e6
 m = 1e1
-mu = 4e-18
+mu = 6e-18
 a = 0.9
 p0 = 14.0
 e0 = 0.2
@@ -173,3 +172,6 @@ newlabs = [int(i)/100 for i in (ticks*100/(60*60*24*365))];
 ax[3,0].set_xticks(ticks, newlabs);
 ax[3,0].set_xlabel("years");
 ax[3,0].set_ylabel("strain");
+
+
+plt.show()
