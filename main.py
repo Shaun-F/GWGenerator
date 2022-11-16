@@ -22,7 +22,7 @@ if __name__==__main__:
     #run analysis
 
     tmparr = np.arange(1,10,1)
-    SMBHMasses = np.kron(tmparr,[1e6, 1e7]) #solar masses
+    SMBHMasses = np.kron(tmparr,[1e6]) #solar masses
     SecondaryMass = 10 #solar masses
     ProcaMasses = np.kron(tmparr, [1e-14,1e-15,1e-16,1e-17,1e-18,1e-19]) #eV
 

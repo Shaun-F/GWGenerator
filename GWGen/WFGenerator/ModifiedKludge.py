@@ -13,11 +13,18 @@ class EMRIWithProcaWaveform(ProcaSolution,AAKWaveformBase, Kerr):
                     use_gpu=False,
                     num_threads=None
                 ):
-
         self.inspiralkwargs = inspiralfunction_kwargs
         self.sumkwargs = summationfunction_kwargs
         self.use_gpu = use_gpu
         self.num_threads = num_threads
+
+        AAKWaveformBase.__init__(self,
+                            PNTraj,
+                            AAKSummation,
+                            inspiral_kwargs=self.inspiralkwargs,
+                            sum_kwargs = self.sumkwargs,
+                            use_gpu=self.use_gpu,
+                            num_threads=self.num_threads)
 
     def __call__(self, SMBHMass, SecondaryMass, ProcaMass, BHSpin, p0, e0, x0, T=1, npoints=10, BosonSpin=1, CloudModel="relativistic", units="physical", FluxName="analytic", **kwargs):
         massRatio = SecondaryMass/SMBHMass
@@ -49,11 +56,21 @@ class EMRIWithProcaWaveform(ProcaSolution,AAKWaveformBase, Kerr):
         self.inspiralkwargs["FluxName"] = FluxName
 
 
-        aakwaveform = AAKWaveformBase(PNTraj,
-                                        AAKSummation,
-                                        inspiral_kwargs=self.inspiralkwargs,
-                                        sum_kwargs = self.sumkwargs,
-                                        use_gpu=self.use_gpu,
-                                        num_threads=self.num_threads)
+        qS,phiS,qK,phiK = self.sanity_check_angles(qs,phis,qk,phik)
+        self.sanity_check_init(SMBHMass, SecondaryMass,BHSpin,p0,e0,x0)
 
-        return aakwaveform(SMBHMass, SecondaryMass, BHSpin, p0, e0, x0, qs,phis,qk,phik, dist, Phi_phi0=Phi_phi0, Phi_theta0=Phi_theta0, Phi_r0=Phi_r0, mich=mich, dt=dt, T=T)
+        #get the Trajectory
+        t,p,e,Y,pphi,ptheta,pr = self.inspiral_generator(SMBHMass,SecondaryMass,BHSpin,p0,e0,x0,T=T, dt=dt, Phi_phi0=Phi_phi0, Phi_theta0=Phi_theta0, Phi_r0=Phi_r0, **self.inspiralkwargs)
+        self.Trajectory = {"t":t, "p":p, "e":e, "Y":Y, "Phi_phi":pphi, "Phi_theta":ptheta, "Phi_r":pr}
+        self.sanity_check_traj(p,e,Y)
+
+        self.end_time = t[-1]
+
+        # number of modes to use (from original AAK model)
+        self.num_modes_kept = self.nmodes = int(30 * e0)
+        if self.num_modes_kept < 4:
+            self.num_modes_kept = self.nmodes = 4
+
+
+        self.waveform = self.create_waveform(t,SMBHMass,BHSpin,p,e,Y,pphi, ptheta, pr, SecondaryMass,qS,phiS, qK, phiK, dist, self.nmodes,mich=mich,dt=dt,T=T)
+        return self.waveform
