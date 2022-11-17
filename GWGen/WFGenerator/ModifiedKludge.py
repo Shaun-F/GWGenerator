@@ -8,13 +8,13 @@ import warnings
 
 class EMRIWithProcaWaveform(ProcaSolution,AAKWaveformBase, Kerr):
     def __init__(self,
-                    inspiralfunction_kwargs={},
-                    summationfunction_kwargs={},
+                    inspiral_kwargs={},
+                    sum_kwargs={},
                     use_gpu=False,
                     num_threads=None
                 ):
-        self.inspiralkwargs = inspiralfunction_kwargs
-        self.sumkwargs = summationfunction_kwargs
+        self.inspiralkwargs = inspiral_kwargs
+        self.sumkwargs = sum_kwargs
         self.use_gpu = use_gpu
         self.num_threads = num_threads
 

@@ -19,9 +19,9 @@ from GWGen.WFGenerator import *
 # set initial parameters
 M = 1e6
 m = 1e1
-mu = 5.8e-18
+mu = 1e-18
 a = 0.9
-p0 = 14.0
+p0 = 10.0
 e0 = 0.2
 iota0 = 0.1
 Y0 = np.cos(iota0)
@@ -183,5 +183,17 @@ newlabs = [int(i)/100 for i in (ticks*100/(60*60*24*365))];
 ax[4,0].set_xticks(ticks, newlabs);
 ax[4,0].set_xlabel("years");
 ax[4,0].set_ylabel("e");
+
+minsize = min([len(tp), len(twp)])
+dom = tp[0:minsize-1]
+ax[4,1].plot(wfgen.Trajectory["t"], wfgen.Trajectory["Phi_r"], label="withproca")
+ax[4,1].plot(wfgenerator.Trajectory["t"], wfgenerator.Trajectory["Phi_r"], label="withoutproca")
+ax[4,1].set_title(" radial phase evolution")
+ax[4,1].legend()
+ticks = ax[4,1].get_xticks()[1:-1];
+newlabs = [int(i)/100 for i in (ticks*100/(60*60*24*365))];
+ax[4,1].set_xticks(ticks, newlabs);
+ax[4,1].set_xlabel("years");
+ax[4,1].set_ylabel("e");
 
 plt.show()

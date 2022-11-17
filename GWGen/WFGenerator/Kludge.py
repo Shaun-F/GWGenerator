@@ -35,6 +35,8 @@ class PN(Kerr, FluxFunction):
 		self.UndressedLFlux = lambda e,p: (self.LFlux(self.a,e,p)*self.epsilon * self.SecondaryMass * unit.Msun * cons.c**2).decompose() #dimensionfull
 		self.EFluxModification = DeltaEFlux
 		self.LFluxModification = DeltaLFlux
+		self.IntegratorRun=True
+		self.IntegratorExitReason=""
 
 
 	def __call__(self, t, y):
@@ -90,6 +92,12 @@ class PN(Kerr, FluxFunction):
 			edot=0
 		else:
 			edot = (dldp*Edot - dedp*Ldot)/norm
+		if EdotN>0:
+			self.IntegratorRun=False
+			self.IntegratorExitReason="PN Energy flux larger than zero! Breaking."
+		elif LdotN>0:
+			self.IntegratorRun=False
+			self.IntegratorExitReason="PN Angular Momentum flux larger than zero! Breaking."
 
 		#adimensionlize
 		pdot = (pdot/cons.c).decompose().value
@@ -167,6 +175,10 @@ class PNTraj(TrajectoryBase):
 				print("Error: semi-latus rectum increased! Breaking")
 				run=False
 				exit_reason="Semi-latus rectum increased. Possibly beyond validity of PN expressions for fluxes"
+
+			#catch breaks from integrand function
+			run=self.PNEvaluator.IntegratorRun
+			exit_reason=self.PNEvaluator.IntegratorExitReason
 
 
 		if exit_reason!="":
