@@ -91,9 +91,9 @@ if __name__=='__main__':
             ax[0,1].set_xlabel("years")
             ax[0,1].set_ylabel("strain")
 
-            smallestwv = min([len(moddedwv), len(unmoddedwv)])
+            smallestwv = min([len(moddedwv), len(unmoddedwv)])-1
             dom3 = np.arange(smallestwv)*dt
-            ax[1,0].plot(dom3, (moddedwv.real[0:smallestwv-1] - unmoddedwv.real[0:smallestwv-1]), label=r"h_{+}")
+            ax[1,0].plot(dom3, (moddedwv[0:smallestwv].real - unmoddedwv[0:smallestwv].real), label=r"h_{+}")
             ax[1,0].set_title("difference between with and with proca")
             ax[1,0].legend()
             ticks = ax[1,0].get_xticks()[1:-1];
