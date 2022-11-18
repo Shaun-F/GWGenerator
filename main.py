@@ -106,5 +106,5 @@ if __name__=='__main__':
             prop = dict(boxstyle="round", facecolor="wheat", alpha=0.5)
             ax[1,1].text(0.5,0.5, "mismatch = {0:.4f}".format(mismatch), bbox=prop, fontsize=14, verticalalignment='center', horizontalalignment='center')
 
-            fig.savefig("data/wvcomparisonSMBHMass{0}SecMass{1}ProcMass{2}p0{3}e0{4}.png".format(BHMASS,SecondaryMass,PROCAMASS,p0,e0),dpi=300)
+            fig.savefig("data/wvcomparisonSMBHMass{0}_SecMass{1}_ProcMass{2}_p0{3}_e0{4}.png".format(BHMASS,SecondaryMass,PROCAMASS,p0,e0),dpi=300)
             plt.clf()
