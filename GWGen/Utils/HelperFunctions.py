@@ -15,6 +15,16 @@ def WaveformInnerProduct(timedomain, h1,h2, fmin=0.0001, fmax=1):
     timelength = len(timedomain)
     DeltaT = timedomain[1]-timedomain[0]
     frequency_range = np.fft.fftfreq(timelength, d=DeltaT)
+    #Consider real frequencies
+    frequency_length = frequency_range
+    domain = frequency_range[frequency_length-1]
+    range1 = h1_InFreq[frequency_length-1]
+    range2 = h2_InFreq[frequency_length-1]
+    range2star = np.conjugate(range2)
+    PowerSpectralDensity = np.array([LisaSensitivity(i) for i in domain])
+
+
+    integrand = range1*range2star/PowerSpectralDensity
 
 def LisaSensitivity(f):
     """
