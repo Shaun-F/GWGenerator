@@ -6,8 +6,60 @@ mp.dps=25
 mp.pretty=True
 
 
+def WaveformInnerProduct(timedomain, h1,h2, fmin=0.0001, fmax=1):
+    """
+    complex waveforms h1 and h2 are in time-domain with time domain in units of seconds. Compute inner product defined in
+    """
+    h1_InFreq = np.fft.fft(h1)
+    h2_InFreq = np.fft.fft(h2)
+    timelength = len(timedomain)
+    DeltaT = timedomain[1]-timedomain[0]
+    frequency_range = np.fft.fftfreq(timelength, d=DeltaT)
+
+def LisaSensitivity(f):
+    """
+    frequency in Hertz
+
+    http://arxiv.org/abs/1803.01944
+    """
+    L=2.5e9 #gigameters
+    fstar = 0.01909 #Hertz
+    ret = (10/(3*L**2)) * (OpticalMetrologyNoise(f) + 4*AccelNoise(f)/((2*np.pi*f)**4))*(1+(6/10)*(f/fstar)**2) + ConfusionNoise(f)
+    return ret
 
 
+def OpticalMetrologyNoise(f):
+    """
+    frequency in Herz
+
+    http://arxiv.org/abs/1803.01944
+    """
+    ret = (1.5*10**(-11))**2 * (1 + (0.002/f)**4) # square meters per Hertz
+    return ret
+
+def AccelNoise(f):
+    """
+    frequency in Hertz
+
+    http://arxiv.org/abs/1803.01944
+    """
+    ret = (3*10**(-15))**2 * (1+(0.0004/f)**2)*(1+(f/0.008)**4) #square meters per quartic seconds per Hertz
+    return ret
+
+def ConfusionNoise(f):
+    """
+    frequency in Hertz
+
+    http://arxiv.org/abs/1803.01944
+    """
+    #4 year observation time
+    A = 9*10**(-45)
+    alpha = 0.138
+    beta = -221
+    gamma = 1680
+    kappa = 521
+    fk = 0.00113
+    ret = A*f**(-7/3) * np.exp(-f**alpha + beta*f*np.sin(kappa*f)) * (1+np.tanh(gamma*(fk-f))) #inverse Hertz
 
 def stringtocomplex(string):
     exponentpiece = re.search(r'\^-\d+', string).group()

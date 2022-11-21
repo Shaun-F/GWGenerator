@@ -19,7 +19,11 @@ class ProcaSolution():
 			self.BosonSpin = BosonSpin
 			self.CloudModel = CloudModel
 			self.BosonCloud = SR.ultralight_boson.UltralightBoson(spin=self.BosonSpin, model=self.CloudModel)
-			self.BosonWaveform = self.BosonCloud.make_waveform(BHMass, BHSpin, ProcaMass, units=units)
+
+			try:
+				self.BosonWaveform = self.BosonCloud.make_waveform(BHMass, BHSpin, ProcaMass, units=units)
+			except ValueError as err:
+				print("Error in Proca Solution: \n {0}".format(err))
 
 	def BosonCloudGWEFlux(self,t=0):
 			#Must divide by mass ratio m/M to get actual dimensionless power, where m is the mass of the secondary

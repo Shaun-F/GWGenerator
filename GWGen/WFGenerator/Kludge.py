@@ -19,9 +19,15 @@ import astropy.constants as cons
 SEPARATRIXCUTOFF=0.1;
 
 class PN(Kerr, FluxFunction):
-	def __init__(self, M,m, bhspin=0.9, DeltaEFlux=0.0, DeltaLFlux=0.0, FluxName="analytic"):
+
+	def __init__(self, M,m, bhspin=0.9, DeltaEFlux=0.0*unit.kg*unit.m**2/(unit.s**3), DeltaLFlux=0.0*unit.kg*unit.m**2/(unit.s**2), FluxName="analytic"):
 		Kerr.__init__(self,BHSpin=bhspin) ###better to use super? How with multiple inheritance and multilpe arguments to inits?
 		FluxFunction.__init__(self, name=FluxName)
+
+		#sanity checks
+		assert isinstance(DeltaEFlux,unit.quantity.Quantity) and isinstance(DeltaLFlux, unit.quantity.Quantity), "Error: Flux modification must be of type (astropy.units.quantity.Quantity)"
+		assert DeltaEFlux.unit == unit.kg*unit.m**2/(unit.s**3), "Error: DeltaEFlux must have units kg m**2/s**3"
+		assert DeltaLFlux.unit == unit.kg*unit.m**2/(unit.s**2), "Error: DeltaLFlux must have units kg m**2/s**2"
 
 		self.epsilon=m/M
 		self.SMBHMass = M
@@ -31,13 +37,21 @@ class PN(Kerr, FluxFunction):
 		self.AzimuthalFrequency = self.OmegaPhi()
 		self.PolarFrequency = self.OmegaTheta()
 		self.FluxName = FluxName
-		self.UndressedEFlux = lambda e,p: self.EFlux(self.a,e,p)*self.epsilon**2*(cons.c**5)/cons.G #dimensionfull
-		self.UndressedLFlux = lambda e,p: (self.LFlux(self.a,e,p)*self.epsilon * self.SecondaryMass * unit.Msun * cons.c**2).decompose() #dimensionfull
+
+		efluxUnitConv = (self.epsilon**2*(cons.c**5)/cons.G).to(unit.kg*unit.m**2/(unit.s**3))
+		lfluxUnitConv = (self.epsilon * self.SecondaryMass * unit.Msun * cons.c**2).to(unit.kg*unit.m**2/(unit.s**2))
+		self.UndressedEFlux = lambda e,p: self.EFlux(self.a,e,p)*efluxUnitConv #dimensionfull
+		self.UndressedLFlux = lambda e,p: self.LFlux(self.a,e,p)*lfluxUnitConv #dimensionfull
 		self.EFluxModification = DeltaEFlux
 		self.LFluxModification = DeltaLFlux
 		self.IntegratorRun=True
 		self.IntegratorExitReason=""
 
+		#unit conversions
+		self.dldpUnit = (self.SecondaryMass*unit.Msun*cons.c).decompose()
+		self.dldeUnit = (self.SecondaryMass*unit.Msun*cons.G*self.SMBHMass*unit.Msun/cons.c).decompose()
+		self.dedpUnit = (self.epsilon*cons.c**4/cons.G).decompose()
+		self.dedeUnit = (self.SecondaryMass*unit.Msun*cons.c**2).decompose()
 
 	def __call__(self, t, y):
 		"""
@@ -78,15 +92,15 @@ class PN(Kerr, FluxFunction):
 			print("ERROR: type error in frequency and flux generation as (e,p)=({0},{1})".format(ecc,semimaj))
 
 		#(see: http://arxiv.org/abs/gr-qc/0702054, eq 4.3)
-		Edot = (EdotN + self.EFluxModification).decompose()
-		Ldot = (LdotN + self.LFluxModification).decompose()
-		dldp = (self.dLdp()(ecc,semimaj)*self.SecondaryMass*unit.Msun*cons.c).decompose()
-		dlde = (self.dLde()(ecc,semimaj)*self.SecondaryMass*unit.Msun*cons.G*self.SMBHMass*unit.Msun/cons.c).decompose()
-		dedp = (self.dEdp()(ecc,semimaj)*self.epsilon*cons.c**4/cons.G).decompose()
-		dede = (self.dEde()(ecc,semimaj)*self.SecondaryMass*unit.Msun*cons.c**2).decompose()
+		Edot = EdotN + self.EFluxModification #units: kg m**2/s**3
+		Ldot = LdotN + self.LFluxModification #units: kg m**2/s**2
+		dldp = self.dLdp()(ecc,semimaj)*self.dldpUnit
+		dlde = self.dLde()(ecc,semimaj)*self.dldeUnit
+		dedp = self.dEdp()(ecc,semimaj)*self.dedpUnit
+		dede = self.dEde()(ecc,semimaj)*self.dedeUnit
 
 		norm = (dldp*dede - dlde*dedp)
-		pdot = (dede*Ldot - dlde*Edot)/norm
+		pdot = (dede*Ldot - dlde*Edot)/norm #units: m/s
 
 		if ecc<10**(-5):
 			edot=0
@@ -129,8 +143,8 @@ class PNTraj(TrajectoryBase):
 		x0: initial inclination of orbital plane (NOTE: currently only considering equatorial orbits)
 		T: integration time (years)
 		"""
-		self.DeltaEFlux = kwargs.get("DeltaEFlux", 0)
-		self.DeltaLFlux = kwargs.get("DeltaLFlux", 0)
+		self.DeltaEFlux = kwargs.get("DeltaEFlux", 0.0*unit.kg*unit.m**2/(unit.s**3))
+		self.DeltaLFlux = kwargs.get("DeltaLFlux", 0.0*unit.kg*unit.m**2/(unit.s**2))
 		self.FluxName = kwargs.get("FluxName","analytic")
 		#boundary values
 		y0 = [p0, e0, 0.0, 0.0] #zero mean anomaly initially
