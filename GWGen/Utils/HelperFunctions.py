@@ -1,4 +1,5 @@
 import re
+import numpy as np
 from mpmath import *
 import astropy.constants as cons
 import astropy.units as unit
@@ -70,6 +71,7 @@ def ConfusionNoise(f):
     kappa = 521
     fk = 0.00113
     ret = A*f**(-7/3) * np.exp(-f**alpha + beta*f*np.sin(kappa*f)) * (1+np.tanh(gamma*(fk-f))) #inverse Hertz
+    return ret
 
 def stringtocomplex(string):
     exponentpiece = re.search(r'\^-\d+', string).group()
