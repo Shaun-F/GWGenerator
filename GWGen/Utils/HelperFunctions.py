@@ -1,31 +1,90 @@
 import re
 import numpy as np
+import scipy as sp
+import scipy.fft
+import warnings
 from mpmath import *
 import astropy.constants as cons
 import astropy.units as unit
 mp.dps=25
 mp.pretty=True
 
+import time
 
 def WaveformInnerProduct(timedomain, h1,h2, fmin=0.0001, fmax=1):
     """
     complex waveforms h1 and h2 are in time-domain with time domain in units of seconds. Compute inner product defined in
     """
-    h1_InFreq = np.fft.fft(h1)
-    h2_InFreq = np.fft.fft(h2)
+    if len(h1)!=len(h2):
+        warnings.warn("Waveforms have different lengths. Truncating longer waveform")
+        minlength = min([len(h1), len(h2)])-1
+        h1 = h1[0:minlength]
+        h2 = h2[0:minlength]
+
+    if len(timedomain)!=len(h1) or len(timedomain)!=len(h2):
+        raise RuntimeError("time domain has different length than the waveforms")
+
+    h1_InFreq = sp.fft.fft(h1)
+    h2_InFreq = sp.fft.fft(h2)
     timelength = len(timedomain)
     DeltaT = timedomain[1]-timedomain[0]
-    frequency_range = np.fft.fftfreq(timelength, d=DeltaT)
-    #Consider real frequencies
-    frequency_length = frequency_range
-    domain = frequency_range[frequency_length-1]
-    range1 = h1_InFreq[frequency_length-1]
-    range2 = h2_InFreq[frequency_length-1]
-    range2star = np.conjugate(range2)
-    PowerSpectralDensity = np.array([LisaSensitivity(i) for i in domain])
+    frequency_range = sp.fft.fftfreq(timelength, d=DeltaT)
+
+    #Consider real frequencies and ignore zero frequency
+    frequency_length = int(len(frequency_range)/2 -1)
+    frequency_domain = frequency_range[1:frequency_length]
+    h1f = h1_InFreq[1:frequency_length]
+    h2f = h2_InFreq[1:frequency_length]
+    h2fstar = np.conjugate(h2f)
+    PowerSpectralDensity = LisaSensitivity(frequency_domain)
 
 
-    integrand = range1*range2star/PowerSpectralDensity
+
+    integrand = h1f*h2fstar/PowerSpectralDensity
+
+
+    if frequency_domain[0]<fmin:
+        greater_mask = np.ma.masked_greater(frequency_domain,fmin).mask
+    else:
+        greater_mask = np.array([True for i in frequency_domain])
+
+    if frequency_domain[-1]>fmax:
+        lesser_mask = np.ma.masked_less(frequency_domain,fmax).mask
+    else:
+        lesser_mask = np.array([True for i in frequency_domain])
+
+    mask = np.logical_not(np.logical_and(greater_mask,lesser_mask))
+    masked_frequency_range = np.ma.masked_where(mask,frequency_domain).compressed()
+    masked_integrand = np.ma.masked_where(mask, integrand).compressed()
+
+
+
+    integral = sp.integrate.simpson(masked_integrand.real, x=masked_frequency_range)
+
+    ret = 4*integral
+    return ret
+
+def Faithfulness(timedomain, h1, h2):
+    """
+    time domain must be in units of seconds
+    """
+
+    if len(h1)!=len(h2):
+        warning.warn("Waveforms have different lengths. Truncating longer waveform")
+        minlength = min([len(h1), len(h2)])-1
+        h1 = h1[0:minlength]
+        h2 = h2[0:minlength]
+
+    if len(timedomain)!=len(h1) or len(timedomain)!=len(h2):
+        raise RuntimeError("time domain has different length than the waveforms")
+        
+    h1h2 = WaveformInnerProduct(timedomain, h1, h2)
+    h1h1 = WaveformInnerProduct(timedomain, h1, h1)
+    h2h2 = WaveformInnerProduct(timedomain, h2, h2)
+    ret = h1h2/np.sqrt(h1h1*h2h2)
+
+    return ret
+
 
 def LisaSensitivity(f):
     """

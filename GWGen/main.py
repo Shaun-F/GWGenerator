@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 os.chdir("../")
 path = os.getcwd()
 sys.path.insert(0, path)
@@ -11,8 +12,15 @@ plt.rcParams['text.usetex'] = True
 import joblib
 from joblib import Parallel, delayed
 
+
+#data directory
+DataDirectory = "/Data/"
+
+#generate plots
+PlotData = False
+
 #boson spin
-spin=0
+spin=1
 
 #parameters
 BHSpin=0.9
@@ -29,7 +37,7 @@ mich=False
 T=5 #LISA data run
 dt=15 #time resolution in seconds
 
-use_gpu=False
+use_gpu=False #if CUDA or cupy is installed, this flag sets GPU parallelization
 
 
 # keyword arguments for inspiral generator (RunKerrGenericPn5Inspiral)
@@ -54,7 +62,7 @@ if __name__=='__main__':
 
     PROCAALPHACUTOFF = 0.04 #cutoff for dimensionless gravitational coupling. values larger than this correspond to proca clouds whose GW fluxes approximately exceed that of the EMRI
 
-    def process(BHMASS, PROCAMASS):
+    def process(BHMASS, PROCAMASS, plot=False):
         #alpha values larger than 0.02 produce energy fluxes larger than the undressed flux
         if alphavalue(BHMASS,PROCAMASS)>PROCAALPHACUTOFF and spin==1:
             print("alpha>0.4. skipping loop")
@@ -77,50 +85,78 @@ if __name__=='__main__':
         #Mismatch
         mismatch = get_mismatch(unmoddedwv, moddedwv)
 
-        #plots
-        fig,ax = plt.subplots(2,2,figsize=(16,8))
-        plt.subplots_adjust(wspace=0.5,hspace=0.5)
+        #Faithfulness
+        minlen = min([len(moddedwv), len(unmoddedwv)])
+        time = np.arange(minlen)*dt
+        faith = Faithfulness(time, moddedwv, unmoddedwv)
 
-        dom1 = np.arange(len(unmoddedwv))*dt
-        ax[0,0].plot(dom1, unmoddedwv.real, label=r"h_{+}")
-        ax[0,0].set_title("Gravitational Waveform (without proca)")
-        ax[0,0].legend()
-        ticks = ax[0,0].get_xticks()[1:-1];
-        newlabs = [int(i)/100 for i in (ticks*100/(60*60*24*365))];
-        ax[0,0].set_xticks(ticks, newlabs);
+        #data structure
+        data = {
+                "SMBHMASS": SMBHMASS,
+                "SecondaryMass":SecondaryMass,
+                "PROCAMASS":PROCAMASS,
+                "p0":p0,
+                "e0":e0,
+                "BHSpin":spin,
+                "mismatch":mismatch,
+                "faithfulness":faith
+                }
 
-        dom2 = np.arange(len(moddedwv))*dt
-        ax[0,1].plot(dom2, moddedwv.real, label=r"h_{+}")
-        ax[0,1].set_title("Gravitational Waveform (with proca)")
-        ax[0,1].legend()
-        ticks = ax[0,1].get_xticks()[1:-1];
-        newlabs = [int(i)/100 for i in (ticks*100/(60*60*24*365))];
-        ax[0,1].set_xticks(ticks, newlabs);
-        ax[0,1].set_xlabel("years")
-        ax[0,1].set_ylabel("strain")
 
-        smallestwv = min([len(moddedwv), len(unmoddedwv)])-1
-        dom3 = np.arange(smallestwv)*dt
-        ax[1,0].plot(dom3, (moddedwv[0:smallestwv].real - unmoddedwv[0:smallestwv].real), label=r"h_{+}")
-        ax[1,0].set_title("difference between with and with proca")
-        ax[1,0].legend()
-        ticks = ax[1,0].get_xticks()[1:-1];
-        newlabs = [int(i)/100 for i in (ticks*100/(60*60*24*365))];
-        ax[1,0].set_xticks(ticks, newlabs);
-        ax[1,0].set_xlabel("years")
-        ax[1,0].set_ylabel("strain")
+        #output data to disk
+        jsondata = json.dumps(data)
+        with open(DataDirectory+"SMBHMass{0}_SecMass{1}_ProcMass{2}_ProcSpin{3}.png".format(BHMASS,SecondaryMass,PROCAMASS,spin), "w") as file:
+            file.write(jsondata)
 
-        ax[1,1].axis('off')
-        prop = dict(boxstyle="round", facecolor="wheat", alpha=0.5)
-        str = r"""mismatch = {0:.4f}
-        SMBHMass = {1}
-        Proca Mass = {2}
-        BosonSpin = {3}
-        BHSpin = {4}
-        """.format(mismatch, BHMASS, PROCAMASS, spin,BHSpin)
-        ax[1,1].text(0.5,0.5, str, bbox=prop, fontsize=14, verticalalignment='center', horizontalalignment='center')
 
-        fig.savefig("data/wvcomparisonSMBHMass{0}_SecMass{1}_ProcMass{2}_ProcSpin{5}_p0{3}_e0{4}.png".format(BHMASS,SecondaryMass,PROCAMASS,p0,e0,spin),dpi=300)
-        plt.clf()
 
-    Parallel(n_jobs=8)(delayed(process)(bhmass, pmass) for bhmass in SMBHMasses for pmass in ProcaMasses)
+        if plot:
+            #plots
+            fig,ax = plt.subplots(2,2,figsize=(16,8))
+            plt.subplots_adjust(wspace=0.5,hspace=0.5)
+
+            dom1 = np.arange(len(unmoddedwv))*dt
+            ax[0,0].plot(dom1, unmoddedwv.real, label=r"h_{+}")
+            ax[0,0].set_title("Gravitational Waveform (without proca)")
+            ax[0,0].legend()
+            ticks = ax[0,0].get_xticks()[1:-1];
+            newlabs = [int(i)/100 for i in (ticks*100/(60*60*24*365))];
+            ax[0,0].set_xticks(ticks, newlabs);
+
+            dom2 = np.arange(len(moddedwv))*dt
+            ax[0,1].plot(dom2, moddedwv.real, label=r"h_{+}")
+            ax[0,1].set_title("Gravitational Waveform (with proca)")
+            ax[0,1].legend()
+            ticks = ax[0,1].get_xticks()[1:-1];
+            newlabs = [int(i)/100 for i in (ticks*100/(60*60*24*365))];
+            ax[0,1].set_xticks(ticks, newlabs);
+            ax[0,1].set_xlabel("years")
+            ax[0,1].set_ylabel("strain")
+
+            smallestwv = min([len(moddedwv), len(unmoddedwv)])-1
+            dom3 = np.arange(smallestwv)*dt
+            ax[1,0].plot(dom3, (moddedwv[0:smallestwv].real - unmoddedwv[0:smallestwv].real), label=r"h_{+}")
+            ax[1,0].set_title("difference between with and with proca")
+            ax[1,0].legend()
+            ticks = ax[1,0].get_xticks()[1:-1];
+            newlabs = [int(i)/100 for i in (ticks*100/(60*60*24*365))];
+            ax[1,0].set_xticks(ticks, newlabs);
+            ax[1,0].set_xlabel("years")
+            ax[1,0].set_ylabel("strain")
+
+            ax[1,1].axis('off')
+            prop = dict(boxstyle="round", facecolor="wheat", alpha=0.5)
+            str = r"""mismatch = {0:.4f}
+            SMBHMass = {1}
+            Proca Mass = {2}
+            BosonSpin = {3}
+            BHSpin = {4}
+            p0 = {5}
+            e0 = {6}
+            """.format(mismatch, BHMASS, PROCAMASS, spin,BHSpin, p0, e0)
+            ax[1,1].text(0.5,0.5, str, bbox=prop, fontsize=14, verticalalignment='center', horizontalalignment='center')
+
+            fig.savefig(DataDirectory+"Plot_SMBHMass{0}_SecMass{1}_ProcMass{2}_ProcSpin{5}_p0{3}_e0{4}.png".format(BHMASS,SecondaryMass,PROCAMASS,p0,e0,spin),dpi=300)
+            plt.clf()
+
+    Parallel(n_jobs=8)(delayed(process)(bhmass, pmass,plot=PlotData) for bhmass in SMBHMasses for pmass in ProcaMasses)
