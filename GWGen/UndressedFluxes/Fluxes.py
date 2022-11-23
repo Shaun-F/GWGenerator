@@ -7,8 +7,8 @@ from .AnalyticFEWFluxes import *
 class FluxFunction():
     def __init__(self,name="analytic"):
         if name=="analytic":
-            self.EFlux = lambda q,e,p: dIdt.pydEdt(q,e,p,1,10,10)
-            self.LFlux = lambda q,e,p: dIdt.pydLdt(q,e,p,1,10,10)
+            self.EFlux = AnalyticFEWEFlux
+            self.LFlux = AnalyticFEWLFlux
         elif name=="numerical":
             self.EFlux = GenerateNumericalEInterpolation()
             self.LFlux = GenerateNumericalLInterpolation()
@@ -16,6 +16,13 @@ class FluxFunction():
     def __call__(self,q,e,p):
         return {"EFlux":self.EFlux(q,e,p),"LFlux":self.LFlux(q,e,p)}
 
+
+
+def AnalyticFEWEFlux(q,e,p,Y=1):
+    return dIdt.pydEdt(q,e,p,Y,10,10)
+
+def AnalyticFEWLFlux(q,e,p,Y=1):
+    return dIdt.pydLdt(q,e,p,Y,10,10)
 
 
 #My own implementation of 5PN fluxes
