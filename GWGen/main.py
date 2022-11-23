@@ -12,8 +12,10 @@ plt.rcParams['text.usetex'] = True
 import joblib
 from joblib import Parallel, delayed
 
+#number of cpus to use for parallelization
+NCPUs = 6
 
-#data directory
+#data directory relative to local parent GWGen
 DataDirectory = "/Data/"
 
 #generate plots
@@ -42,8 +44,8 @@ use_gpu=False #if CUDA or cupy is installed, this flag sets GPU parallelization
 
 # keyword arguments for inspiral generator (RunKerrGenericPn5Inspiral)
 inspiral_kwargs = {
-    "npoints": 50,  # we want a densely sampled trajectory
-    "max_init_len": int(1e3),  # all of the trajectories will be well under len = 1000
+    "npoints": 100,  # we want a densely sampled trajectory
+    "max_init_len": int(1e3),
 }
 
 # keyword arguments for summation generator (AAKSummation)
@@ -55,12 +57,13 @@ sum_kwargs = {
 if __name__=='__main__':
     #run analysis
 
-    tmparr = np.arange(1,10,1)
+    tmparr = np.arange(1,10,0.1)
     SMBHMasses = np.kron(tmparr,[1e6,1e7]) #solar masses
     SecondaryMass = 10 #solar masses
     ProcaMasses = np.kron(tmparr, [1e-14,1e-15,1e-16,1e-17,1e-18,1e-19]) #eV
 
     PROCAALPHACUTOFF = 0.04 #cutoff for dimensionless gravitational coupling. values larger than this correspond to proca clouds whose GW fluxes approximately exceed that of the EMRI
+
 
     def process(BHMASS, PROCAMASS, plot=False):
         #alpha values larger than 0.02 produce energy fluxes larger than the undressed flux
@@ -92,7 +95,7 @@ if __name__=='__main__':
 
         #data structure
         data = {
-                "SMBHMASS": SMBHMASS,
+                "SMBHMASS": BHMASS,
                 "SecondaryMass":SecondaryMass,
                 "PROCAMASS":PROCAMASS,
                 "p0":p0,
@@ -105,7 +108,8 @@ if __name__=='__main__':
 
         #output data to disk
         jsondata = json.dumps(data)
-        with open(DataDirectory+"SMBHMass{0}_SecMass{1}_ProcMass{2}_ProcSpin{3}.png".format(BHMASS,SecondaryMass,PROCAMASS,spin), "w") as file:
+        filename = os.path.abspath(os.path.dirname(__file__)) + DataDirectory + "SMBHMass{0}_SecMass{1}_ProcMass{2}_ProcSpin{3}.json".format(BHMASS,SecondaryMass,PROCAMASS,spin)
+        with open(filename, "w") as file:
             file.write(jsondata)
 
 
@@ -159,4 +163,4 @@ if __name__=='__main__':
             fig.savefig(DataDirectory+"Plot_SMBHMass{0}_SecMass{1}_ProcMass{2}_ProcSpin{5}_p0{3}_e0{4}.png".format(BHMASS,SecondaryMass,PROCAMASS,p0,e0,spin),dpi=300)
             plt.clf()
 
-    Parallel(n_jobs=8)(delayed(process)(bhmass, pmass,plot=PlotData) for bhmass in SMBHMasses for pmass in ProcaMasses)
+    Parallel(n_jobs=NCPUs)(delayed(process)(bhmass, pmass,plot=PlotData) for bhmass in SMBHMasses for pmass in ProcaMasses)

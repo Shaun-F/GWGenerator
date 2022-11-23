@@ -70,14 +70,15 @@ def Faithfulness(timedomain, h1, h2):
     """
 
     if len(h1)!=len(h2):
-        warning.warn("Waveforms have different lengths. Truncating longer waveform")
-        minlength = min([len(h1), len(h2)])-1
+        warnings.warn("Waveforms have different lengths. Truncating longer waveform")
+        minlength = min([len(h1), len(h2)])
         h1 = h1[0:minlength]
         h2 = h2[0:minlength]
+        assert len(h1)==len(h2)
 
-    if len(timedomain)!=len(h1) or len(timedomain)!=len(h2):
-        raise RuntimeError("time domain has different length than the waveforms")
-        
+    assert len(timedomain)==len(h1), "time domain has different length than the waveforms. time domain length: {0} waveform 1 length: {1} waveform 2 length: {2}".format(len(timedomain), len(h1), len(h2))
+    
+
     h1h2 = WaveformInnerProduct(timedomain, h1, h2)
     h1h1 = WaveformInnerProduct(timedomain, h1, h1)
     h2h2 = WaveformInnerProduct(timedomain, h2, h2)

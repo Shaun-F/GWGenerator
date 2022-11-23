@@ -2,12 +2,13 @@ import pandas as pd
 import numpy as np
 import os
 from GWGen.NumericalData import *
+from .AnalyticFEWFluxes import *
 
 class FluxFunction():
     def __init__(self,name="analytic"):
         if name=="analytic":
-            self.EFlux = Analytic5PNEFlux
-            self.LFlux = Analytic5PNLFlux
+            self.EFlux = lambda q,e,p: dIdt.pydEdt(q,e,p,1,10,10)
+            self.LFlux = lambda q,e,p: dIdt.pydLdt(q,e,p,1,10,10)
         elif name=="numerical":
             self.EFlux = GenerateNumericalEInterpolation()
             self.LFlux = GenerateNumericalLInterpolation()
@@ -16,6 +17,8 @@ class FluxFunction():
         return {"EFlux":self.EFlux(q,e,p),"LFlux":self.LFlux(q,e,p)}
 
 
+
+#My own implementation of 5PN fluxes
 def Analytic5PNLFlux(bhspin,ecc,semimaj):
     """
     Generate 5pn-accurate angular momentum flux value

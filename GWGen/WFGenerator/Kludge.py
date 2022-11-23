@@ -206,7 +206,7 @@ class PNTraj(TrajectoryBase):
 		Phi_r = np.asarray(Phi_r_out)
 
 		#add polar data
-		Phi_theta = (np.pi/2)*np.ones_like(Phi_phi)
+		Phi_theta = (0)*np.ones_like(Phi_phi)
 		x = np.ones_like(Phi_theta)
 
 		return (t, p, e, x, Phi_phi, Phi_theta, Phi_r)
