@@ -13,7 +13,7 @@ import joblib
 from joblib import Parallel, delayed
 
 #number of cpus to use for parallelization
-NCPUs = 6
+NCPUs = 5
 
 #data directory relative to local parent GWGen
 DataDirectory = "/Data/"
