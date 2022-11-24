@@ -11,6 +11,11 @@ mp.pretty=True
 
 import time
 
+def ProcaCloudCharacteristSize(BHMass, ProcaMass):
+    alpha = alphavalue(BHMass, ProcaMass)
+    return None
+
+
 def WaveformInnerProduct(timedomain, h1,h2, fmin=0.0001, fmax=1):
     """
     complex waveforms h1 and h2 are in time-domain with time domain in units of seconds. Compute inner product defined in
@@ -77,7 +82,7 @@ def Faithfulness(timedomain, h1, h2):
         assert len(h1)==len(h2)
 
     assert len(timedomain)==len(h1), "time domain has different length than the waveforms. time domain length: {0} waveform 1 length: {1} waveform 2 length: {2}".format(len(timedomain), len(h1), len(h2))
-    
+
 
     h1h2 = WaveformInnerProduct(timedomain, h1, h2)
     h1h1 = WaveformInnerProduct(timedomain, h1, h1)

@@ -46,6 +46,10 @@ class ProcaSolution():
 
 
 
+
+
+
+"""
 class OldProcaSolution():
     def __init__(self):
         self.SolutionDir = pathToSolutionSet;
@@ -63,3 +67,4 @@ class OldProcaSolution():
     def ProcaFlux(self, ProcaMass=0.3, ModeNumber=1, OvertoneNumber=0, BHSpin=0.9):
         interp = self.GenerateFluxInterpolation(modenumber=ModeNumber,overtone=OvertoneNumber, BHspin=BHSpin)
         return interp(ProcaMass)
+"""
