@@ -13,7 +13,7 @@ import joblib
 from joblib import Parallel, delayed
 
 #number of cpus to use for parallelization
-NCPUs = 5
+NCPUs = 6
 
 #data directory relative to local parent GWGen
 DataDirectory = "/Data/"
@@ -164,11 +164,8 @@ if __name__=='__main__':
     tmparr = np.arange(1,10,0.1)
     SMBHMasses = np.kron(tmparr,[1e6,1e7]) #solar masses
     SecondaryMass = 10 #solar masses
-    ProcaMasses = np.kron(tmparr, [1e-18,1e-19]) #eV
+    ProcaMasses = np.kron(tmparr, [1e-18,1e-19,1e-20]) #eV
 
-    #debugging
-    SMBHMasses = [1e6]
-    ProcaMasses = np.asarray([ 3.4e-18])
 
 
     PROCAALPHACUTOFF = 0.04 #cutoff for dimensionless gravitational coupling. values larger than this correspond to proca clouds whose GW fluxes approximately exceed that of the EMRI
