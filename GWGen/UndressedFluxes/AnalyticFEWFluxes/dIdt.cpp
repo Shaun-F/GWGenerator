@@ -1190,8 +1190,12 @@ static const char __pyx_k_nv[] = "nv";
 static const char __pyx_k_main[] = "__main__";
 static const char __pyx_k_name[] = "__name__";
 static const char __pyx_k_test[] = "__test__";
+static const char __pyx_k_pydCdt[] = "pydCdt";
 static const char __pyx_k_pydEdt[] = "pydEdt";
 static const char __pyx_k_pydLdt[] = "pydLdt";
+static const char __pyx_k_pydYdt[] = "pydYdt";
+static const char __pyx_k_pydedt[] = "pydedt";
+static const char __pyx_k_pydpdt[] = "pydpdt";
 static const char __pyx_k_dIdt_pyx[] = "dIdt.pyx";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_GWGen_UndressedFluxes_AnalyticFE[] = "GWGen.UndressedFluxes.AnalyticFEWFluxes.dIdt";
@@ -1205,20 +1209,36 @@ static PyObject *__pyx_n_s_name;
 static PyObject *__pyx_n_s_ne;
 static PyObject *__pyx_n_s_nv;
 static PyObject *__pyx_n_s_p;
+static PyObject *__pyx_n_s_pydCdt;
 static PyObject *__pyx_n_s_pydEdt;
 static PyObject *__pyx_n_s_pydLdt;
+static PyObject *__pyx_n_s_pydYdt;
+static PyObject *__pyx_n_s_pydedt;
+static PyObject *__pyx_n_s_pydpdt;
 static PyObject *__pyx_n_s_q;
 static PyObject *__pyx_n_s_test;
 static PyObject *__pyx_pf_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_pydEdt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne); /* proto */
 static PyObject *__pyx_pf_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_2pydLdt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne); /* proto */
+static PyObject *__pyx_pf_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_4pydCdt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne); /* proto */
+static PyObject *__pyx_pf_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_6pydpdt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne); /* proto */
+static PyObject *__pyx_pf_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_8pydedt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne); /* proto */
+static PyObject *__pyx_pf_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_10pydYdt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne); /* proto */
 static PyObject *__pyx_tuple_;
 static PyObject *__pyx_tuple__3;
+static PyObject *__pyx_tuple__5;
+static PyObject *__pyx_tuple__7;
+static PyObject *__pyx_tuple__9;
+static PyObject *__pyx_tuple__11;
 static PyObject *__pyx_codeobj__2;
 static PyObject *__pyx_codeobj__4;
+static PyObject *__pyx_codeobj__6;
+static PyObject *__pyx_codeobj__8;
+static PyObject *__pyx_codeobj__10;
+static PyObject *__pyx_codeobj__12;
 /* Late includes */
 
-/* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":7
- * 	double dLdt8H_5PNe10 (const double q, const double p, const double e, const double Y, const int Nv, const int ne)
+/* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":12
+ * 
  * 
  * def pydEdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
  * 	return dEdt8H_5PNe10(q,e,p,Y,nv,ne)
@@ -1272,35 +1292,35 @@ static PyObject *__pyx_pw_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_1py
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_p)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("pydEdt", 1, 6, 6, 1); __PYX_ERR(0, 7, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("pydEdt", 1, 6, 6, 1); __PYX_ERR(0, 12, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_e)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("pydEdt", 1, 6, 6, 2); __PYX_ERR(0, 7, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("pydEdt", 1, 6, 6, 2); __PYX_ERR(0, 12, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_Y)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("pydEdt", 1, 6, 6, 3); __PYX_ERR(0, 7, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("pydEdt", 1, 6, 6, 3); __PYX_ERR(0, 12, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
         if (likely((values[4] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_nv)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("pydEdt", 1, 6, 6, 4); __PYX_ERR(0, 7, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("pydEdt", 1, 6, 6, 4); __PYX_ERR(0, 12, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  5:
         if (likely((values[5] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_ne)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("pydEdt", 1, 6, 6, 5); __PYX_ERR(0, 7, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("pydEdt", 1, 6, 6, 5); __PYX_ERR(0, 12, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "pydEdt") < 0)) __PYX_ERR(0, 7, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "pydEdt") < 0)) __PYX_ERR(0, 12, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 6) {
       goto __pyx_L5_argtuple_error;
@@ -1321,7 +1341,7 @@ static PyObject *__pyx_pw_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_1py
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("pydEdt", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 7, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("pydEdt", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 12, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("GWGen.UndressedFluxes.AnalyticFEWFluxes.dIdt.pydEdt", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -1349,7 +1369,7 @@ static PyObject *__pyx_pf_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_pyd
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("pydEdt", 0);
 
-  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":8
+  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":13
  * 
  * def pydEdt(q,p,e,Y,nv,ne):
  * 	return dEdt8H_5PNe10(q,e,p,Y,nv,ne)             # <<<<<<<<<<<<<<
@@ -1357,20 +1377,20 @@ static PyObject *__pyx_pf_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_pyd
  * 	return dLdt8H_5PNe10(q,e,p,Y,nv,ne)
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_q); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 8, __pyx_L1_error)
-  __pyx_t_2 = __pyx_PyFloat_AsDouble(__pyx_v_e); if (unlikely((__pyx_t_2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 8, __pyx_L1_error)
-  __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_p); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 8, __pyx_L1_error)
-  __pyx_t_4 = __pyx_PyFloat_AsDouble(__pyx_v_Y); if (unlikely((__pyx_t_4 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 8, __pyx_L1_error)
-  __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_v_nv); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 8, __pyx_L1_error)
-  __pyx_t_6 = __Pyx_PyInt_As_int(__pyx_v_ne); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 8, __pyx_L1_error)
-  __pyx_t_7 = PyFloat_FromDouble(dEdt8H_5PNe10(__pyx_t_1, __pyx_t_2, __pyx_t_3, __pyx_t_4, __pyx_t_5, __pyx_t_6)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 8, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_q); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 13, __pyx_L1_error)
+  __pyx_t_2 = __pyx_PyFloat_AsDouble(__pyx_v_e); if (unlikely((__pyx_t_2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 13, __pyx_L1_error)
+  __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_p); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 13, __pyx_L1_error)
+  __pyx_t_4 = __pyx_PyFloat_AsDouble(__pyx_v_Y); if (unlikely((__pyx_t_4 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 13, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_v_nv); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 13, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_As_int(__pyx_v_ne); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 13, __pyx_L1_error)
+  __pyx_t_7 = PyFloat_FromDouble(dEdt8H_5PNe10(__pyx_t_1, __pyx_t_2, __pyx_t_3, __pyx_t_4, __pyx_t_5, __pyx_t_6)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 13, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __pyx_r = __pyx_t_7;
   __pyx_t_7 = 0;
   goto __pyx_L0;
 
-  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":7
- * 	double dLdt8H_5PNe10 (const double q, const double p, const double e, const double Y, const int Nv, const int ne)
+  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":12
+ * 
  * 
  * def pydEdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
  * 	return dEdt8H_5PNe10(q,e,p,Y,nv,ne)
@@ -1388,11 +1408,12 @@ static PyObject *__pyx_pf_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_pyd
   return __pyx_r;
 }
 
-/* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":9
+/* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":14
  * def pydEdt(q,p,e,Y,nv,ne):
  * 	return dEdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydLdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
  * 	return dLdt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydCdt(q,p,e,Y,nv,ne):
  */
 
 /* Python wrapper */
@@ -1442,35 +1463,35 @@ static PyObject *__pyx_pw_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_3py
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_p)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("pydLdt", 1, 6, 6, 1); __PYX_ERR(0, 9, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("pydLdt", 1, 6, 6, 1); __PYX_ERR(0, 14, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_e)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("pydLdt", 1, 6, 6, 2); __PYX_ERR(0, 9, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("pydLdt", 1, 6, 6, 2); __PYX_ERR(0, 14, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_Y)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("pydLdt", 1, 6, 6, 3); __PYX_ERR(0, 9, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("pydLdt", 1, 6, 6, 3); __PYX_ERR(0, 14, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
         if (likely((values[4] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_nv)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("pydLdt", 1, 6, 6, 4); __PYX_ERR(0, 9, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("pydLdt", 1, 6, 6, 4); __PYX_ERR(0, 14, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  5:
         if (likely((values[5] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_ne)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("pydLdt", 1, 6, 6, 5); __PYX_ERR(0, 9, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("pydLdt", 1, 6, 6, 5); __PYX_ERR(0, 14, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "pydLdt") < 0)) __PYX_ERR(0, 9, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "pydLdt") < 0)) __PYX_ERR(0, 14, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 6) {
       goto __pyx_L5_argtuple_error;
@@ -1491,7 +1512,7 @@ static PyObject *__pyx_pw_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_3py
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("pydLdt", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 9, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("pydLdt", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 14, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("GWGen.UndressedFluxes.AnalyticFEWFluxes.dIdt.pydLdt", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -1519,35 +1540,718 @@ static PyObject *__pyx_pf_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_2py
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("pydLdt", 0);
 
-  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":10
+  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":15
  * 	return dEdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydLdt(q,p,e,Y,nv,ne):
  * 	return dLdt8H_5PNe10(q,e,p,Y,nv,ne)             # <<<<<<<<<<<<<<
+ * def pydCdt(q,p,e,Y,nv,ne):
+ * 	return dCdt8H_5PNe10(q,e,p,Y,nv,ne)
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_q); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 10, __pyx_L1_error)
-  __pyx_t_2 = __pyx_PyFloat_AsDouble(__pyx_v_e); if (unlikely((__pyx_t_2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 10, __pyx_L1_error)
-  __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_p); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 10, __pyx_L1_error)
-  __pyx_t_4 = __pyx_PyFloat_AsDouble(__pyx_v_Y); if (unlikely((__pyx_t_4 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 10, __pyx_L1_error)
-  __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_v_nv); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 10, __pyx_L1_error)
-  __pyx_t_6 = __Pyx_PyInt_As_int(__pyx_v_ne); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 10, __pyx_L1_error)
-  __pyx_t_7 = PyFloat_FromDouble(dLdt8H_5PNe10(__pyx_t_1, __pyx_t_2, __pyx_t_3, __pyx_t_4, __pyx_t_5, __pyx_t_6)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 10, __pyx_L1_error)
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_q); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 15, __pyx_L1_error)
+  __pyx_t_2 = __pyx_PyFloat_AsDouble(__pyx_v_e); if (unlikely((__pyx_t_2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 15, __pyx_L1_error)
+  __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_p); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 15, __pyx_L1_error)
+  __pyx_t_4 = __pyx_PyFloat_AsDouble(__pyx_v_Y); if (unlikely((__pyx_t_4 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 15, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_v_nv); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 15, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_As_int(__pyx_v_ne); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 15, __pyx_L1_error)
+  __pyx_t_7 = PyFloat_FromDouble(dLdt8H_5PNe10(__pyx_t_1, __pyx_t_2, __pyx_t_3, __pyx_t_4, __pyx_t_5, __pyx_t_6)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 15, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __pyx_r = __pyx_t_7;
   __pyx_t_7 = 0;
   goto __pyx_L0;
 
-  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":9
+  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":14
  * def pydEdt(q,p,e,Y,nv,ne):
  * 	return dEdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydLdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
  * 	return dLdt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydCdt(q,p,e,Y,nv,ne):
  */
 
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_7);
   __Pyx_AddTraceback("GWGen.UndressedFluxes.AnalyticFEWFluxes.dIdt.pydLdt", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":16
+ * def pydLdt(q,p,e,Y,nv,ne):
+ * 	return dLdt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydCdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
+ * 	return dCdt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydpdt(q,p,e,Y,nv,ne):
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_5pydCdt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_5pydCdt = {"pydCdt", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_5pydCdt, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_5pydCdt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  PyObject *__pyx_v_q = 0;
+  PyObject *__pyx_v_p = 0;
+  PyObject *__pyx_v_e = 0;
+  PyObject *__pyx_v_Y = 0;
+  PyObject *__pyx_v_nv = 0;
+  PyObject *__pyx_v_ne = 0;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("pydCdt (wrapper)", 0);
+  {
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_q,&__pyx_n_s_p,&__pyx_n_s_e,&__pyx_n_s_Y,&__pyx_n_s_nv,&__pyx_n_s_ne,0};
+    PyObject* values[6] = {0,0,0,0,0,0};
+    if (unlikely(__pyx_kwds)) {
+      Py_ssize_t kw_args;
+      const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
+      switch (pos_args) {
+        case  6: values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
+        CYTHON_FALLTHROUGH;
+        case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
+        CYTHON_FALLTHROUGH;
+        case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
+        CYTHON_FALLTHROUGH;
+        case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+        CYTHON_FALLTHROUGH;
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        CYTHON_FALLTHROUGH;
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        CYTHON_FALLTHROUGH;
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = PyDict_Size(__pyx_kwds);
+      switch (pos_args) {
+        case  0:
+        if (likely((values[0] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_q)) != 0)) kw_args--;
+        else goto __pyx_L5_argtuple_error;
+        CYTHON_FALLTHROUGH;
+        case  1:
+        if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_p)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("pydCdt", 1, 6, 6, 1); __PYX_ERR(0, 16, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  2:
+        if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_e)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("pydCdt", 1, 6, 6, 2); __PYX_ERR(0, 16, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  3:
+        if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_Y)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("pydCdt", 1, 6, 6, 3); __PYX_ERR(0, 16, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  4:
+        if (likely((values[4] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_nv)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("pydCdt", 1, 6, 6, 4); __PYX_ERR(0, 16, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  5:
+        if (likely((values[5] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_ne)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("pydCdt", 1, 6, 6, 5); __PYX_ERR(0, 16, __pyx_L3_error)
+        }
+      }
+      if (unlikely(kw_args > 0)) {
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "pydCdt") < 0)) __PYX_ERR(0, 16, __pyx_L3_error)
+      }
+    } else if (PyTuple_GET_SIZE(__pyx_args) != 6) {
+      goto __pyx_L5_argtuple_error;
+    } else {
+      values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+      values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+      values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+      values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
+      values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
+      values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
+    }
+    __pyx_v_q = values[0];
+    __pyx_v_p = values[1];
+    __pyx_v_e = values[2];
+    __pyx_v_Y = values[3];
+    __pyx_v_nv = values[4];
+    __pyx_v_ne = values[5];
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("pydCdt", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 16, __pyx_L3_error)
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("GWGen.UndressedFluxes.AnalyticFEWFluxes.dIdt.pydCdt", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_4pydCdt(__pyx_self, __pyx_v_q, __pyx_v_p, __pyx_v_e, __pyx_v_Y, __pyx_v_nv, __pyx_v_ne);
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_4pydCdt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  double __pyx_t_1;
+  double __pyx_t_2;
+  double __pyx_t_3;
+  double __pyx_t_4;
+  int __pyx_t_5;
+  int __pyx_t_6;
+  PyObject *__pyx_t_7 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("pydCdt", 0);
+
+  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":17
+ * 	return dLdt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydCdt(q,p,e,Y,nv,ne):
+ * 	return dCdt8H_5PNe10(q,e,p,Y,nv,ne)             # <<<<<<<<<<<<<<
+ * def pydpdt(q,p,e,Y,nv,ne):
+ * 	return dpdt8H_5PNe10(q,e,p,Y,nv,ne)
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_q); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 17, __pyx_L1_error)
+  __pyx_t_2 = __pyx_PyFloat_AsDouble(__pyx_v_e); if (unlikely((__pyx_t_2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 17, __pyx_L1_error)
+  __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_p); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 17, __pyx_L1_error)
+  __pyx_t_4 = __pyx_PyFloat_AsDouble(__pyx_v_Y); if (unlikely((__pyx_t_4 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 17, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_v_nv); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 17, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_As_int(__pyx_v_ne); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 17, __pyx_L1_error)
+  __pyx_t_7 = PyFloat_FromDouble(dCdt8H_5PNe10(__pyx_t_1, __pyx_t_2, __pyx_t_3, __pyx_t_4, __pyx_t_5, __pyx_t_6)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 17, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_7);
+  __pyx_r = __pyx_t_7;
+  __pyx_t_7 = 0;
+  goto __pyx_L0;
+
+  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":16
+ * def pydLdt(q,p,e,Y,nv,ne):
+ * 	return dLdt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydCdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
+ * 	return dCdt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydpdt(q,p,e,Y,nv,ne):
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_7);
+  __Pyx_AddTraceback("GWGen.UndressedFluxes.AnalyticFEWFluxes.dIdt.pydCdt", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":18
+ * def pydCdt(q,p,e,Y,nv,ne):
+ * 	return dCdt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydpdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
+ * 	return dpdt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydedt(q,p,e,Y,nv,ne):
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_7pydpdt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_7pydpdt = {"pydpdt", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_7pydpdt, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_7pydpdt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  PyObject *__pyx_v_q = 0;
+  PyObject *__pyx_v_p = 0;
+  PyObject *__pyx_v_e = 0;
+  PyObject *__pyx_v_Y = 0;
+  PyObject *__pyx_v_nv = 0;
+  PyObject *__pyx_v_ne = 0;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("pydpdt (wrapper)", 0);
+  {
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_q,&__pyx_n_s_p,&__pyx_n_s_e,&__pyx_n_s_Y,&__pyx_n_s_nv,&__pyx_n_s_ne,0};
+    PyObject* values[6] = {0,0,0,0,0,0};
+    if (unlikely(__pyx_kwds)) {
+      Py_ssize_t kw_args;
+      const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
+      switch (pos_args) {
+        case  6: values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
+        CYTHON_FALLTHROUGH;
+        case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
+        CYTHON_FALLTHROUGH;
+        case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
+        CYTHON_FALLTHROUGH;
+        case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+        CYTHON_FALLTHROUGH;
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        CYTHON_FALLTHROUGH;
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        CYTHON_FALLTHROUGH;
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = PyDict_Size(__pyx_kwds);
+      switch (pos_args) {
+        case  0:
+        if (likely((values[0] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_q)) != 0)) kw_args--;
+        else goto __pyx_L5_argtuple_error;
+        CYTHON_FALLTHROUGH;
+        case  1:
+        if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_p)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("pydpdt", 1, 6, 6, 1); __PYX_ERR(0, 18, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  2:
+        if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_e)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("pydpdt", 1, 6, 6, 2); __PYX_ERR(0, 18, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  3:
+        if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_Y)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("pydpdt", 1, 6, 6, 3); __PYX_ERR(0, 18, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  4:
+        if (likely((values[4] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_nv)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("pydpdt", 1, 6, 6, 4); __PYX_ERR(0, 18, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  5:
+        if (likely((values[5] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_ne)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("pydpdt", 1, 6, 6, 5); __PYX_ERR(0, 18, __pyx_L3_error)
+        }
+      }
+      if (unlikely(kw_args > 0)) {
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "pydpdt") < 0)) __PYX_ERR(0, 18, __pyx_L3_error)
+      }
+    } else if (PyTuple_GET_SIZE(__pyx_args) != 6) {
+      goto __pyx_L5_argtuple_error;
+    } else {
+      values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+      values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+      values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+      values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
+      values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
+      values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
+    }
+    __pyx_v_q = values[0];
+    __pyx_v_p = values[1];
+    __pyx_v_e = values[2];
+    __pyx_v_Y = values[3];
+    __pyx_v_nv = values[4];
+    __pyx_v_ne = values[5];
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("pydpdt", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 18, __pyx_L3_error)
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("GWGen.UndressedFluxes.AnalyticFEWFluxes.dIdt.pydpdt", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_6pydpdt(__pyx_self, __pyx_v_q, __pyx_v_p, __pyx_v_e, __pyx_v_Y, __pyx_v_nv, __pyx_v_ne);
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_6pydpdt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  double __pyx_t_1;
+  double __pyx_t_2;
+  double __pyx_t_3;
+  double __pyx_t_4;
+  int __pyx_t_5;
+  int __pyx_t_6;
+  PyObject *__pyx_t_7 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("pydpdt", 0);
+
+  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":19
+ * 	return dCdt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydpdt(q,p,e,Y,nv,ne):
+ * 	return dpdt8H_5PNe10(q,e,p,Y,nv,ne)             # <<<<<<<<<<<<<<
+ * def pydedt(q,p,e,Y,nv,ne):
+ * 	return dedt8H_5PNe10(q,e,p,Y,nv,ne)
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_q); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 19, __pyx_L1_error)
+  __pyx_t_2 = __pyx_PyFloat_AsDouble(__pyx_v_e); if (unlikely((__pyx_t_2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 19, __pyx_L1_error)
+  __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_p); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 19, __pyx_L1_error)
+  __pyx_t_4 = __pyx_PyFloat_AsDouble(__pyx_v_Y); if (unlikely((__pyx_t_4 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 19, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_v_nv); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 19, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_As_int(__pyx_v_ne); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 19, __pyx_L1_error)
+  __pyx_t_7 = PyFloat_FromDouble(dpdt8H_5PNe10(__pyx_t_1, __pyx_t_2, __pyx_t_3, __pyx_t_4, __pyx_t_5, __pyx_t_6)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 19, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_7);
+  __pyx_r = __pyx_t_7;
+  __pyx_t_7 = 0;
+  goto __pyx_L0;
+
+  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":18
+ * def pydCdt(q,p,e,Y,nv,ne):
+ * 	return dCdt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydpdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
+ * 	return dpdt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydedt(q,p,e,Y,nv,ne):
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_7);
+  __Pyx_AddTraceback("GWGen.UndressedFluxes.AnalyticFEWFluxes.dIdt.pydpdt", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":20
+ * def pydpdt(q,p,e,Y,nv,ne):
+ * 	return dpdt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydedt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
+ * 	return dedt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydYdt(q,p,e,Y,nv,ne):
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_9pydedt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_9pydedt = {"pydedt", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_9pydedt, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_9pydedt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  PyObject *__pyx_v_q = 0;
+  PyObject *__pyx_v_p = 0;
+  PyObject *__pyx_v_e = 0;
+  PyObject *__pyx_v_Y = 0;
+  PyObject *__pyx_v_nv = 0;
+  PyObject *__pyx_v_ne = 0;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("pydedt (wrapper)", 0);
+  {
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_q,&__pyx_n_s_p,&__pyx_n_s_e,&__pyx_n_s_Y,&__pyx_n_s_nv,&__pyx_n_s_ne,0};
+    PyObject* values[6] = {0,0,0,0,0,0};
+    if (unlikely(__pyx_kwds)) {
+      Py_ssize_t kw_args;
+      const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
+      switch (pos_args) {
+        case  6: values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
+        CYTHON_FALLTHROUGH;
+        case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
+        CYTHON_FALLTHROUGH;
+        case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
+        CYTHON_FALLTHROUGH;
+        case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+        CYTHON_FALLTHROUGH;
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        CYTHON_FALLTHROUGH;
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        CYTHON_FALLTHROUGH;
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = PyDict_Size(__pyx_kwds);
+      switch (pos_args) {
+        case  0:
+        if (likely((values[0] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_q)) != 0)) kw_args--;
+        else goto __pyx_L5_argtuple_error;
+        CYTHON_FALLTHROUGH;
+        case  1:
+        if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_p)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("pydedt", 1, 6, 6, 1); __PYX_ERR(0, 20, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  2:
+        if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_e)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("pydedt", 1, 6, 6, 2); __PYX_ERR(0, 20, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  3:
+        if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_Y)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("pydedt", 1, 6, 6, 3); __PYX_ERR(0, 20, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  4:
+        if (likely((values[4] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_nv)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("pydedt", 1, 6, 6, 4); __PYX_ERR(0, 20, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  5:
+        if (likely((values[5] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_ne)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("pydedt", 1, 6, 6, 5); __PYX_ERR(0, 20, __pyx_L3_error)
+        }
+      }
+      if (unlikely(kw_args > 0)) {
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "pydedt") < 0)) __PYX_ERR(0, 20, __pyx_L3_error)
+      }
+    } else if (PyTuple_GET_SIZE(__pyx_args) != 6) {
+      goto __pyx_L5_argtuple_error;
+    } else {
+      values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+      values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+      values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+      values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
+      values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
+      values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
+    }
+    __pyx_v_q = values[0];
+    __pyx_v_p = values[1];
+    __pyx_v_e = values[2];
+    __pyx_v_Y = values[3];
+    __pyx_v_nv = values[4];
+    __pyx_v_ne = values[5];
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("pydedt", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 20, __pyx_L3_error)
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("GWGen.UndressedFluxes.AnalyticFEWFluxes.dIdt.pydedt", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_8pydedt(__pyx_self, __pyx_v_q, __pyx_v_p, __pyx_v_e, __pyx_v_Y, __pyx_v_nv, __pyx_v_ne);
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_8pydedt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  double __pyx_t_1;
+  double __pyx_t_2;
+  double __pyx_t_3;
+  double __pyx_t_4;
+  int __pyx_t_5;
+  int __pyx_t_6;
+  PyObject *__pyx_t_7 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("pydedt", 0);
+
+  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":21
+ * 	return dpdt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydedt(q,p,e,Y,nv,ne):
+ * 	return dedt8H_5PNe10(q,e,p,Y,nv,ne)             # <<<<<<<<<<<<<<
+ * def pydYdt(q,p,e,Y,nv,ne):
+ * 	return dYdt8H_5PNe10(q,e,p,Y,nv,ne)
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_q); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 21, __pyx_L1_error)
+  __pyx_t_2 = __pyx_PyFloat_AsDouble(__pyx_v_e); if (unlikely((__pyx_t_2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 21, __pyx_L1_error)
+  __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_p); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 21, __pyx_L1_error)
+  __pyx_t_4 = __pyx_PyFloat_AsDouble(__pyx_v_Y); if (unlikely((__pyx_t_4 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 21, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_v_nv); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 21, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_As_int(__pyx_v_ne); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 21, __pyx_L1_error)
+  __pyx_t_7 = PyFloat_FromDouble(dedt8H_5PNe10(__pyx_t_1, __pyx_t_2, __pyx_t_3, __pyx_t_4, __pyx_t_5, __pyx_t_6)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 21, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_7);
+  __pyx_r = __pyx_t_7;
+  __pyx_t_7 = 0;
+  goto __pyx_L0;
+
+  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":20
+ * def pydpdt(q,p,e,Y,nv,ne):
+ * 	return dpdt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydedt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
+ * 	return dedt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydYdt(q,p,e,Y,nv,ne):
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_7);
+  __Pyx_AddTraceback("GWGen.UndressedFluxes.AnalyticFEWFluxes.dIdt.pydedt", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":22
+ * def pydedt(q,p,e,Y,nv,ne):
+ * 	return dedt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydYdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
+ * 	return dYdt8H_5PNe10(q,e,p,Y,nv,ne)
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_11pydYdt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_11pydYdt = {"pydYdt", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_11pydYdt, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_11pydYdt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  PyObject *__pyx_v_q = 0;
+  PyObject *__pyx_v_p = 0;
+  PyObject *__pyx_v_e = 0;
+  PyObject *__pyx_v_Y = 0;
+  PyObject *__pyx_v_nv = 0;
+  PyObject *__pyx_v_ne = 0;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("pydYdt (wrapper)", 0);
+  {
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_q,&__pyx_n_s_p,&__pyx_n_s_e,&__pyx_n_s_Y,&__pyx_n_s_nv,&__pyx_n_s_ne,0};
+    PyObject* values[6] = {0,0,0,0,0,0};
+    if (unlikely(__pyx_kwds)) {
+      Py_ssize_t kw_args;
+      const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
+      switch (pos_args) {
+        case  6: values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
+        CYTHON_FALLTHROUGH;
+        case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
+        CYTHON_FALLTHROUGH;
+        case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
+        CYTHON_FALLTHROUGH;
+        case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+        CYTHON_FALLTHROUGH;
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        CYTHON_FALLTHROUGH;
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        CYTHON_FALLTHROUGH;
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = PyDict_Size(__pyx_kwds);
+      switch (pos_args) {
+        case  0:
+        if (likely((values[0] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_q)) != 0)) kw_args--;
+        else goto __pyx_L5_argtuple_error;
+        CYTHON_FALLTHROUGH;
+        case  1:
+        if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_p)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("pydYdt", 1, 6, 6, 1); __PYX_ERR(0, 22, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  2:
+        if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_e)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("pydYdt", 1, 6, 6, 2); __PYX_ERR(0, 22, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  3:
+        if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_Y)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("pydYdt", 1, 6, 6, 3); __PYX_ERR(0, 22, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  4:
+        if (likely((values[4] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_nv)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("pydYdt", 1, 6, 6, 4); __PYX_ERR(0, 22, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  5:
+        if (likely((values[5] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_ne)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("pydYdt", 1, 6, 6, 5); __PYX_ERR(0, 22, __pyx_L3_error)
+        }
+      }
+      if (unlikely(kw_args > 0)) {
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "pydYdt") < 0)) __PYX_ERR(0, 22, __pyx_L3_error)
+      }
+    } else if (PyTuple_GET_SIZE(__pyx_args) != 6) {
+      goto __pyx_L5_argtuple_error;
+    } else {
+      values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+      values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+      values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+      values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
+      values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
+      values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
+    }
+    __pyx_v_q = values[0];
+    __pyx_v_p = values[1];
+    __pyx_v_e = values[2];
+    __pyx_v_Y = values[3];
+    __pyx_v_nv = values[4];
+    __pyx_v_ne = values[5];
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("pydYdt", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 22, __pyx_L3_error)
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("GWGen.UndressedFluxes.AnalyticFEWFluxes.dIdt.pydYdt", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_10pydYdt(__pyx_self, __pyx_v_q, __pyx_v_p, __pyx_v_e, __pyx_v_Y, __pyx_v_nv, __pyx_v_ne);
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_10pydYdt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  double __pyx_t_1;
+  double __pyx_t_2;
+  double __pyx_t_3;
+  double __pyx_t_4;
+  int __pyx_t_5;
+  int __pyx_t_6;
+  PyObject *__pyx_t_7 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("pydYdt", 0);
+
+  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":23
+ * 	return dedt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydYdt(q,p,e,Y,nv,ne):
+ * 	return dYdt8H_5PNe10(q,e,p,Y,nv,ne)             # <<<<<<<<<<<<<<
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_1 = __pyx_PyFloat_AsDouble(__pyx_v_q); if (unlikely((__pyx_t_1 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 23, __pyx_L1_error)
+  __pyx_t_2 = __pyx_PyFloat_AsDouble(__pyx_v_e); if (unlikely((__pyx_t_2 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 23, __pyx_L1_error)
+  __pyx_t_3 = __pyx_PyFloat_AsDouble(__pyx_v_p); if (unlikely((__pyx_t_3 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 23, __pyx_L1_error)
+  __pyx_t_4 = __pyx_PyFloat_AsDouble(__pyx_v_Y); if (unlikely((__pyx_t_4 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 23, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_v_nv); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 23, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_As_int(__pyx_v_ne); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 23, __pyx_L1_error)
+  __pyx_t_7 = PyFloat_FromDouble(dYdt8H_5PNe10(__pyx_t_1, __pyx_t_2, __pyx_t_3, __pyx_t_4, __pyx_t_5, __pyx_t_6)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 23, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_7);
+  __pyx_r = __pyx_t_7;
+  __pyx_t_7 = 0;
+  goto __pyx_L0;
+
+  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":22
+ * def pydedt(q,p,e,Y,nv,ne):
+ * 	return dedt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydYdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
+ * 	return dYdt8H_5PNe10(q,e,p,Y,nv,ne)
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_7);
+  __Pyx_AddTraceback("GWGen.UndressedFluxes.AnalyticFEWFluxes.dIdt.pydYdt", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -1611,8 +2315,12 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_ne, __pyx_k_ne, sizeof(__pyx_k_ne), 0, 0, 1, 1},
   {&__pyx_n_s_nv, __pyx_k_nv, sizeof(__pyx_k_nv), 0, 0, 1, 1},
   {&__pyx_n_s_p, __pyx_k_p, sizeof(__pyx_k_p), 0, 0, 1, 1},
+  {&__pyx_n_s_pydCdt, __pyx_k_pydCdt, sizeof(__pyx_k_pydCdt), 0, 0, 1, 1},
   {&__pyx_n_s_pydEdt, __pyx_k_pydEdt, sizeof(__pyx_k_pydEdt), 0, 0, 1, 1},
   {&__pyx_n_s_pydLdt, __pyx_k_pydLdt, sizeof(__pyx_k_pydLdt), 0, 0, 1, 1},
+  {&__pyx_n_s_pydYdt, __pyx_k_pydYdt, sizeof(__pyx_k_pydYdt), 0, 0, 1, 1},
+  {&__pyx_n_s_pydedt, __pyx_k_pydedt, sizeof(__pyx_k_pydedt), 0, 0, 1, 1},
+  {&__pyx_n_s_pydpdt, __pyx_k_pydpdt, sizeof(__pyx_k_pydpdt), 0, 0, 1, 1},
   {&__pyx_n_s_q, __pyx_k_q, sizeof(__pyx_k_q), 0, 0, 1, 1},
   {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
   {0, 0, 0, 0, 0, 0, 0}
@@ -1625,28 +2333,76 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":7
- * 	double dLdt8H_5PNe10 (const double q, const double p, const double e, const double Y, const int Nv, const int ne)
+  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":12
+ * 
  * 
  * def pydEdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
  * 	return dEdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydLdt(q,p,e,Y,nv,ne):
  */
-  __pyx_tuple_ = PyTuple_Pack(6, __pyx_n_s_q, __pyx_n_s_p, __pyx_n_s_e, __pyx_n_s_Y, __pyx_n_s_nv, __pyx_n_s_ne); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 7, __pyx_L1_error)
+  __pyx_tuple_ = PyTuple_Pack(6, __pyx_n_s_q, __pyx_n_s_p, __pyx_n_s_e, __pyx_n_s_Y, __pyx_n_s_nv, __pyx_n_s_ne); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 12, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple_);
   __Pyx_GIVEREF(__pyx_tuple_);
-  __pyx_codeobj__2 = (PyObject*)__Pyx_PyCode_New(6, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple_, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_dIdt_pyx, __pyx_n_s_pydEdt, 7, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__2)) __PYX_ERR(0, 7, __pyx_L1_error)
+  __pyx_codeobj__2 = (PyObject*)__Pyx_PyCode_New(6, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple_, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_dIdt_pyx, __pyx_n_s_pydEdt, 12, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__2)) __PYX_ERR(0, 12, __pyx_L1_error)
 
-  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":9
+  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":14
  * def pydEdt(q,p,e,Y,nv,ne):
  * 	return dEdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydLdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
  * 	return dLdt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydCdt(q,p,e,Y,nv,ne):
  */
-  __pyx_tuple__3 = PyTuple_Pack(6, __pyx_n_s_q, __pyx_n_s_p, __pyx_n_s_e, __pyx_n_s_Y, __pyx_n_s_nv, __pyx_n_s_ne); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(0, 9, __pyx_L1_error)
+  __pyx_tuple__3 = PyTuple_Pack(6, __pyx_n_s_q, __pyx_n_s_p, __pyx_n_s_e, __pyx_n_s_Y, __pyx_n_s_nv, __pyx_n_s_ne); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(0, 14, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__3);
   __Pyx_GIVEREF(__pyx_tuple__3);
-  __pyx_codeobj__4 = (PyObject*)__Pyx_PyCode_New(6, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__3, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_dIdt_pyx, __pyx_n_s_pydLdt, 9, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__4)) __PYX_ERR(0, 9, __pyx_L1_error)
+  __pyx_codeobj__4 = (PyObject*)__Pyx_PyCode_New(6, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__3, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_dIdt_pyx, __pyx_n_s_pydLdt, 14, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__4)) __PYX_ERR(0, 14, __pyx_L1_error)
+
+  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":16
+ * def pydLdt(q,p,e,Y,nv,ne):
+ * 	return dLdt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydCdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
+ * 	return dCdt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydpdt(q,p,e,Y,nv,ne):
+ */
+  __pyx_tuple__5 = PyTuple_Pack(6, __pyx_n_s_q, __pyx_n_s_p, __pyx_n_s_e, __pyx_n_s_Y, __pyx_n_s_nv, __pyx_n_s_ne); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(0, 16, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__5);
+  __Pyx_GIVEREF(__pyx_tuple__5);
+  __pyx_codeobj__6 = (PyObject*)__Pyx_PyCode_New(6, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__5, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_dIdt_pyx, __pyx_n_s_pydCdt, 16, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__6)) __PYX_ERR(0, 16, __pyx_L1_error)
+
+  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":18
+ * def pydCdt(q,p,e,Y,nv,ne):
+ * 	return dCdt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydpdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
+ * 	return dpdt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydedt(q,p,e,Y,nv,ne):
+ */
+  __pyx_tuple__7 = PyTuple_Pack(6, __pyx_n_s_q, __pyx_n_s_p, __pyx_n_s_e, __pyx_n_s_Y, __pyx_n_s_nv, __pyx_n_s_ne); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(0, 18, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__7);
+  __Pyx_GIVEREF(__pyx_tuple__7);
+  __pyx_codeobj__8 = (PyObject*)__Pyx_PyCode_New(6, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__7, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_dIdt_pyx, __pyx_n_s_pydpdt, 18, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__8)) __PYX_ERR(0, 18, __pyx_L1_error)
+
+  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":20
+ * def pydpdt(q,p,e,Y,nv,ne):
+ * 	return dpdt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydedt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
+ * 	return dedt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydYdt(q,p,e,Y,nv,ne):
+ */
+  __pyx_tuple__9 = PyTuple_Pack(6, __pyx_n_s_q, __pyx_n_s_p, __pyx_n_s_e, __pyx_n_s_Y, __pyx_n_s_nv, __pyx_n_s_ne); if (unlikely(!__pyx_tuple__9)) __PYX_ERR(0, 20, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__9);
+  __Pyx_GIVEREF(__pyx_tuple__9);
+  __pyx_codeobj__10 = (PyObject*)__Pyx_PyCode_New(6, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__9, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_dIdt_pyx, __pyx_n_s_pydedt, 20, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__10)) __PYX_ERR(0, 20, __pyx_L1_error)
+
+  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":22
+ * def pydedt(q,p,e,Y,nv,ne):
+ * 	return dedt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydYdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
+ * 	return dYdt8H_5PNe10(q,e,p,Y,nv,ne)
+ */
+  __pyx_tuple__11 = PyTuple_Pack(6, __pyx_n_s_q, __pyx_n_s_p, __pyx_n_s_e, __pyx_n_s_Y, __pyx_n_s_nv, __pyx_n_s_ne); if (unlikely(!__pyx_tuple__11)) __PYX_ERR(0, 22, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__11);
+  __Pyx_GIVEREF(__pyx_tuple__11);
+  __pyx_codeobj__12 = (PyObject*)__Pyx_PyCode_New(6, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__11, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_dIdt_pyx, __pyx_n_s_pydYdt, 22, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__12)) __PYX_ERR(0, 22, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -1925,27 +2681,75 @@ if (!__Pyx_RefNanny) {
   if (__Pyx_patch_abc() < 0) __PYX_ERR(0, 3, __pyx_L1_error)
   #endif
 
-  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":7
- * 	double dLdt8H_5PNe10 (const double q, const double p, const double e, const double Y, const int Nv, const int ne)
+  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":12
+ * 
  * 
  * def pydEdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
  * 	return dEdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydLdt(q,p,e,Y,nv,ne):
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_1pydEdt, NULL, __pyx_n_s_GWGen_UndressedFluxes_AnalyticFE); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 7, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_1pydEdt, NULL, __pyx_n_s_GWGen_UndressedFluxes_AnalyticFE); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 12, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_pydEdt, __pyx_t_1) < 0) __PYX_ERR(0, 7, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_pydEdt, __pyx_t_1) < 0) __PYX_ERR(0, 12, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":9
+  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":14
  * def pydEdt(q,p,e,Y,nv,ne):
  * 	return dEdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydLdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
  * 	return dLdt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydCdt(q,p,e,Y,nv,ne):
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_3pydLdt, NULL, __pyx_n_s_GWGen_UndressedFluxes_AnalyticFE); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 9, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_3pydLdt, NULL, __pyx_n_s_GWGen_UndressedFluxes_AnalyticFE); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 14, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_pydLdt, __pyx_t_1) < 0) __PYX_ERR(0, 9, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_pydLdt, __pyx_t_1) < 0) __PYX_ERR(0, 14, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":16
+ * def pydLdt(q,p,e,Y,nv,ne):
+ * 	return dLdt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydCdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
+ * 	return dCdt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydpdt(q,p,e,Y,nv,ne):
+ */
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_5pydCdt, NULL, __pyx_n_s_GWGen_UndressedFluxes_AnalyticFE); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 16, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_pydCdt, __pyx_t_1) < 0) __PYX_ERR(0, 16, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":18
+ * def pydCdt(q,p,e,Y,nv,ne):
+ * 	return dCdt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydpdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
+ * 	return dpdt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydedt(q,p,e,Y,nv,ne):
+ */
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_7pydpdt, NULL, __pyx_n_s_GWGen_UndressedFluxes_AnalyticFE); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 18, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_pydpdt, __pyx_t_1) < 0) __PYX_ERR(0, 18, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":20
+ * def pydpdt(q,p,e,Y,nv,ne):
+ * 	return dpdt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydedt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
+ * 	return dedt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydYdt(q,p,e,Y,nv,ne):
+ */
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_9pydedt, NULL, __pyx_n_s_GWGen_UndressedFluxes_AnalyticFE); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 20, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_pydedt, __pyx_t_1) < 0) __PYX_ERR(0, 20, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+  /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":22
+ * def pydedt(q,p,e,Y,nv,ne):
+ * 	return dedt8H_5PNe10(q,e,p,Y,nv,ne)
+ * def pydYdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
+ * 	return dYdt8H_5PNe10(q,e,p,Y,nv,ne)
+ */
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5GWGen_15UndressedFluxes_17AnalyticFEWFluxes_4dIdt_11pydYdt, NULL, __pyx_n_s_GWGen_UndressedFluxes_AnalyticFE); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 22, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_pydYdt, __pyx_t_1) < 0) __PYX_ERR(0, 22, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "GWGen/UndressedFluxes/AnalyticFEWFluxes/dIdt.pyx":3
