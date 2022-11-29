@@ -47,9 +47,8 @@ class EMRIWithProcaWaveform(ProcaSolution,AAKWaveformBase, Kerr):
             warnings.warn("Eccentricity below safe threshold for FEW. Functions behave poorly for e<1e-6")
             e0=1e-6 #Certain functions in FEW are not well-behaved below this value
 
-        ConvertToBBHUnits = SecondaryMass/self.BosonCloudMass() #Convert boson cloud energy flux from units of boson cloud mass to units of secondary BBH mass
-        asymptoticBosonCloudEFlux = self.BosonCloudGWEFlux()*ConvertToBBHUnits #dimenionsless flux in units of secondary mass over time
-        asymptoticBosonCloudLFlux = self.BosonCloudGWLFlux()*ConvertToBBHUnits*self.BosonCloudMass() #dimensionless angular momentum in units of secondary's energy times mass of cloud
+        asymptoticBosonCloudEFlux = self.BosonCloudGWEFlux() #Dimensionfull Flux
+        asymptoticBosonCloudLFlux = self.BosonCloudGWLFlux() #Dimensionfull Flux
 
         self.inspiralkwargs["DeltaEFlux"] = asymptoticBosonCloudEFlux
         self.inspiralkwargs["DeltaLFlux"] = asymptoticBosonCloudLFlux

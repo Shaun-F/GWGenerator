@@ -29,10 +29,23 @@ class ProcaSolution():
 			except ValueError as err:
 				print("Error in Proca Solution: \n {0}".format(err))
 
+			self.Kerr = Kerr(BHSpin=BHSpin)
 			self.alpha = alphavalue(self.SMBHMass, self.ProcaMass)
 			self.enden = self.GetEnergyDensity()
 
-	def FractionalGWEFlux(self,r):
+
+	def ChangeInOrbitalEnergy(self):
+		fractionalenden = self.FractionalGWEFlux() #anonymous function in (t,p)
+		deltaEdeltaM = self.Kerr.dEdM() #anonymous function in (e,p)
+		DeltaOrbitalEnergy = lambda t,e,p: deltaEdeltaM(e,p)*fractionalenden(t,p)
+
+		return DeltaOrbitalEnergy
+
+	def FractionalGWEFlux(self):
+		FractionalFactor = lambda p:self.FractionalEnergyDensity(p)**2
+		FractionalEnDen = lambda t,p: FractionalFactor(p)*self.BosonCloudGWEFlux(t)
+
+		return FractionalEnDen
 
 
 	def FractionalEnergyDensity(self, r):

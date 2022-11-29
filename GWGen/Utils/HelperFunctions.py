@@ -11,12 +11,6 @@ mp.pretty=True
 
 import time
 
-def ProcaCloudCharacteristicSize(BHMass, ProcaMass, SuperRadUltralightBosonClass):
-    alpha = alphavalue(BHMass, ProcaMass)
-    omegar = None;
-    return None
-
-
 def WaveformInnerProduct(timedomain, h1,h2, fmin=0.0001, fmax=1):
     """
     complex waveforms h1 and h2 are in time-domain with time domain in units of seconds. Compute inner product defined in
