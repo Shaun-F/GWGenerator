@@ -11,8 +11,9 @@ mp.pretty=True
 
 import time
 
-def ProcaCloudCharacteristSize(BHMass, ProcaMass):
+def ProcaCloudCharacteristicSize(BHMass, ProcaMass, SuperRadUltralightBosonClass):
     alpha = alphavalue(BHMass, ProcaMass)
+    omegar = None;
     return None
 
 
