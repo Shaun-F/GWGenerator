@@ -32,6 +32,9 @@ class ProcaSolution():
 			self.alpha = alphavalue(self.SMBHMass, self.ProcaMass)
 			self.enden = self.GetEnergyDensity()
 
+	def FractionalGWEFlux(self,r):
+
+
 	def FractionalEnergyDensity(self, r):
 		rstart = self.coorddata[0][0]
 		rmax = self.coorddata[0].dropna().values[-1]
