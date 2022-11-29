@@ -11,6 +11,7 @@ class Kerr():
             Energy: calculate energy of orbit, relative to BH mass
             AngularMomentum: calculate angular momentum
             Carter: calculate carter (equals zero, assuming equatorial orbits)
+            dEdM: change in orbital energy due to change in spacetime mass
             dEdp: change in energy relative to semi-major axis
             dEde: change in energy relative to eccentricity
             dLdp: change in orbital angular momentum relative to semi-major axis
@@ -39,6 +40,7 @@ class Kerr():
 
     def dEdM(self):
         a = float(self.a)
+        #Assumes equatorial orbits, Y=1
         res = lambda e,p: ((1 - e**2)*(-1 + ((-1 + e**2)*(a**2*(1 + 3*e**2 + p) + p*(-3 - e**2 + p - 2*Sqrt((a**6*(-1 + e**2)**2 + a**2*(-4*e**2 + (-2 + p)**2)*p**2 + 2*a**4*p*(-2 + p + e**2*(2 + p)))/p**3))))/(4*a**2*(-1 + e**2)**2 - (3 + e**2 - p)**2*p) + ((-1 + e**2)*(16*a**2*(-1 + e**2)**2 - p*(e**4 + e**2*(6 - 4*p) + 3*(3 - 4*p + p**2)))*(a**2*(1 + 3*e**2 + p) + p*(-3 - e**2 + p - 2*Sqrt((a**6*(-1 + e**2)**2 + a**2*(-4*e**2 + (-2 + p)**2)*p**2 + 2*a**4*p*(-2 + p + e**2*(2 + p)))/p**3))))/(-4*a**2*(-1 + e**2)**2 + (3 + e**2 - p)**2*p)**2 + ((-1 + e**2)*(a**2*p + 4*a**2*(1 + 3*e**2 + p) + p*(-3 - e**2 + p - 2*Sqrt((a**6*(-1 + e**2)**2 + a**2*(-4*e**2 + (-2 + p)**2)*p**2 + 2*a**4*p*(-2 + p + e**2*(2 + p)))/p**3)) + (-9*a**6*(-1 + e**2)**2 + a**2*p**2*(-12 + 12*e**2 + 16*p - 5*p**2) - 2*a**4*p*(-12 + 7*p + e**2*(12 + 7*p)) + p**4*Sqrt((a**6*(-1 + e**2)**2 + a**2*(-4*e**2 + (-2 + p)**2)*p**2 + 2*a**4*p*(-2 + p + e**2*(2 + p)))/p**3))/(p**2*Sqrt((a**6*(-1 + e**2)**2 + a**2*(-4*e**2 + (-2 + p)**2)*p**2 + 2*a**4*p*(-2 + p + e**2*(2 + p)))/p**3))))/(-4*a**2*(-1 + e**2)**2 + (3 + e**2 - p)**2*p)))/(2.*p*Sqrt(1 - ((1 - e**2)*(1 + ((-1 + e**2)*(a**2*(1 + 3*e**2 + p) + p*(-3 - e**2 + p - 2*Sqrt((a**6*(-1 + e**2)**2 + a**2*(-4*e**2 + (-2 + p)**2)*p**2 + 2*a**4*p*(-2 + p + e**2*(2 + p)))/p**3))))/(-4*a**2*(-1 + e**2)**2 + (3 + e**2 - p)**2*p)))/p))
         return res
 

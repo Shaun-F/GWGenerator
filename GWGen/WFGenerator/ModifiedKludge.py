@@ -47,8 +47,8 @@ class EMRIWithProcaWaveform(ProcaSolution,AAKWaveformBase, Kerr):
             warnings.warn("Eccentricity below safe threshold for FEW. Functions behave poorly for e<1e-6")
             e0=1e-6 #Certain functions in FEW are not well-behaved below this value
 
-        asymptoticBosonCloudEFlux = self.BosonCloudGWEFlux() #Dimensionfull Flux
-        asymptoticBosonCloudLFlux = self.BosonCloudGWLFlux() #Dimensionfull Flux
+        asymptoticBosonCloudEFlux = massRatio*self.ChangeInOrbitalEnergy() #Dimensionfull Flux. Mass Ratio prefactor comes from derivative of orbital energy wrt spacetime mass and factor of mass of the geodesic. Takes into account effective mass seen by secondary BH during its orbit
+        asymptoticBosonCloudLFlux = lambda t,e,p: asymptoticBosonCloudEFlux(t,e,p)*self.BosonWaveform.azimuthal_num()/(self.BosonWaveform.freq_gw(t)*unit.Hz) #assuming all energy emitted in 1 mode
 
         self.inspiralkwargs["DeltaEFlux"] = asymptoticBosonCloudEFlux
         self.inspiralkwargs["DeltaLFlux"] = asymptoticBosonCloudLFlux

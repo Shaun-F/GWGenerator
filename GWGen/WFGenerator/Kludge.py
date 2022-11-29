@@ -2,6 +2,7 @@ from scipy.integrate import DOP853
 from mpmath import *
 mp.dps=25
 mp.pretty=True
+import inspect
 
 import numpy as np
 from ..Utils import *
@@ -25,9 +26,14 @@ class PN(Kerr, FluxFunction):
 		FluxFunction.__init__(self, name=FluxName)
 
 		#sanity checks
-		assert isinstance(DeltaEFlux,unit.quantity.Quantity) and isinstance(DeltaLFlux, unit.quantity.Quantity), "Error: Flux modification must be of type (astropy.units.quantity.Quantity)"
-		assert DeltaEFlux.unit == unit.kg*unit.m**2/(unit.s**3), "Error: DeltaEFlux must have units kg m**2/s**3"
-		assert DeltaLFlux.unit == unit.kg*unit.m**2/(unit.s**2), "Error: DeltaLFlux must have units kg m**2/s**2"
+		assert inspect.isfunction(DeltaEFlux), "Error: Delta E Flux is not a function. Must be a function with argument (t,e,p)"
+		assert inspect.isfunction(DeltaLFlux), "Error: Delta L Flux is not a function. Must be a function with argument (t,e,p)"
+
+		ranvals = [0.1 for i in inspect.signature(fun).parameters]
+		ranvals[-1]=10
+		assert DeltaEFlux(*ranvals).unit == unit.kg*unit.m**2/(unit.s**3), "Error: DeltaEFlux must have units kg m**2/s**3"
+		assert DeltaLFlux(*ranvals).unit == unit.kg*unit.m**2/(unit.s**3), "Error: DeltaEFlux must have units kg m**2/s**3"
+
 
 		self.epsilon=m/M
 		self.SMBHMass = M
@@ -88,12 +94,18 @@ class PN(Kerr, FluxFunction):
 
 			#Angular momentum
 			LdotN = self.UndressedLFlux(ecc,semimaj) #this is negative
+
+			#Energy correction
+			Ecorr = self.EFluxModification(t*self.SMBHMass*MTSUN_SI, ecc, semimaj)
+
+			#Angular Momentum Corrector
+			Lcorr = self.LFluxModification(t*self.SMBHMass*MTSUN_SI, ecc, semimaj)
 		except TypeError:
 			print("ERROR: type error in frequency and flux generation as (e,p)=({0},{1})".format(ecc,semimaj))
 
 		#(see: http://arxiv.org/abs/gr-qc/0702054, eq 4.3)
-		Edot = EdotN + self.EFluxModification #units: kg m**2/s**3
-		Ldot = LdotN + self.LFluxModification #units: kg m**2/s**2
+		Edot = EdotN + Ecorr #units: kg m**2/s**3
+		Ldot = LdotN + Lcorr #units: kg m**2/s**2
 		dldp = self.dLdp()(ecc,semimaj)*self.dldpUnit
 		dlde = self.dLde()(ecc,semimaj)*self.dldeUnit
 		dedp = self.dEdp()(ecc,semimaj)*self.dedpUnit
@@ -146,6 +158,7 @@ class PNTraj(TrajectoryBase):
 		self.DeltaEFlux = kwargs.get("DeltaEFlux", 0.0*unit.kg*unit.m**2/(unit.s**3))
 		self.DeltaLFlux = kwargs.get("DeltaLFlux", 0.0*unit.kg*unit.m**2/(unit.s**2))
 		self.FluxName = kwargs.get("FluxName","analytic")
+		self.SMBHMass = M
 		#boundary values
 		y0 = [p0, e0, 0.0, 0.0] #zero mean anomaly initially
 

@@ -47,6 +47,12 @@ class ProcaSolution():
 
 		return FractionalEnDen
 
+	def FractionalGWLFlux(self):
+		fracenden = self.FractionalGWEFlux()
+		factor = lambda t: self.BosonWaveform.azimuthal_num()/(self.BosonWaveform.freq_gw(t)*unit.Hz).decompose()
+
+		ret = lambda t,p: fracenden(t,p)*factor(t)
+		return ret
 
 	def FractionalEnergyDensity(self, r):
 		rstart = self.coorddata[0][0]
@@ -110,7 +116,6 @@ class ProcaSolution():
 			Eflux = self.BosonCloudGWEFlux(t) #dimensionless power
 			azimuthalnumber = self.BosonWaveform.azimuthal_num()
 			frequency = self.BosonWaveform.freq_gw(t)*unit.Hz
-			dimlessfrequency = (cons.G*self.SMBHMass*unit.Msun/(cons.c**3))*frequency*unit.Hz #in units of SMBH frequency
 			return (azimuthalnumber*Eflux/frequency).decompose() #all power emitted in single proca mode. In units of cloud energy Mc * c^2
 
 	def BosonCloudGWTimescale(self):
