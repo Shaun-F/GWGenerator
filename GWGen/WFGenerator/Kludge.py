@@ -14,7 +14,7 @@ from few.waveform import AAKWaveformBase
 from few.summation.aakwave import AAKSummation
 from few.utils.baseclasses import TrajectoryBase
 
-import astropy.units as unit
+import astropy.units as unit;
 import astropy.constants as cons
 
 SEPARATRIXCUTOFF=0.1;

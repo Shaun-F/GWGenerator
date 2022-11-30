@@ -23,6 +23,11 @@ class Kerr():
         self.a = BHSpin
         self.Pi= np.pi
 
+    def Horizon_Frequency(self):
+        val = self.a/(2*(1+(1-self.a**2)**(1/2)))
+        return val
+
+
     def Energy(self):
         a = float(self.a)
         res = lambda e,p: Sqrt(1 - ((1 - e**2)*(1 + ((-1 + e**2)*(a**2*(1 + 3*e**2 + p) + p*(-3 - e**2 + p - 2*Sqrt((a**6*(-1 + e**2)**2 + a**2*(-4*e**2 + (-2 + p)**2)*p**2 + 2*a**4*p*(-2 + p + e**2*(2 + p)))/p**3))))/(-4*a**2*(-1 + e**2)**2 + (3 + e**2 - p)**2*p)))/p)

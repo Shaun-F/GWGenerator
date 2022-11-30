@@ -11,6 +11,27 @@ from GWGen.Utils import *
 import re
 
 pathToSolutionSet = os.path.abspath(os.path.dirname(__file__))+'/../../Analytic_Flux/ProcaEnDenCSVData/';
+NumericalFluxFilePath = os.path.abspath(os.path.dirname(__file__))+'/NumericalFlux/pr_sat_gw.npz';
+NumericalCloudFilePath = os.path.abspath(os.path.dirname(__file__))+'/NumericalFlux/m1_pr_mds.npz';
+NumericalFitFilePath = os.path.abspath(os.path.dirname(__file__))+'/NumericalFlux/pr_fits.npz';
+
+flux_data = np.load(NumericalFluxFilePath)
+m1_flux = flux_data["m1_flux"]
+m1_mu = flux_data["m1_mu"]
+
+m1_data = np.load(NumericalCloudFilePath)
+m1_wr = m1_data['wr'].flatten()
+m1_wi = m1_data['wi'].flatten()
+m1_a = m1_data['a'].flatten()
+m1_y = m1_data['y'].flatten()
+m1_dwr = m1_data["dwr"].flatten()
+
+fits_data = np.load(NumericalFitFilePath)
+amat1 = fits_data['amat1']
+
+Punit = (cons.c**5/cons.G).decompose().value;
+Tunit = (cons.G/cons.c**3*cons.M_sun).decompose().value;
+MUunit = (unit.eV/cons.hbar*(cons.G*cons.M_sun)/(cons.c**3)).decompose().value;
 
 class ProcaSolution():
 	def __init__(self, BHMass, BHSpin, ProcaMass, BosonSpin=1,CloudModel = "relativistic",units="physical"):
@@ -24,6 +45,9 @@ class ProcaSolution():
 			self.CloudModel = CloudModel
 			self.BosonCloud = SR.ultralight_boson.UltralightBoson(spin=self.BosonSpin, model=self.CloudModel)
 
+
+			self.mode_number=1
+
 			try:
 				self.BosonWaveform = self.BosonCloud.make_waveform(BHMass, BHSpin, ProcaMass, units=units)
 			except ValueError as err:
@@ -32,6 +56,7 @@ class ProcaSolution():
 			self.Kerr = Kerr(BHSpin=BHSpin)
 			self.alpha = alphavalue(self.SMBHMass, self.ProcaMass)
 			self.enden = self.GetEnergyDensity()
+
 
 
 	def ChangeInOrbitalEnergy(self):
@@ -123,6 +148,38 @@ class ProcaSolution():
 
 	def BosonCloudMass(self,t=0):
 			return self.BosonWaveform.mass_cloud(t)
+
+	def superradiant_condition(self):
+		self.proca_frequency = self.BosonCloud._cloud_model.omega_real(self.mode_number,self.alpha,self.SMBHSpin,0)/self.SMBHMass
+		horfreq = self.Kerr.Horizon_Frequency()/self.SMBHMass
+
+		return self.proca_frequency<self.mode_number*horfreq
+
+	def Final_SMBHMass(self):
+		return pass
+
+	def Final_SMBHSpin(self,initialspin , initialmass, finalmass, frequency):
+		Mf = finalmass
+		Mi = initialmass
+		Mbar = Mf/Mi
+		xi = initialspin
+		wr = frequency
+		m = self.mode_number
+		val = m/(wr*Mbar*Mi) * (1 - 1/Mbar) + xi/(Mbar**2)
+		return val
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
