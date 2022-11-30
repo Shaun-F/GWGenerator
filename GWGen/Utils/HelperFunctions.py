@@ -185,3 +185,12 @@ def alphavalue(BHMass, procamass):
     if BHMass<1:
         print("Is Black hole mass in units of solar masses?")
     return (procamass*unit.eV*BHMass*unit.Msun*cons.G/(cons.hbar*cons.c**3)).decompose()
+
+
+
+
+
+def PrettyPrint(str):
+    decoration = "****************"
+    prn_str = decoration+'\n'+str+'\n'+decoration
+    print(prn_str)

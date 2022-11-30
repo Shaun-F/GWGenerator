@@ -57,7 +57,12 @@ class ProcaSolution():
 			self.alpha = alphavalue(self.SMBHMass, self.ProcaMass)
 			self.enden = self.GetEnergyDensity()
 
-
+	@property
+	def FinalBHMass(self):
+		return self.BosonWaveform._Mbh
+	@property
+	def FinalBHSpin(self):
+		return self.BosonWaveform._abh
 
 	def ChangeInOrbitalEnergy(self):
 		fractionalenden = self.FractionalGWEFlux() #anonymous function in (t,p)
@@ -132,22 +137,22 @@ class ProcaSolution():
 
 
 	def BosonCloudGWEFlux(self,t=0):
-			#Must divide by mass ratio m/M to get actual dimensionless power, where m is the mass of the secondary
-			## See definition of dimenionless energy and dimensionless time
-			DimensionfullPower = self.BosonWaveform.power_gw(t)*unit.watt
-			res = (DimensionfullPower).decompose() # dimensionfull power
-			return -res
+		#Must divide by mass ratio m/M to get actual dimensionless power, where m is the mass of the secondary
+		## See definition of dimenionless energy and dimensionless time
+		DimensionfullPower = self.BosonWaveform.power_gw(t)*unit.watt
+		res = (DimensionfullPower).decompose() # dimensionfull power
+		return -res
 	def BosonCloudGWLFlux(self,t=0):
-			Eflux = self.BosonCloudGWEFlux(t) #dimensionless power
-			azimuthalnumber = self.BosonWaveform.azimuthal_num()
-			frequency = self.BosonWaveform.freq_gw(t)*unit.Hz
-			return (azimuthalnumber*Eflux/frequency).decompose() #all power emitted in single proca mode. In units of cloud energy Mc * c^2
+		Eflux = self.BosonCloudGWEFlux(t) #dimensionless power
+		azimuthalnumber = self.BosonWaveform.azimuthal_num()
+		frequency = self.BosonWaveform.freq_gw(t)*unit.Hz
+		return (azimuthalnumber*Eflux/frequency).decompose() #all power emitted in single proca mode. In units of cloud energy Mc * c^2
 
 	def BosonCloudGWTimescale(self):
-        	return self.BosonWaveform.gw_time()
+		return self.BosonWaveform.gw_time()
 
 	def BosonCloudMass(self,t=0):
-			return self.BosonWaveform.mass_cloud(t)
+		return self.BosonWaveform.mass_cloud(t)
 
 	def superradiant_condition(self):
 		self.proca_frequency = self.BosonCloud._cloud_model.omega_real(self.mode_number,self.alpha,self.SMBHSpin,0)/self.SMBHMass
@@ -155,18 +160,7 @@ class ProcaSolution():
 
 		return self.proca_frequency<self.mode_number*horfreq
 
-	def Final_SMBHMass(self):
-		return pass
 
-	def Final_SMBHSpin(self,initialspin , initialmass, finalmass, frequency):
-		Mf = finalmass
-		Mi = initialmass
-		Mbar = Mf/Mi
-		xi = initialspin
-		wr = frequency
-		m = self.mode_number
-		val = m/(wr*Mbar*Mi) * (1 - 1/Mbar) + xi/(Mbar**2)
-		return val
 
 
 

@@ -29,10 +29,10 @@ class PN(Kerr, FluxFunction):
 		assert inspect.isfunction(DeltaEFlux), "Error: Delta E Flux is not a function. Must be a function with argument (t,e,p)"
 		assert inspect.isfunction(DeltaLFlux), "Error: Delta L Flux is not a function. Must be a function with argument (t,e,p)"
 
-		ranvals = [0.1 for i in inspect.signature(fun).parameters]
+		ranvals = [0.1 for i in inspect.signature(DeltaEFlux).parameters]
 		ranvals[-1]=10
 		assert DeltaEFlux(*ranvals).unit == unit.kg*unit.m**2/(unit.s**3), "Error: DeltaEFlux must have units kg m**2/s**3"
-		assert DeltaLFlux(*ranvals).unit == unit.kg*unit.m**2/(unit.s**3), "Error: DeltaEFlux must have units kg m**2/s**3"
+		assert DeltaLFlux(*ranvals).unit == unit.kg*unit.m**2/(unit.s**2), "Error: DeltaLFlux must have units kg m**2/s**2"
 
 
 		self.epsilon=m/M
@@ -140,10 +140,6 @@ class PN(Kerr, FluxFunction):
 		return dydt
 
 class PNTraj(TrajectoryBase):
-
-	def __init__(self, *args, **kwargs):
-
-		pass
 
 	def get_inspiral(self, M, mu, a, p0, e0, x0, T=1.0,npoints=10, **kwargs):
 		"""
