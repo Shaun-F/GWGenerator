@@ -25,6 +25,14 @@ class PN(Kerr, FluxFunction):
 		Kerr.__init__(self,BHSpin=bhspin) ###better to use super? How with multiple inheritance and multilpe arguments to inits?
 		FluxFunction.__init__(self, name=FluxName)
 
+		#convert delta fluxes to anonymous functions
+		if type(DeltaEFlux) == unit.quantity.Quantity:
+			val = DeltaEFlux.value
+			DeltaEFlux = lambda t,e,p: val*unit.kg*unit.m**2/(unit.s**3)
+		if type(DeltaLFlux) == unit.quantity.Quantity:
+			val = DeltaLFlux.value
+			DeltaLFlux = lambda t,e,p: val*unit.kg*unit.m**2/(unit.s**2)
+
 		#sanity checks
 		assert inspect.isfunction(DeltaEFlux), "Error: Delta E Flux is not a function. Must be a function with argument (t,e,p)"
 		assert inspect.isfunction(DeltaLFlux), "Error: Delta L Flux is not a function. Must be a function with argument (t,e,p)"
