@@ -54,6 +54,8 @@ sum_kwargs = {
     "pad_output": False,
 }
 
+unmoddedwvcl = EMRIWaveform(inspiral_kwargs=inspiral_kwargs, sum_kwargs=sum_kwargs, use_gpu=False)
+moddedwvcl = EMRIWithProcaWaveform(inspiral_kwargs=inspiral_kwargs, sum_kwargs=sum_kwargs, use_gpu=False)
 
 
 
@@ -64,11 +66,9 @@ def process(BHMASS, PROCAMASS, plot=False,procacutoff=0.4, SecondaryMass=10):
         return None
 
     print("SMBH Mass: {0}\nProca Mass: {1}".format(BHMASS, PROCAMASS))
-    unmoddedwvcl = EMRIWaveform(inspiral_kwargs=inspiral_kwargs, sum_kwargs=sum_kwargs, use_gpu=False)
     unmoddedwv = unmoddedwvcl(BHMASS, SecondaryMass, BHSpin, p0, e0, x0, qS, phiS, qK, phiK, dist, mich=mich, dt=dt,T=T)
     unmoddedtraj = unmoddedwvcl.Trajectory
 
-    moddedwvcl = EMRIWithProcaWaveform(inspiral_kwargs=inspiral_kwargs, sum_kwargs=sum_kwargs, use_gpu=False)
     moddedwv = moddedwvcl(BHMASS, SecondaryMass, PROCAMASS, BHSpin,p0,e0,x0,T=T, qS=qS, phiS=phiS, qK=qK, phiK=phiK, dist=dist,mich=mich,dt=dt, BosonSpin=spin)
     moddedtraj = moddedwvcl.Trajectory
 

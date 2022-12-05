@@ -64,10 +64,11 @@ class ProcaSolution():
 	def FinalBHSpin(self):
 		return self.BosonWaveform._abh
 
-	def ChangeInOrbitalEnergy(self):
+	def ChangeInOrbitalEnergy(self, SecondaryMass=1, SMBHMass=1):
+		MassRatio = SecondaryMass/SMBHMass
 		fractionalenden = self.FractionalGWEFlux() #anonymous function in (t,p)
 		deltaEdeltaM = self.Kerr.dEdM() #anonymous function in (e,p)
-		DeltaOrbitalEnergy = lambda t,e,p: deltaEdeltaM(e,p)*fractionalenden(t,p)
+		DeltaOrbitalEnergy = lambda t,e,p: MassRatio*deltaEdeltaM(e,p)*fractionalenden(t,p)
 
 		return DeltaOrbitalEnergy
 

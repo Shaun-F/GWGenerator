@@ -25,13 +25,16 @@ class PN(Kerr, FluxFunction):
 		Kerr.__init__(self,BHSpin=bhspin) ###better to use super? How with multiple inheritance and multilpe arguments to inits?
 		FluxFunction.__init__(self, name=FluxName)
 
+		EFluxUnit = unit.kg*unit.m**2/(unit.s**3)
+		LFluxUnit = unit.kg*unit.m**2/(unit.s**2)
+
 		#convert delta fluxes to anonymous functions
 		if type(DeltaEFlux) == unit.quantity.Quantity:
-			val = DeltaEFlux.value
-			DeltaEFlux = lambda t,e,p: val*unit.kg*unit.m**2/(unit.s**3)
+			val = DeltaEFlux.to(EFluxUnit).value
+			DeltaEFlux = lambda t,e,p: val*EFluxUnit
 		if type(DeltaLFlux) == unit.quantity.Quantity:
-			val = DeltaLFlux.value
-			DeltaLFlux = lambda t,e,p: val*unit.kg*unit.m**2/(unit.s**2)
+			val = DeltaLFlux.to(LFluxUnit).value
+			DeltaLFlux = lambda t,e,p: val*LFluxUnit
 
 		#sanity checks
 		assert inspect.isfunction(DeltaEFlux), "Error: Delta E Flux is not a function. Must be a function with argument (t,e,p)"
@@ -39,8 +42,8 @@ class PN(Kerr, FluxFunction):
 
 		ranvals = [0.1 for i in inspect.signature(DeltaEFlux).parameters]
 		ranvals[-1]=10
-		assert DeltaEFlux(*ranvals).unit == unit.kg*unit.m**2/(unit.s**3), "Error: DeltaEFlux must have units kg m**2/s**3"
-		assert DeltaLFlux(*ranvals).unit == unit.kg*unit.m**2/(unit.s**2), "Error: DeltaLFlux must have units kg m**2/s**2"
+		assert DeltaEFlux(*ranvals).unit == EFluxUnit, "Error: DeltaEFlux must have units kg m**2/s**3"
+		assert DeltaLFlux(*ranvals).unit == LFluxUnit, "Error: DeltaLFlux must have units kg m**2/s**2"
 
 
 		self.epsilon=m/M
@@ -52,8 +55,8 @@ class PN(Kerr, FluxFunction):
 		self.PolarFrequency = self.OmegaTheta()
 		self.FluxName = FluxName
 
-		efluxUnitConv = (self.epsilon**2*(cons.c**5)/cons.G).to(unit.kg*unit.m**2/(unit.s**3))
-		lfluxUnitConv = (self.epsilon * self.SecondaryMass * unit.Msun * cons.c**2).to(unit.kg*unit.m**2/(unit.s**2))
+		efluxUnitConv = (self.epsilon**2*(cons.c**5)/cons.G).to(EFluxUnit)
+		lfluxUnitConv = (self.epsilon * self.SecondaryMass * unit.Msun * cons.c**2).to(LFluxUnit)
 		self.UndressedEFlux = lambda e,p: self.EFlux(self.a,e,p)*efluxUnitConv #dimensionfull
 		self.UndressedLFlux = lambda e,p: self.LFlux(self.a,e,p)*lfluxUnitConv #dimensionfull
 		self.EFluxModification = DeltaEFlux
@@ -74,7 +77,7 @@ class PN(Kerr, FluxFunction):
 			a: dimensionless black hole spin
 		"""
 
-
+		aa=time.time()
 		#mass ratio
 		epsilon = self.epsilon
 
@@ -83,6 +86,8 @@ class PN(Kerr, FluxFunction):
 		ecc = float(y[1])
 		phi_phase = float(y[2])
 		radial_phase = float(y[3])
+
+		parameter_time=time.time()
 		#setup guard for bad integration steps
 		if ecc>=1.0  or (semimaj-get_separatrix(self.a, ecc,1.)) < SEPARATRIXCUTOFF or ecc<0:
 			return [0.0, 0.0,0.0,0.0]
@@ -92,32 +97,44 @@ class PN(Kerr, FluxFunction):
 			ecc=1e-16
 		try:
 			# Azimuthal Frequency
+			bb=time.time()
 			Omega_phi = self.AzimuthalFrequency(ecc,semimaj);
+			phi_time=time.time()
 
 			# Radial Frequency
 			Omega_r = self.RadialFrequency(ecc,semimaj)
+			r_time = time.time()
 
 			#Energy flux
 			EdotN = self.UndressedEFlux(ecc,semimaj) #this is negative
+			EdotN_time=time.time()
 
 			#Angular momentum
 			LdotN = self.UndressedLFlux(ecc,semimaj) #this is negative
+			LdotN_time=time.time()
 
 			#Energy correction
 			Ecorr = self.EFluxModification(t*self.SMBHMass*MTSUN_SI, ecc, semimaj)
+			Ecorr_time=time.time()
 
 			#Angular Momentum Corrector
 			Lcorr = self.LFluxModification(t*self.SMBHMass*MTSUN_SI, ecc, semimaj)
+			Lcorr_time=time.time()
 		except TypeError:
 			print("ERROR: type error in frequency and flux generation as (e,p)=({0},{1})".format(ecc,semimaj))
+
+		value_time=time.time()
 
 		#(see: http://arxiv.org/abs/gr-qc/0702054, eq 4.3)
 		Edot = EdotN + Ecorr #units: kg m**2/s**3
 		Ldot = LdotN + Lcorr #units: kg m**2/s**2
+
 		dldp = self.dLdp()(ecc,semimaj)*self.dldpUnit
 		dlde = self.dLde()(ecc,semimaj)*self.dldeUnit
 		dedp = self.dEdp()(ecc,semimaj)*self.dedpUnit
 		dede = self.dEde()(ecc,semimaj)*self.dedeUnit
+
+		derivate_time=time.time()
 
 		norm = (dldp*dede - dlde*dedp)
 		pdot = (dede*Ldot - dlde*Edot)/norm #units: m/s
@@ -133,6 +150,8 @@ class PN(Kerr, FluxFunction):
 			self.IntegratorRun=False
 			self.IntegratorExitReason="PN Angular Momentum flux larger than zero! Breaking."
 
+		edotpdot_time=time.time()
+
 		#adimensionlize
 		pdot = (pdot/cons.c).decompose().value
 		edot = (edot*cons.G*self.SMBHMass*unit.Msun/(cons.c**3)).decompose().value
@@ -144,6 +163,23 @@ class PN(Kerr, FluxFunction):
 		Phi_r_dot =  Omega_r
 
 		dydt = [pdot, edot, Phi_phi_dot, Phi_r_dot]
+
+		conversion_time=time.time()
+
+		print("""
+		parameter time: {0}
+		value time: {1}
+			phi_time: {5}
+			r time: {6}
+			EdotN time: {7}
+			LdotN_time: {8}
+			Ecorr_time: {9}
+			Lcorr_time: {10}
+		derivate time: {2}
+		edotpdot_time: {3}
+		conversion time: {4}
+		""".format(parameter_time-aa, value_time-parameter_time, derivate_time-value_time, edotpdot_time-derivate_time,conversion_time-edotpdot_time, phi_time-bb, r_time-phi_time, EdotN_time-r_time, LdotN_time-EdotN_time, Ecorr_time-LdotN_time,Lcorr_time-Ecorr_time)
+		)
 
 		return dydt
 
@@ -194,6 +230,10 @@ class PNTraj(TrajectoryBase):
 			Phi_phi_out.append(Phi_phi)
 			Phi_r_out.append(Phi_r)
 
+			#catch breaks from integrand function
+			run=self.PNEvaluator.IntegratorRun
+			exit_reason=self.PNEvaluator.IntegratorExitReason
+
 			#catch separatrix crossing and halt integration
 			if (p - get_separatrix(float(a),float(e),float(x0)))<SEPARATRIXCUTOFF:
 				run=False
@@ -202,14 +242,11 @@ class PNTraj(TrajectoryBase):
 			if e<0 or e>=1:
 				run=False
 				exit_reason="Ecccentricity exceeded bounds"
-			if p_out[-1]>p_out[-2]:
-				print("Error: semi-latus rectum increased! Breaking")
+			if p_out[-1]>=p_out[-2]:
 				run=False
-				exit_reason="Semi-latus rectum increased. Possibly beyond validity of PN expressions for fluxes"
+				exit_reason="Semi-latus rectum failed to decrease. Possibly beyond validity of PN expressions for fluxes or proca flux drastically exceeds GW flux."
 
-			#catch breaks from integrand function
-			run=self.PNEvaluator.IntegratorRun
-			exit_reason=self.PNEvaluator.IntegratorExitReason
+
 
 
 		if exit_reason!="":
