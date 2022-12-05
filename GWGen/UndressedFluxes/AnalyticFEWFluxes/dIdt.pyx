@@ -9,15 +9,15 @@ cdef extern from "dIdt8H_5PNe10.h":
 	double dYdt8H_5PNe10 (const double q, const double p, const double e, const double Y, const int Nv, const int ne);
 
 
-def pydEdt(q,p,e,Y,nv,ne):
-	return dEdt8H_5PNe10(q,e,p,Y,nv,ne)
-def pydLdt(q,p,e,Y,nv,ne):
-	return dLdt8H_5PNe10(q,e,p,Y,nv,ne)
-def pydCdt(q,p,e,Y,nv,ne):
-	return dCdt8H_5PNe10(q,e,p,Y,nv,ne)
-def pydpdt(q,p,e,Y,nv,ne):
-	return dpdt8H_5PNe10(q,e,p,Y,nv,ne)
-def pydedt(q,p,e,Y,nv,ne):
-	return dedt8H_5PNe10(q,e,p,Y,nv,ne)
-def pydYdt(q,p,e,Y,nv,ne):
-	return dYdt8H_5PNe10(q,e,p,Y,nv,ne)
+def pydEdt(q,e,p,Y,nv,ne):
+	return dEdt8H_5PNe10(q,p,e,Y,nv,ne)
+def pydLdt(q,e,p,Y,nv,ne):
+	return dLdt8H_5PNe10(q,p,e,Y,nv,ne)
+def pydCdt(q,e,p,Y,nv,ne):
+	return dCdt8H_5PNe10(q,p,e,Y,nv,ne)
+def pydpdt(q,e,p,Y,nv,ne):
+	return dpdt8H_5PNe10(q,p,e,Y,nv,ne)
+def pydedt(q,e,p,Y,nv,ne):
+	return dedt8H_5PNe10(q,p,e,Y,nv,ne)
+def pydYdt(q,e,p,Y,nv,ne):
+	return dYdt8H_5PNe10(q,p,e,Y,nv,ne)

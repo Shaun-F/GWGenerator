@@ -11,7 +11,7 @@
 #else
 #define CYTHON_ABI "0_29_32"
 #define CYTHON_HEX_VERSION 0x001D20F0
-#define CYTHON_FUTURE_DIVISION 1
+#define CYTHON_FUTURE_DIVISION 0
 #include <stddef.h>
 #ifndef offsetof
   #define offsetof(type, member) ( (size_t) & ((type*)0) -> member )
@@ -752,8 +752,8 @@ static CYTHON_INLINE float __PYX_NAN() {
   #endif
 #endif
 
-#define __PYX_HAVE__dIdt
-#define __PYX_HAVE_API__dIdt
+#define __PYX_HAVE__pyAnalyticFluxes
+#define __PYX_HAVE_API__pyAnalyticFluxes
 /* Early includes */
 #include "dIdt8H_5PNe10.h"
 #ifdef _OPENMP
@@ -1175,19 +1175,18 @@ static int __Pyx_check_binary_version(void);
 static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 
 
-/* Module declarations from 'dIdt' */
-#define __Pyx_MODULE_NAME "dIdt"
-extern int __pyx_module_is_main_dIdt;
-int __pyx_module_is_main_dIdt = 0;
+/* Module declarations from 'pyAnalyticFluxes' */
+#define __Pyx_MODULE_NAME "pyAnalyticFluxes"
+extern int __pyx_module_is_main_pyAnalyticFluxes;
+int __pyx_module_is_main_pyAnalyticFluxes = 0;
 
-/* Implementation of 'dIdt' */
+/* Implementation of 'pyAnalyticFluxes' */
 static const char __pyx_k_Y[] = "Y";
 static const char __pyx_k_e[] = "e";
 static const char __pyx_k_p[] = "p";
 static const char __pyx_k_q[] = "q";
 static const char __pyx_k_ne[] = "ne";
 static const char __pyx_k_nv[] = "nv";
-static const char __pyx_k_dIdt[] = "dIdt";
 static const char __pyx_k_main[] = "__main__";
 static const char __pyx_k_name[] = "__name__";
 static const char __pyx_k_test[] = "__test__";
@@ -1198,16 +1197,17 @@ static const char __pyx_k_pydYdt[] = "pydYdt";
 static const char __pyx_k_pydedt[] = "pydedt";
 static const char __pyx_k_pydpdt[] = "pydpdt";
 static const char __pyx_k_src_dIdt_pyx[] = "src/dIdt.pyx";
+static const char __pyx_k_pyAnalyticFluxes[] = "pyAnalyticFluxes";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static PyObject *__pyx_n_s_Y;
 static PyObject *__pyx_n_s_cline_in_traceback;
-static PyObject *__pyx_n_s_dIdt;
 static PyObject *__pyx_n_s_e;
 static PyObject *__pyx_n_s_main;
 static PyObject *__pyx_n_s_name;
 static PyObject *__pyx_n_s_ne;
 static PyObject *__pyx_n_s_nv;
 static PyObject *__pyx_n_s_p;
+static PyObject *__pyx_n_s_pyAnalyticFluxes;
 static PyObject *__pyx_n_s_pydCdt;
 static PyObject *__pyx_n_s_pydEdt;
 static PyObject *__pyx_n_s_pydLdt;
@@ -1217,12 +1217,12 @@ static PyObject *__pyx_n_s_pydpdt;
 static PyObject *__pyx_n_s_q;
 static PyObject *__pyx_kp_s_src_dIdt_pyx;
 static PyObject *__pyx_n_s_test;
-static PyObject *__pyx_pf_4dIdt_pydEdt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne); /* proto */
-static PyObject *__pyx_pf_4dIdt_2pydLdt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne); /* proto */
-static PyObject *__pyx_pf_4dIdt_4pydCdt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne); /* proto */
-static PyObject *__pyx_pf_4dIdt_6pydpdt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne); /* proto */
-static PyObject *__pyx_pf_4dIdt_8pydedt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne); /* proto */
-static PyObject *__pyx_pf_4dIdt_10pydYdt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne); /* proto */
+static PyObject *__pyx_pf_16pyAnalyticFluxes_pydEdt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne); /* proto */
+static PyObject *__pyx_pf_16pyAnalyticFluxes_2pydLdt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne); /* proto */
+static PyObject *__pyx_pf_16pyAnalyticFluxes_4pydCdt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne); /* proto */
+static PyObject *__pyx_pf_16pyAnalyticFluxes_6pydpdt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne); /* proto */
+static PyObject *__pyx_pf_16pyAnalyticFluxes_8pydedt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne); /* proto */
+static PyObject *__pyx_pf_16pyAnalyticFluxes_10pydYdt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne); /* proto */
 static PyObject *__pyx_tuple_;
 static PyObject *__pyx_tuple__3;
 static PyObject *__pyx_tuple__5;
@@ -1237,7 +1237,7 @@ static PyObject *__pyx_codeobj__10;
 static PyObject *__pyx_codeobj__12;
 /* Late includes */
 
-/* "dIdt.pyx":12
+/* "src/dIdt.pyx":12
  * 
  * 
  * def pydEdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
@@ -1246,9 +1246,9 @@ static PyObject *__pyx_codeobj__12;
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4dIdt_1pydEdt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_4dIdt_1pydEdt = {"pydEdt", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_4dIdt_1pydEdt, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_4dIdt_1pydEdt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_16pyAnalyticFluxes_1pydEdt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_16pyAnalyticFluxes_1pydEdt = {"pydEdt", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_16pyAnalyticFluxes_1pydEdt, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_16pyAnalyticFluxes_1pydEdt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_q = 0;
   PyObject *__pyx_v_p = 0;
   PyObject *__pyx_v_e = 0;
@@ -1343,18 +1343,18 @@ static PyObject *__pyx_pw_4dIdt_1pydEdt(PyObject *__pyx_self, PyObject *__pyx_ar
   __pyx_L5_argtuple_error:;
   __Pyx_RaiseArgtupleInvalid("pydEdt", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 12, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("dIdt.pydEdt", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("pyAnalyticFluxes.pydEdt", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_4dIdt_pydEdt(__pyx_self, __pyx_v_q, __pyx_v_p, __pyx_v_e, __pyx_v_Y, __pyx_v_nv, __pyx_v_ne);
+  __pyx_r = __pyx_pf_16pyAnalyticFluxes_pydEdt(__pyx_self, __pyx_v_q, __pyx_v_p, __pyx_v_e, __pyx_v_Y, __pyx_v_nv, __pyx_v_ne);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4dIdt_pydEdt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne) {
+static PyObject *__pyx_pf_16pyAnalyticFluxes_pydEdt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   double __pyx_t_1;
@@ -1369,7 +1369,7 @@ static PyObject *__pyx_pf_4dIdt_pydEdt(CYTHON_UNUSED PyObject *__pyx_self, PyObj
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("pydEdt", 0);
 
-  /* "dIdt.pyx":13
+  /* "src/dIdt.pyx":13
  * 
  * def pydEdt(q,p,e,Y,nv,ne):
  * 	return dEdt8H_5PNe10(q,e,p,Y,nv,ne)             # <<<<<<<<<<<<<<
@@ -1389,7 +1389,7 @@ static PyObject *__pyx_pf_4dIdt_pydEdt(CYTHON_UNUSED PyObject *__pyx_self, PyObj
   __pyx_t_7 = 0;
   goto __pyx_L0;
 
-  /* "dIdt.pyx":12
+  /* "src/dIdt.pyx":12
  * 
  * 
  * def pydEdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
@@ -1400,7 +1400,7 @@ static PyObject *__pyx_pf_4dIdt_pydEdt(CYTHON_UNUSED PyObject *__pyx_self, PyObj
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_7);
-  __Pyx_AddTraceback("dIdt.pydEdt", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("pyAnalyticFluxes.pydEdt", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -1408,7 +1408,7 @@ static PyObject *__pyx_pf_4dIdt_pydEdt(CYTHON_UNUSED PyObject *__pyx_self, PyObj
   return __pyx_r;
 }
 
-/* "dIdt.pyx":14
+/* "src/dIdt.pyx":14
  * def pydEdt(q,p,e,Y,nv,ne):
  * 	return dEdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydLdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
@@ -1417,9 +1417,9 @@ static PyObject *__pyx_pf_4dIdt_pydEdt(CYTHON_UNUSED PyObject *__pyx_self, PyObj
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4dIdt_3pydLdt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_4dIdt_3pydLdt = {"pydLdt", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_4dIdt_3pydLdt, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_4dIdt_3pydLdt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_16pyAnalyticFluxes_3pydLdt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_16pyAnalyticFluxes_3pydLdt = {"pydLdt", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_16pyAnalyticFluxes_3pydLdt, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_16pyAnalyticFluxes_3pydLdt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_q = 0;
   PyObject *__pyx_v_p = 0;
   PyObject *__pyx_v_e = 0;
@@ -1514,18 +1514,18 @@ static PyObject *__pyx_pw_4dIdt_3pydLdt(PyObject *__pyx_self, PyObject *__pyx_ar
   __pyx_L5_argtuple_error:;
   __Pyx_RaiseArgtupleInvalid("pydLdt", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 14, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("dIdt.pydLdt", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("pyAnalyticFluxes.pydLdt", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_4dIdt_2pydLdt(__pyx_self, __pyx_v_q, __pyx_v_p, __pyx_v_e, __pyx_v_Y, __pyx_v_nv, __pyx_v_ne);
+  __pyx_r = __pyx_pf_16pyAnalyticFluxes_2pydLdt(__pyx_self, __pyx_v_q, __pyx_v_p, __pyx_v_e, __pyx_v_Y, __pyx_v_nv, __pyx_v_ne);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4dIdt_2pydLdt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne) {
+static PyObject *__pyx_pf_16pyAnalyticFluxes_2pydLdt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   double __pyx_t_1;
@@ -1540,7 +1540,7 @@ static PyObject *__pyx_pf_4dIdt_2pydLdt(CYTHON_UNUSED PyObject *__pyx_self, PyOb
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("pydLdt", 0);
 
-  /* "dIdt.pyx":15
+  /* "src/dIdt.pyx":15
  * 	return dEdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydLdt(q,p,e,Y,nv,ne):
  * 	return dLdt8H_5PNe10(q,e,p,Y,nv,ne)             # <<<<<<<<<<<<<<
@@ -1560,7 +1560,7 @@ static PyObject *__pyx_pf_4dIdt_2pydLdt(CYTHON_UNUSED PyObject *__pyx_self, PyOb
   __pyx_t_7 = 0;
   goto __pyx_L0;
 
-  /* "dIdt.pyx":14
+  /* "src/dIdt.pyx":14
  * def pydEdt(q,p,e,Y,nv,ne):
  * 	return dEdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydLdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
@@ -1571,7 +1571,7 @@ static PyObject *__pyx_pf_4dIdt_2pydLdt(CYTHON_UNUSED PyObject *__pyx_self, PyOb
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_7);
-  __Pyx_AddTraceback("dIdt.pydLdt", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("pyAnalyticFluxes.pydLdt", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -1579,7 +1579,7 @@ static PyObject *__pyx_pf_4dIdt_2pydLdt(CYTHON_UNUSED PyObject *__pyx_self, PyOb
   return __pyx_r;
 }
 
-/* "dIdt.pyx":16
+/* "src/dIdt.pyx":16
  * def pydLdt(q,p,e,Y,nv,ne):
  * 	return dLdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydCdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
@@ -1588,9 +1588,9 @@ static PyObject *__pyx_pf_4dIdt_2pydLdt(CYTHON_UNUSED PyObject *__pyx_self, PyOb
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4dIdt_5pydCdt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_4dIdt_5pydCdt = {"pydCdt", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_4dIdt_5pydCdt, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_4dIdt_5pydCdt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_16pyAnalyticFluxes_5pydCdt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_16pyAnalyticFluxes_5pydCdt = {"pydCdt", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_16pyAnalyticFluxes_5pydCdt, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_16pyAnalyticFluxes_5pydCdt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_q = 0;
   PyObject *__pyx_v_p = 0;
   PyObject *__pyx_v_e = 0;
@@ -1685,18 +1685,18 @@ static PyObject *__pyx_pw_4dIdt_5pydCdt(PyObject *__pyx_self, PyObject *__pyx_ar
   __pyx_L5_argtuple_error:;
   __Pyx_RaiseArgtupleInvalid("pydCdt", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 16, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("dIdt.pydCdt", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("pyAnalyticFluxes.pydCdt", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_4dIdt_4pydCdt(__pyx_self, __pyx_v_q, __pyx_v_p, __pyx_v_e, __pyx_v_Y, __pyx_v_nv, __pyx_v_ne);
+  __pyx_r = __pyx_pf_16pyAnalyticFluxes_4pydCdt(__pyx_self, __pyx_v_q, __pyx_v_p, __pyx_v_e, __pyx_v_Y, __pyx_v_nv, __pyx_v_ne);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4dIdt_4pydCdt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne) {
+static PyObject *__pyx_pf_16pyAnalyticFluxes_4pydCdt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   double __pyx_t_1;
@@ -1711,7 +1711,7 @@ static PyObject *__pyx_pf_4dIdt_4pydCdt(CYTHON_UNUSED PyObject *__pyx_self, PyOb
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("pydCdt", 0);
 
-  /* "dIdt.pyx":17
+  /* "src/dIdt.pyx":17
  * 	return dLdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydCdt(q,p,e,Y,nv,ne):
  * 	return dCdt8H_5PNe10(q,e,p,Y,nv,ne)             # <<<<<<<<<<<<<<
@@ -1731,7 +1731,7 @@ static PyObject *__pyx_pf_4dIdt_4pydCdt(CYTHON_UNUSED PyObject *__pyx_self, PyOb
   __pyx_t_7 = 0;
   goto __pyx_L0;
 
-  /* "dIdt.pyx":16
+  /* "src/dIdt.pyx":16
  * def pydLdt(q,p,e,Y,nv,ne):
  * 	return dLdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydCdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
@@ -1742,7 +1742,7 @@ static PyObject *__pyx_pf_4dIdt_4pydCdt(CYTHON_UNUSED PyObject *__pyx_self, PyOb
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_7);
-  __Pyx_AddTraceback("dIdt.pydCdt", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("pyAnalyticFluxes.pydCdt", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -1750,7 +1750,7 @@ static PyObject *__pyx_pf_4dIdt_4pydCdt(CYTHON_UNUSED PyObject *__pyx_self, PyOb
   return __pyx_r;
 }
 
-/* "dIdt.pyx":18
+/* "src/dIdt.pyx":18
  * def pydCdt(q,p,e,Y,nv,ne):
  * 	return dCdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydpdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
@@ -1759,9 +1759,9 @@ static PyObject *__pyx_pf_4dIdt_4pydCdt(CYTHON_UNUSED PyObject *__pyx_self, PyOb
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4dIdt_7pydpdt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_4dIdt_7pydpdt = {"pydpdt", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_4dIdt_7pydpdt, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_4dIdt_7pydpdt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_16pyAnalyticFluxes_7pydpdt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_16pyAnalyticFluxes_7pydpdt = {"pydpdt", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_16pyAnalyticFluxes_7pydpdt, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_16pyAnalyticFluxes_7pydpdt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_q = 0;
   PyObject *__pyx_v_p = 0;
   PyObject *__pyx_v_e = 0;
@@ -1856,18 +1856,18 @@ static PyObject *__pyx_pw_4dIdt_7pydpdt(PyObject *__pyx_self, PyObject *__pyx_ar
   __pyx_L5_argtuple_error:;
   __Pyx_RaiseArgtupleInvalid("pydpdt", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 18, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("dIdt.pydpdt", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("pyAnalyticFluxes.pydpdt", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_4dIdt_6pydpdt(__pyx_self, __pyx_v_q, __pyx_v_p, __pyx_v_e, __pyx_v_Y, __pyx_v_nv, __pyx_v_ne);
+  __pyx_r = __pyx_pf_16pyAnalyticFluxes_6pydpdt(__pyx_self, __pyx_v_q, __pyx_v_p, __pyx_v_e, __pyx_v_Y, __pyx_v_nv, __pyx_v_ne);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4dIdt_6pydpdt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne) {
+static PyObject *__pyx_pf_16pyAnalyticFluxes_6pydpdt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   double __pyx_t_1;
@@ -1882,7 +1882,7 @@ static PyObject *__pyx_pf_4dIdt_6pydpdt(CYTHON_UNUSED PyObject *__pyx_self, PyOb
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("pydpdt", 0);
 
-  /* "dIdt.pyx":19
+  /* "src/dIdt.pyx":19
  * 	return dCdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydpdt(q,p,e,Y,nv,ne):
  * 	return dpdt8H_5PNe10(q,e,p,Y,nv,ne)             # <<<<<<<<<<<<<<
@@ -1902,7 +1902,7 @@ static PyObject *__pyx_pf_4dIdt_6pydpdt(CYTHON_UNUSED PyObject *__pyx_self, PyOb
   __pyx_t_7 = 0;
   goto __pyx_L0;
 
-  /* "dIdt.pyx":18
+  /* "src/dIdt.pyx":18
  * def pydCdt(q,p,e,Y,nv,ne):
  * 	return dCdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydpdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
@@ -1913,7 +1913,7 @@ static PyObject *__pyx_pf_4dIdt_6pydpdt(CYTHON_UNUSED PyObject *__pyx_self, PyOb
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_7);
-  __Pyx_AddTraceback("dIdt.pydpdt", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("pyAnalyticFluxes.pydpdt", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -1921,7 +1921,7 @@ static PyObject *__pyx_pf_4dIdt_6pydpdt(CYTHON_UNUSED PyObject *__pyx_self, PyOb
   return __pyx_r;
 }
 
-/* "dIdt.pyx":20
+/* "src/dIdt.pyx":20
  * def pydpdt(q,p,e,Y,nv,ne):
  * 	return dpdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydedt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
@@ -1930,9 +1930,9 @@ static PyObject *__pyx_pf_4dIdt_6pydpdt(CYTHON_UNUSED PyObject *__pyx_self, PyOb
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4dIdt_9pydedt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_4dIdt_9pydedt = {"pydedt", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_4dIdt_9pydedt, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_4dIdt_9pydedt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_16pyAnalyticFluxes_9pydedt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_16pyAnalyticFluxes_9pydedt = {"pydedt", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_16pyAnalyticFluxes_9pydedt, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_16pyAnalyticFluxes_9pydedt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_q = 0;
   PyObject *__pyx_v_p = 0;
   PyObject *__pyx_v_e = 0;
@@ -2027,18 +2027,18 @@ static PyObject *__pyx_pw_4dIdt_9pydedt(PyObject *__pyx_self, PyObject *__pyx_ar
   __pyx_L5_argtuple_error:;
   __Pyx_RaiseArgtupleInvalid("pydedt", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 20, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("dIdt.pydedt", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("pyAnalyticFluxes.pydedt", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_4dIdt_8pydedt(__pyx_self, __pyx_v_q, __pyx_v_p, __pyx_v_e, __pyx_v_Y, __pyx_v_nv, __pyx_v_ne);
+  __pyx_r = __pyx_pf_16pyAnalyticFluxes_8pydedt(__pyx_self, __pyx_v_q, __pyx_v_p, __pyx_v_e, __pyx_v_Y, __pyx_v_nv, __pyx_v_ne);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4dIdt_8pydedt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne) {
+static PyObject *__pyx_pf_16pyAnalyticFluxes_8pydedt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   double __pyx_t_1;
@@ -2053,7 +2053,7 @@ static PyObject *__pyx_pf_4dIdt_8pydedt(CYTHON_UNUSED PyObject *__pyx_self, PyOb
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("pydedt", 0);
 
-  /* "dIdt.pyx":21
+  /* "src/dIdt.pyx":21
  * 	return dpdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydedt(q,p,e,Y,nv,ne):
  * 	return dedt8H_5PNe10(q,e,p,Y,nv,ne)             # <<<<<<<<<<<<<<
@@ -2073,7 +2073,7 @@ static PyObject *__pyx_pf_4dIdt_8pydedt(CYTHON_UNUSED PyObject *__pyx_self, PyOb
   __pyx_t_7 = 0;
   goto __pyx_L0;
 
-  /* "dIdt.pyx":20
+  /* "src/dIdt.pyx":20
  * def pydpdt(q,p,e,Y,nv,ne):
  * 	return dpdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydedt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
@@ -2084,7 +2084,7 @@ static PyObject *__pyx_pf_4dIdt_8pydedt(CYTHON_UNUSED PyObject *__pyx_self, PyOb
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_7);
-  __Pyx_AddTraceback("dIdt.pydedt", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("pyAnalyticFluxes.pydedt", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -2092,7 +2092,7 @@ static PyObject *__pyx_pf_4dIdt_8pydedt(CYTHON_UNUSED PyObject *__pyx_self, PyOb
   return __pyx_r;
 }
 
-/* "dIdt.pyx":22
+/* "src/dIdt.pyx":22
  * def pydedt(q,p,e,Y,nv,ne):
  * 	return dedt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydYdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
@@ -2100,9 +2100,9 @@ static PyObject *__pyx_pf_4dIdt_8pydedt(CYTHON_UNUSED PyObject *__pyx_self, PyOb
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_4dIdt_11pydYdt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_4dIdt_11pydYdt = {"pydYdt", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_4dIdt_11pydYdt, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_4dIdt_11pydYdt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_16pyAnalyticFluxes_11pydYdt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_16pyAnalyticFluxes_11pydYdt = {"pydYdt", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_16pyAnalyticFluxes_11pydYdt, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_16pyAnalyticFluxes_11pydYdt(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_q = 0;
   PyObject *__pyx_v_p = 0;
   PyObject *__pyx_v_e = 0;
@@ -2197,18 +2197,18 @@ static PyObject *__pyx_pw_4dIdt_11pydYdt(PyObject *__pyx_self, PyObject *__pyx_a
   __pyx_L5_argtuple_error:;
   __Pyx_RaiseArgtupleInvalid("pydYdt", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 22, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("dIdt.pydYdt", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("pyAnalyticFluxes.pydYdt", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_4dIdt_10pydYdt(__pyx_self, __pyx_v_q, __pyx_v_p, __pyx_v_e, __pyx_v_Y, __pyx_v_nv, __pyx_v_ne);
+  __pyx_r = __pyx_pf_16pyAnalyticFluxes_10pydYdt(__pyx_self, __pyx_v_q, __pyx_v_p, __pyx_v_e, __pyx_v_Y, __pyx_v_nv, __pyx_v_ne);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4dIdt_10pydYdt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne) {
+static PyObject *__pyx_pf_16pyAnalyticFluxes_10pydYdt(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_q, PyObject *__pyx_v_p, PyObject *__pyx_v_e, PyObject *__pyx_v_Y, PyObject *__pyx_v_nv, PyObject *__pyx_v_ne) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   double __pyx_t_1;
@@ -2223,7 +2223,7 @@ static PyObject *__pyx_pf_4dIdt_10pydYdt(CYTHON_UNUSED PyObject *__pyx_self, PyO
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("pydYdt", 0);
 
-  /* "dIdt.pyx":23
+  /* "src/dIdt.pyx":23
  * 	return dedt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydYdt(q,p,e,Y,nv,ne):
  * 	return dYdt8H_5PNe10(q,e,p,Y,nv,ne)             # <<<<<<<<<<<<<<
@@ -2241,7 +2241,7 @@ static PyObject *__pyx_pf_4dIdt_10pydYdt(CYTHON_UNUSED PyObject *__pyx_self, PyO
   __pyx_t_7 = 0;
   goto __pyx_L0;
 
-  /* "dIdt.pyx":22
+  /* "src/dIdt.pyx":22
  * def pydedt(q,p,e,Y,nv,ne):
  * 	return dedt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydYdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
@@ -2251,7 +2251,7 @@ static PyObject *__pyx_pf_4dIdt_10pydYdt(CYTHON_UNUSED PyObject *__pyx_self, PyO
   /* function exit code */
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_7);
-  __Pyx_AddTraceback("dIdt.pydYdt", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("pyAnalyticFluxes.pydYdt", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
   __Pyx_XGIVEREF(__pyx_r);
@@ -2266,17 +2266,17 @@ static PyMethodDef __pyx_methods[] = {
 #if PY_MAJOR_VERSION >= 3
 #if CYTHON_PEP489_MULTI_PHASE_INIT
 static PyObject* __pyx_pymod_create(PyObject *spec, PyModuleDef *def); /*proto*/
-static int __pyx_pymod_exec_dIdt(PyObject* module); /*proto*/
+static int __pyx_pymod_exec_pyAnalyticFluxes(PyObject* module); /*proto*/
 static PyModuleDef_Slot __pyx_moduledef_slots[] = {
   {Py_mod_create, (void*)__pyx_pymod_create},
-  {Py_mod_exec, (void*)__pyx_pymod_exec_dIdt},
+  {Py_mod_exec, (void*)__pyx_pymod_exec_pyAnalyticFluxes},
   {0, NULL}
 };
 #endif
 
 static struct PyModuleDef __pyx_moduledef = {
     PyModuleDef_HEAD_INIT,
-    "dIdt",
+    "pyAnalyticFluxes",
     0, /* m_doc */
   #if CYTHON_PEP489_MULTI_PHASE_INIT
     0, /* m_size */
@@ -2307,13 +2307,13 @@ static struct PyModuleDef __pyx_moduledef = {
 static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_Y, __pyx_k_Y, sizeof(__pyx_k_Y), 0, 0, 1, 1},
   {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
-  {&__pyx_n_s_dIdt, __pyx_k_dIdt, sizeof(__pyx_k_dIdt), 0, 0, 1, 1},
   {&__pyx_n_s_e, __pyx_k_e, sizeof(__pyx_k_e), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
   {&__pyx_n_s_name, __pyx_k_name, sizeof(__pyx_k_name), 0, 0, 1, 1},
   {&__pyx_n_s_ne, __pyx_k_ne, sizeof(__pyx_k_ne), 0, 0, 1, 1},
   {&__pyx_n_s_nv, __pyx_k_nv, sizeof(__pyx_k_nv), 0, 0, 1, 1},
   {&__pyx_n_s_p, __pyx_k_p, sizeof(__pyx_k_p), 0, 0, 1, 1},
+  {&__pyx_n_s_pyAnalyticFluxes, __pyx_k_pyAnalyticFluxes, sizeof(__pyx_k_pyAnalyticFluxes), 0, 0, 1, 1},
   {&__pyx_n_s_pydCdt, __pyx_k_pydCdt, sizeof(__pyx_k_pydCdt), 0, 0, 1, 1},
   {&__pyx_n_s_pydEdt, __pyx_k_pydEdt, sizeof(__pyx_k_pydEdt), 0, 0, 1, 1},
   {&__pyx_n_s_pydLdt, __pyx_k_pydLdt, sizeof(__pyx_k_pydLdt), 0, 0, 1, 1},
@@ -2333,7 +2333,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "dIdt.pyx":12
+  /* "src/dIdt.pyx":12
  * 
  * 
  * def pydEdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
@@ -2345,7 +2345,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple_);
   __pyx_codeobj__2 = (PyObject*)__Pyx_PyCode_New(6, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple_, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_dIdt_pyx, __pyx_n_s_pydEdt, 12, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__2)) __PYX_ERR(0, 12, __pyx_L1_error)
 
-  /* "dIdt.pyx":14
+  /* "src/dIdt.pyx":14
  * def pydEdt(q,p,e,Y,nv,ne):
  * 	return dEdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydLdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
@@ -2357,7 +2357,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__3);
   __pyx_codeobj__4 = (PyObject*)__Pyx_PyCode_New(6, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__3, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_dIdt_pyx, __pyx_n_s_pydLdt, 14, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__4)) __PYX_ERR(0, 14, __pyx_L1_error)
 
-  /* "dIdt.pyx":16
+  /* "src/dIdt.pyx":16
  * def pydLdt(q,p,e,Y,nv,ne):
  * 	return dLdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydCdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
@@ -2369,7 +2369,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__5);
   __pyx_codeobj__6 = (PyObject*)__Pyx_PyCode_New(6, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__5, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_dIdt_pyx, __pyx_n_s_pydCdt, 16, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__6)) __PYX_ERR(0, 16, __pyx_L1_error)
 
-  /* "dIdt.pyx":18
+  /* "src/dIdt.pyx":18
  * def pydCdt(q,p,e,Y,nv,ne):
  * 	return dCdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydpdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
@@ -2381,7 +2381,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__7);
   __pyx_codeobj__8 = (PyObject*)__Pyx_PyCode_New(6, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__7, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_dIdt_pyx, __pyx_n_s_pydpdt, 18, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__8)) __PYX_ERR(0, 18, __pyx_L1_error)
 
-  /* "dIdt.pyx":20
+  /* "src/dIdt.pyx":20
  * def pydpdt(q,p,e,Y,nv,ne):
  * 	return dpdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydedt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
@@ -2393,7 +2393,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__9);
   __pyx_codeobj__10 = (PyObject*)__Pyx_PyCode_New(6, 0, 6, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__9, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_src_dIdt_pyx, __pyx_n_s_pydedt, 20, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__10)) __PYX_ERR(0, 20, __pyx_L1_error)
 
-  /* "dIdt.pyx":22
+  /* "src/dIdt.pyx":22
  * def pydedt(q,p,e,Y,nv,ne):
  * 	return dedt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydYdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
@@ -2500,11 +2500,11 @@ static int __Pyx_modinit_function_import_code(void) {
 
 
 #if PY_MAJOR_VERSION < 3
-__Pyx_PyMODINIT_FUNC initdIdt(void) CYTHON_SMALL_CODE; /*proto*/
-__Pyx_PyMODINIT_FUNC initdIdt(void)
+__Pyx_PyMODINIT_FUNC initpyAnalyticFluxes(void) CYTHON_SMALL_CODE; /*proto*/
+__Pyx_PyMODINIT_FUNC initpyAnalyticFluxes(void)
 #else
-__Pyx_PyMODINIT_FUNC PyInit_dIdt(void) CYTHON_SMALL_CODE; /*proto*/
-__Pyx_PyMODINIT_FUNC PyInit_dIdt(void)
+__Pyx_PyMODINIT_FUNC PyInit_pyAnalyticFluxes(void) CYTHON_SMALL_CODE; /*proto*/
+__Pyx_PyMODINIT_FUNC PyInit_pyAnalyticFluxes(void)
 #if CYTHON_PEP489_MULTI_PHASE_INIT
 {
   return PyModuleDef_Init(&__pyx_moduledef);
@@ -2571,7 +2571,7 @@ bad:
 }
 
 
-static CYTHON_SMALL_CODE int __pyx_pymod_exec_dIdt(PyObject *__pyx_pyinit_module)
+static CYTHON_SMALL_CODE int __pyx_pymod_exec_pyAnalyticFluxes(PyObject *__pyx_pyinit_module)
 #endif
 #endif
 {
@@ -2583,7 +2583,7 @@ static CYTHON_SMALL_CODE int __pyx_pymod_exec_dIdt(PyObject *__pyx_pyinit_module
   #if CYTHON_PEP489_MULTI_PHASE_INIT
   if (__pyx_m) {
     if (__pyx_m == __pyx_pyinit_module) return 0;
-    PyErr_SetString(PyExc_RuntimeError, "Module 'dIdt' has already been imported. Re-initialisation is not supported.");
+    PyErr_SetString(PyExc_RuntimeError, "Module 'pyAnalyticFluxes' has already been imported. Re-initialisation is not supported.");
     return -1;
   }
   #elif PY_MAJOR_VERSION >= 3
@@ -2598,7 +2598,7 @@ if (!__Pyx_RefNanny) {
       Py_FatalError("failed to import 'refnanny' module");
 }
 #endif
-  __Pyx_RefNannySetupContext("__Pyx_PyMODINIT_FUNC PyInit_dIdt(void)", 0);
+  __Pyx_RefNannySetupContext("__Pyx_PyMODINIT_FUNC PyInit_pyAnalyticFluxes(void)", 0);
   if (__Pyx_check_binary_version() < 0) __PYX_ERR(0, 3, __pyx_L1_error)
   #ifdef __Pxy_PyFrame_Initialize_Offsets
   __Pxy_PyFrame_Initialize_Offsets();
@@ -2635,7 +2635,7 @@ if (!__Pyx_RefNanny) {
   Py_INCREF(__pyx_m);
   #else
   #if PY_MAJOR_VERSION < 3
-  __pyx_m = Py_InitModule4("dIdt", __pyx_methods, 0, 0, PYTHON_API_VERSION); Py_XINCREF(__pyx_m);
+  __pyx_m = Py_InitModule4("pyAnalyticFluxes", __pyx_methods, 0, 0, PYTHON_API_VERSION); Py_XINCREF(__pyx_m);
   #else
   __pyx_m = PyModule_Create(&__pyx_moduledef);
   #endif
@@ -2653,14 +2653,14 @@ if (!__Pyx_RefNanny) {
   #if PY_MAJOR_VERSION < 3 && (__PYX_DEFAULT_STRING_ENCODING_IS_ASCII || __PYX_DEFAULT_STRING_ENCODING_IS_DEFAULT)
   if (__Pyx_init_sys_getdefaultencoding_params() < 0) __PYX_ERR(0, 3, __pyx_L1_error)
   #endif
-  if (__pyx_module_is_main_dIdt) {
+  if (__pyx_module_is_main_pyAnalyticFluxes) {
     if (PyObject_SetAttr(__pyx_m, __pyx_n_s_name, __pyx_n_s_main) < 0) __PYX_ERR(0, 3, __pyx_L1_error)
   }
   #if PY_MAJOR_VERSION >= 3
   {
     PyObject *modules = PyImport_GetModuleDict(); if (unlikely(!modules)) __PYX_ERR(0, 3, __pyx_L1_error)
-    if (!PyDict_GetItemString(modules, "dIdt")) {
-      if (unlikely(PyDict_SetItemString(modules, "dIdt", __pyx_m) < 0)) __PYX_ERR(0, 3, __pyx_L1_error)
+    if (!PyDict_GetItemString(modules, "pyAnalyticFluxes")) {
+      if (unlikely(PyDict_SetItemString(modules, "pyAnalyticFluxes", __pyx_m) < 0)) __PYX_ERR(0, 3, __pyx_L1_error)
     }
   }
   #endif
@@ -2681,78 +2681,78 @@ if (!__Pyx_RefNanny) {
   if (__Pyx_patch_abc() < 0) __PYX_ERR(0, 3, __pyx_L1_error)
   #endif
 
-  /* "dIdt.pyx":12
+  /* "src/dIdt.pyx":12
  * 
  * 
  * def pydEdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
  * 	return dEdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydLdt(q,p,e,Y,nv,ne):
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_4dIdt_1pydEdt, NULL, __pyx_n_s_dIdt); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 12, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_16pyAnalyticFluxes_1pydEdt, NULL, __pyx_n_s_pyAnalyticFluxes); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 12, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_pydEdt, __pyx_t_1) < 0) __PYX_ERR(0, 12, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "dIdt.pyx":14
+  /* "src/dIdt.pyx":14
  * def pydEdt(q,p,e,Y,nv,ne):
  * 	return dEdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydLdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
  * 	return dLdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydCdt(q,p,e,Y,nv,ne):
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_4dIdt_3pydLdt, NULL, __pyx_n_s_dIdt); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 14, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_16pyAnalyticFluxes_3pydLdt, NULL, __pyx_n_s_pyAnalyticFluxes); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 14, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_pydLdt, __pyx_t_1) < 0) __PYX_ERR(0, 14, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "dIdt.pyx":16
+  /* "src/dIdt.pyx":16
  * def pydLdt(q,p,e,Y,nv,ne):
  * 	return dLdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydCdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
  * 	return dCdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydpdt(q,p,e,Y,nv,ne):
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_4dIdt_5pydCdt, NULL, __pyx_n_s_dIdt); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 16, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_16pyAnalyticFluxes_5pydCdt, NULL, __pyx_n_s_pyAnalyticFluxes); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 16, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_pydCdt, __pyx_t_1) < 0) __PYX_ERR(0, 16, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "dIdt.pyx":18
+  /* "src/dIdt.pyx":18
  * def pydCdt(q,p,e,Y,nv,ne):
  * 	return dCdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydpdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
  * 	return dpdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydedt(q,p,e,Y,nv,ne):
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_4dIdt_7pydpdt, NULL, __pyx_n_s_dIdt); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 18, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_16pyAnalyticFluxes_7pydpdt, NULL, __pyx_n_s_pyAnalyticFluxes); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 18, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_pydpdt, __pyx_t_1) < 0) __PYX_ERR(0, 18, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "dIdt.pyx":20
+  /* "src/dIdt.pyx":20
  * def pydpdt(q,p,e,Y,nv,ne):
  * 	return dpdt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydedt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
  * 	return dedt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydYdt(q,p,e,Y,nv,ne):
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_4dIdt_9pydedt, NULL, __pyx_n_s_dIdt); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 20, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_16pyAnalyticFluxes_9pydedt, NULL, __pyx_n_s_pyAnalyticFluxes); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 20, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_pydedt, __pyx_t_1) < 0) __PYX_ERR(0, 20, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "dIdt.pyx":22
+  /* "src/dIdt.pyx":22
  * def pydedt(q,p,e,Y,nv,ne):
  * 	return dedt8H_5PNe10(q,e,p,Y,nv,ne)
  * def pydYdt(q,p,e,Y,nv,ne):             # <<<<<<<<<<<<<<
  * 	return dYdt8H_5PNe10(q,e,p,Y,nv,ne)
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_4dIdt_11pydYdt, NULL, __pyx_n_s_dIdt); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 22, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_16pyAnalyticFluxes_11pydYdt, NULL, __pyx_n_s_pyAnalyticFluxes); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 22, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_pydYdt, __pyx_t_1) < 0) __PYX_ERR(0, 22, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "dIdt.pyx":3
+  /* "src/dIdt.pyx":3
  * 
  * 
  * cdef extern from "dIdt8H_5PNe10.h":             # <<<<<<<<<<<<<<
@@ -2771,11 +2771,11 @@ if (!__Pyx_RefNanny) {
   __Pyx_XDECREF(__pyx_t_1);
   if (__pyx_m) {
     if (__pyx_d) {
-      __Pyx_AddTraceback("init dIdt", __pyx_clineno, __pyx_lineno, __pyx_filename);
+      __Pyx_AddTraceback("init pyAnalyticFluxes", __pyx_clineno, __pyx_lineno, __pyx_filename);
     }
     Py_CLEAR(__pyx_m);
   } else if (!PyErr_Occurred()) {
-    PyErr_SetString(PyExc_ImportError, "init dIdt");
+    PyErr_SetString(PyExc_ImportError, "init pyAnalyticFluxes");
   }
   __pyx_L0:;
   __Pyx_RefNannyFinishContext();

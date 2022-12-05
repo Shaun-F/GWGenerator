@@ -8,16 +8,13 @@
 #include <gsl/gsl_roots.h>
 #include "Python.h"
 
-#ifdef __USE_OMP__
-#include "omp.h"
-#endif
-
 void throw_python_error(char* str_in, int status)
 {
     char str[1000];
     sprintf(str, "%s / Error code: %d", str_in, status);
     PyErr_SetString(PyExc_SystemError, str);
 }
+
 
 // Define elliptic integrals that use Mathematica's conventions
 double EllipticK(double k){
@@ -161,9 +158,7 @@ void KerrGeoConstantsOfMotion(double* E_out, double* L_out, double* Q_out, doubl
 
 void KerrGeoConstantsOfMotionVectorized(double* E_out, double* L_out, double* Q_out, double* a, double* p, double* e, double* x, int n)
 {
-    #ifdef __USE_OMP__
-    #pragma omp parallel for
-    #endif
+
     for (int i = 0; i < n; i += 1)
     {
         KerrGeoConstantsOfMotion(&E_out[i], &L_out[i], &Q_out[i], a[i], p[i], e[i], x[i]);
@@ -201,7 +196,7 @@ void KerrGeoMinoFrequencies(double* CapitalGamma_, double* CapitalUpsilonPhi_, d
     double r1, r2, r3, r4;
     KerrGeoRadialRoots(&r1, &r2, &r3, &r4, a, p, e, x, En, Q);
 
-    double Epsilon0 = pow(a, 2) * (1 - pow(En, 2))/pow(L, 2);
+    //double Epsilon0 = pow(a, 2) * (1 - pow(En, 2))/pow(L, 2);
     double zm = 1 - pow(x, 2);
     double a2zp =(pow(L, 2) + pow(a, 2) * (-1 + pow(En, 2)) * (-1 + zm))/( (-1 + pow(En, 2)) * (-1 + zm));
 
@@ -246,6 +241,8 @@ void KerrGeoCoordinateFrequencies(double* OmegaPhi_, double* OmegaTheta_, double
 
 }
 
+
+/*
 void SchwarzschildGeoCoordinateFrequencies(double* OmegaPhi, double* OmegaR, double p, double e)
 {
 
@@ -269,9 +266,7 @@ void KerrGeoCoordinateFrequenciesVectorized(double* OmegaPhi_, double* OmegaThet
                               double* a, double* p, double* e, double* x, int length)
 {
 
-    #ifdef __USE_OMP__
-    #pragma omp parallel for
-    #endif
+
     for (int i = 0; i < length; i += 1)
     {
         if (a[i] != 0.0)
@@ -451,79 +446,7 @@ void get_separatrix_vector(double* separatrix, double* a, double* e, double* x, 
     }
 
 }
-
-double Y_to_xI_eq(double x, void *params_in)
-{
-    struct params_holder* params = (struct params_holder*)params_in;
-
-    double a = params->a;
-    double p = params->p;
-    double e = params->e;
-    double Y = params->Y;
-
-    double E, L, Q;
-
-    // get constants of motion
-    KerrGeoConstantsOfMotion(&E, &L, &Q, a, p, e, x);
-
-    double Y_ = L / sqrt(pow(L, 2) + Q);
-
-    return Y - Y_;
-}
-
-#define YLIM 0.998
-double Y_to_xI(double a, double p, double e, double Y)
-{
-    // TODO: check this
-    if (abs(Y) > YLIM) return Y;
-    // fills in x with 0.0
-    struct params_holder params = {a, p, e, 0.0, Y};
-    double x_lo, x_hi;
-
-    // set limits
-    // assume Y is close to x
-    x_lo = Y - 0.1;
-    x_hi = Y + 0.1;
-
-    x_lo = x_lo > -YLIM? x_lo : -YLIM;
-    x_hi = x_hi < YLIM? x_hi : YLIM;
-
-    double x = solver (&params, &Y_to_xI_eq, x_lo, x_hi);
-
-    return x;
-}
-
-void Y_to_xI_vector(double* x, double* a, double* p, double* e, double* Y, int length)
-{
-
-    #ifdef __USE_OMP__
-    #pragma omp parallel for
-    #endif
-    for (int i = 0; i < length; i += 1)
-    {
-        x[i] = Y_to_xI(a[i], p[i], e[i], Y[i]);
-    }
-
-}
-
-
-void set_threads(int num_threads)
-{
-    omp_set_num_threads(num_threads);
-}
-
-int get_threads()
-{
-    int num_threads;
-    #pragma omp parallel for
-    for (int i = 0; i < 1; i +=1)
-    {
-        num_threads = omp_get_num_threads();
-    }
-
-    return num_threads;
-}
-
+*/
 
 
 
