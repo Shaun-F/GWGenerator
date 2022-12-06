@@ -17,8 +17,8 @@ cpu_extensions=dict(
 
 
 frequency_ext = Extension(
-            "pyUtility",
-            sources=["src/Utility.cc", "src/Utility.pyx"],
+            "pyKerrFreqs",
+            sources=["src/Utility.cc", "src/UtilityFuncs.pyx"],
             **cpu_extensions
 )
 

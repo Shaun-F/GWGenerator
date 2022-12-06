@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 import os
 from GWGen.NumericalData import *
-from .AnalyticFEWFluxes import *
 
 class FluxFunction():
     def __init__(self,name="analytic"):

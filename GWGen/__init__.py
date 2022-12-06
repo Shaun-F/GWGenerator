@@ -1,5 +1,7 @@
-from .WFGenerator import *
-from .Utils import *
-from .UndressedFluxes import *
-from .DressedFluxes import *
-from .NumericalData import *
+"""
+from GWGen.WFGenerator import *
+from GWGen.Utils import *
+from GWGen.UndressedFluxes import *
+from GWGen.DressedFluxes import *
+from GWGen.NumericalData import *
+"""
