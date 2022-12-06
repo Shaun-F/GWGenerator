@@ -6,6 +6,8 @@ GWGen.egg-info/SOURCES.txt
 GWGen.egg-info/dependency_links.txt
 GWGen.egg-info/top_level.txt
 src/Utility.cc
+src/UtilityFuncs.cpp
 src/UtilityFuncs.pyx
+src/dIdt.cpp
 src/dIdt.pyx
 src/dIdt8H_5PNe10.cc

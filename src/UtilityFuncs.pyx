@@ -1,8 +1,4 @@
-from libcpp.string cimport string
-from libcpp cimport bool
-
-
-cdef extern from "../include/Utility.hh":
+cdef extern from "Utility.hh":
     void KerrGeoCoordinateFrequencies(double* OmegaPhi_, double* OmegaTheta_, double* OmegaR_,
                               double a, double p, double e, double x);
 
