@@ -1,4 +1,4 @@
-from scipy.integrate import DOP853
+from scipy.integrate import solve_ivp
 from mpmath import *
 mp.dps=25
 mp.pretty=True
@@ -17,7 +17,7 @@ from few.utils.baseclasses import TrajectoryBase
 import astropy.units as unit;
 import astropy.constants as cons
 
-SEPARATRIXCUTOFF=0.1;
+SEPARATRIXDELTA=0.2;
 
 class PN(Kerr, FluxFunction):
 
@@ -68,15 +68,15 @@ class PN(Kerr, FluxFunction):
 		self.dedpUnit = (self.epsilon*cons.c**4/cons.G).decompose()
 		self.dedeUnit = (self.SecondaryMass*unit.Msun*cons.c**2).decompose()
 
-		self.__separatrix_cutoff=6
-
+		self.__SEPARATRIX=6+SEPARATRIXDELTA
+		self.__SEPARATRIX_CUT =	self.__SEPARATRIX+SEPARATRIXDELTA
 	@property
 	def separatrix_cutoff(self):
-		return self.__separatrix_cutoff
+		return self.__SEPARATRIX_CUT
 
 	@separatrix_cutoff.setter
-	def separatrix_cutoff(self,newval):
-		self.__separatrix_cutoff=newval
+	def separatrix_cutoff(self, newval):
+		self.__SEPARATRIX_CUT=newval
 
 	def __call__(self, t, y):
 		"""
@@ -95,13 +95,12 @@ class PN(Kerr, FluxFunction):
 		radial_phase = float(y[3])
 
 		#setup guard for bad integration steps
-
 		if ecc>=1.0 or ecc<0 or semimaj<self.separatrix_cutoff:
 			return [0.0, 0.0,0.0,0.0]
 
 		if ecc==0.0:
 			#if eccentricity is zero, replace it by small number to guard against poles in integrals of motion
-			ecc=1e-16
+			ecc=1e-10
 		try:
 			# Orbital Frequency
 			orb_freqs = self.OrbitFrequencies(ecc,semimaj,1);
@@ -122,14 +121,27 @@ class PN(Kerr, FluxFunction):
 			#Angular Momentum Corrector
 			Lcorr = self.LFluxModification(t*self.SMBHMass*MTSUN_SI, ecc, semimaj)
 		except TypeError:
-			raise ValueError("ERROR: type error in frequency and flux generation as (e,p)=({0},{1})".format(ecc,semimaj))
+			print("ERROR: type error in frequency and flux generation as (e,p)=({0},{1})".format(ecc,semimaj))
 		except SystemError as errmsg:
-			raise SystemError("Error at parameter point (p,e)=({0},{1}). \n {2}".format(semimaj, ecc, errmsg))
+			print("Error at parameter point (p,e)=({0},{1}). \n {2}".format(semimaj,ecc,errmsg))
+			self.IntegratorRun=False
+			self.IntegratorExitReason=errmsg
+			return [0.,0.,0.,0.]
+
+		print("EdotN {0}    EdotN>0 {1}".format(EdotN,EdotN>0))
+
+		if EdotN>0:
+			self.IntegratorRun=False
+			self.IntegratorExitReason="PN Energy flux larger than zero! Breaking."
+		elif LdotN>0:
+			self.IntegratorRun=False
+			self.IntegratorExitReason="PN Angular Momentum flux larger than zero! Breaking."
 
 
 		#(see: http://arxiv.org/abs/gr-qc/0702054, eq 4.3)
 		Edot = EdotN + Ecorr #units: kg m**2/s**3
 		Ldot = LdotN + Lcorr #units: kg m**2/s**2
+
 
 		dldp = self.dLdp()(ecc,semimaj)*self.dldpUnit
 		dlde = self.dLde()(ecc,semimaj)*self.dldeUnit
@@ -144,12 +156,8 @@ class PN(Kerr, FluxFunction):
 			edot=0
 		else:
 			edot = (dldp*Edot - dedp*Ldot)/norm
-		if EdotN>0:
-			self.IntegratorRun=False
-			self.IntegratorExitReason="PN Energy flux larger than zero! Breaking."
-		elif LdotN>0:
-			self.IntegratorRun=False
-			self.IntegratorExitReason="PN Angular Momentum flux larger than zero! Breaking."
+
+		print("1 Edot {0}     EdotN {1}".format(Edot, EdotN))
 
 
 		#adimensionlize
@@ -167,6 +175,14 @@ class PN(Kerr, FluxFunction):
 		return dydt
 
 class PNTraj(TrajectoryBase):
+	def __init__(self):
+		self.__integration_method = "DOP853"
+		self.__dense_output=True
+		self.__SEPARATRIX_DELTA=SEPARATRIXDELTA
+		self.__exit_reason=""
+
+		self.time_resolution=100 #seconds
+
 
 	def get_inspiral(self, M, mu, a, p0, e0, x0, T=1.0,npoints=10, **kwargs):
 		"""
@@ -185,68 +201,115 @@ class PNTraj(TrajectoryBase):
 		#boundary values
 		y0 = [p0, e0, 0.0, 0.0] #zero mean anomaly initially
 
+		#compute separatrix of initial parameters
+		self.__initial_separatrix = get_separatrix(float(a), float(e0), 1.)
+		self.__SEPARATRIX_CUTOFF = self.__initial_separatrix + self.__SEPARATRIX_DELTA
+
 
 		#MTSUN_SI converts solar masses to seconds and is equal to G/(c^3)
 		#YRSID_SI converts years into seconds
-
-		T = T * YRSID_SI / (M * MTSUN_SI)
+		t_start = 0
+		t_stop = T * YRSID_SI / (M * MTSUN_SI)
+		t_res = 1/365 * YRSID_SI / (M * MTSUN_SI)
 
 		Msec = M*MTSUN_SI
 
 		#PN evaluator
 		epsilon = float(mu/M)
 		self.PNEvaluator = PN(M,mu,bhspin=a, DeltaEFlux = self.DeltaEFlux, DeltaLFlux = self.DeltaLFlux, FluxName=self.FluxName)
-		integrator = DOP853(self.PNEvaluator, 0.0, y0, T, max_step=T/npoints) #Explicit Runge-Kutta of order 8
-		#arrays to hold output values from integrator
-		t_out, p_out, e_out = [0.], [p0], [e0]
-		Phi_phi_out, Phi_r_out = [0.], [0.]
+		self.PNEvaluator.separatrix_cutoff = self.__SEPARATRIX_CUTOFF
 
 		# run integrator down to T or separatrix
-		run=True
-		exit_reason=""
-		while integrator.t < T and run:
-			integrator.step()
-			p, e, Phi_phi, Phi_r = integrator.y
-			t_out.append(integrator.t * Msec)
-			p_out.append(p)
-			e_out.append(e)
-			Phi_phi_out.append(Phi_phi)
-			Phi_r_out.append(Phi_r)
+		t_span = (t_start, t_stop)
+		t_dom = np.arange(t_start, t_stop, t_res)
+		def __integration_event_tracker(t,y_vec):
+			p,e=y_vec[:2]
+			if e>=1.0 or e<0.:
+				self.__exit_reason = "Eccentricity exceeded bounds"
+				return 0
+			elif p<=self.__SEPARATRIX_CUTOFF:
+				self.__exit_reason="Separatrix reached!"
+				return 0
+			elif not self.PNEvaluator.IntegratorRun:
+				self.__exit_reason = self.PNEvaluator.IntegratorExitReason
+				return 0
+			else:
+				return 1
+		__integration_event_tracker.terminal=True
 
-			#catch breaks from integrand function
-			run=self.PNEvaluator.IntegratorRun
-			exit_reason=self.PNEvaluator.IntegratorExitReason
+		result = solve_ivp(self.PNEvaluator,
+							t_span, #time range
+							y0, #initial values
+							method=self.__integration_method, #integration method
+							t_eval = t_dom, #time points to evaluate trajectory
+							dense_output=self.__dense_output, #compute interpolation over points
+							events = __integration_event_tracker #track boundaries of integration
+						)
 
-			#catch separatrix crossing and halt integration
-			if (p - get_separatrix(float(a),float(e),float(x0)))<SEPARATRIXCUTOFF:
-				run=False
-				exit_reason="Passed separatrix"
+		t_out = result["t"]
+		p_out = result["y"][0]
+		e_out = result["y"][1]
+		Phi_phi_out = result["y"][2]
+		Phi_r_out = result["y"][3]
 
-			if e<0 or e>=1:
-				run=False
-				exit_reason="Ecccentricity exceeded bounds"
-			if p_out[-1]>=p_out[-2]:
-				run=False
-				exit_reason="Semi-latus rectum failed to decrease. Possibly beyond validity of PN expressions for fluxes or proca flux drastically exceeds GW flux."
+		if self.__exit_reason!="":
+			print("Integration halted before ending time. Reasons: {0}".format(self.__exit_reason))
+		else:
+			self.__exit_reason = "Integration reached boundary. Boundary location t = {0:0.2f}".format(t_out[-1])
 
+		if self.__dense_output:
+			new_time_domain = np.arange(t_out[0], t_out[-1], self.time_resolution)
+			interpolationfunction = result["sol"]
+			new_data = interpolationfunction(new_time_domain)
+			t_out = new_time_domain
+			p_out, e_out, Phi_phi_out, Phi_r_out = new_data
 
+		#add polar data
+		Phi_theta = (0)*np.ones_like(Phi_phi_out)
+		x = np.ones_like(Phi_theta)
 
-
-		if exit_reason!="":
-			print("Integration halted before ending time. Reasons: {0}".format(exit_reason))
-
-		#read data
+		#cast to array objects
 		t = np.asarray(t_out)
 		p = np.asarray(p_out)
 		e = np.asarray(e_out)
 		Phi_phi = np.asarray(Phi_phi_out)
 		Phi_r = np.asarray(Phi_r_out)
 
-		#add polar data
-		Phi_theta = (0)*np.ones_like(Phi_phi)
-		x = np.ones_like(Phi_theta)
-
 		return (t, p, e, x, Phi_phi, Phi_theta, Phi_r)
+
+	@property
+	def integration_method(self):
+		return self.__integration_method
+	@integration_method.setter
+	def integration_method(self,newmeth):
+		self.__integration_method=newmeth
+
+	@property
+	def dense_output(self):
+		return self.__dense_output
+	@dense_output.setter
+	def dense_output(self,newmeth):
+		self.__dense_output=newmeth
+
+	#immutable property
+	@property
+	def exit_reason(self):
+		return self.__exit_reason
+
+	@property
+	def separatrix_delta(self):
+		return self.__SEPARATRIX_DELTA
+	@separatrix_delta.setter
+	def separatrix_delta(self,newval):
+		self.__SEPARATRIX_DELTA=newval
+
+	@property
+	def separatrix_cut(self):
+		if hasattr(self, "_PNTraj__SEPARATRIX_CUTOFF"):
+			return self.__SEPARATRIX_CUTOFF
+		else:
+			print("Run trajectory method to generate this property")
+			return None
 
 
 

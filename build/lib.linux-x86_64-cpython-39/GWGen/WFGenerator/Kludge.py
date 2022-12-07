@@ -1,4 +1,4 @@
-from scipy.integrate import DOP853
+from scipy.integrate import solve_ivp
 from mpmath import *
 mp.dps=25
 mp.pretty=True
@@ -68,6 +68,15 @@ class PN(Kerr, FluxFunction):
 		self.dedpUnit = (self.epsilon*cons.c**4/cons.G).decompose()
 		self.dedeUnit = (self.SecondaryMass*unit.Msun*cons.c**2).decompose()
 
+		self.__separatrix_cutoff=6
+	@property
+	def separatrix_cutoff(self):
+		return self.__separatrix_cutoff
+
+	@separatrix_cutoff.setter
+	def separatrix_cutoff(self, newval):
+		self.__separatrix_cutoff=newval
+
 	def __call__(self, t, y):
 		"""
 		y is array holding parameters to integrate y=[p,e,Phi_phi, Phi_r]
@@ -85,7 +94,7 @@ class PN(Kerr, FluxFunction):
 		radial_phase = float(y[3])
 
 		#setup guard for bad integration steps
-		if ecc>=1.0  or (semimaj-get_separatrix(self.a, ecc,1.)) < SEPARATRIXCUTOFF or ecc<0:
+		if ecc>=1.0 or ecc<0 or semimaj<self.separatrix_cutoff:
 			return [0.0, 0.0,0.0,0.0]
 
 		if ecc==0.0:
@@ -111,7 +120,9 @@ class PN(Kerr, FluxFunction):
 			#Angular Momentum Corrector
 			Lcorr = self.LFluxModification(t*self.SMBHMass*MTSUN_SI, ecc, semimaj)
 		except TypeError:
-			raise ValueError("ERROR: type error in frequency and flux generation as (e,p)=({0},{1})".format(ecc,semimaj))
+			print("ERROR: type error in frequency and flux generation as (e,p)=({0},{1})".format(ecc,semimaj))
+		except SystemError as errmsg:
+			raise SystemError("Error at parameter point (p,e)=({0},{1}). \n {2}".format(semimaj,ecc,errmsg))
 
 
 		#(see: http://arxiv.org/abs/gr-qc/0702054, eq 4.3)
@@ -154,6 +165,14 @@ class PN(Kerr, FluxFunction):
 		return dydt
 
 class PNTraj(TrajectoryBase):
+	def __init__(self):
+		self.__integration_method = "DOP853"
+		self.__dense_output=True
+		self.__SEPARATRIX_CUTOFF=SEPARATRIXCUTOFF
+		self.__exit_reason=""
+
+		self.time_resolution=100 #seconds
+
 
 	def get_inspiral(self, M, mu, a, p0, e0, x0, T=1.0,npoints=10, **kwargs):
 		"""
@@ -172,68 +191,97 @@ class PNTraj(TrajectoryBase):
 		#boundary values
 		y0 = [p0, e0, 0.0, 0.0] #zero mean anomaly initially
 
+		#compute separatrix of initial parameters
+		self.__initial_separatrix = get_separatrix(float(a), float(e), 1.)
 
 		#MTSUN_SI converts solar masses to seconds and is equal to G/(c^3)
 		#YRSID_SI converts years into seconds
-
-		T = T * YRSID_SI / (M * MTSUN_SI)
+		t_start = 0
+		t_stop = T * YRSID_SI / (M * MTSUN_SI)
+		t_res = 1/365 * YRSID_SI / (M * MTSUN_SI)
 
 		Msec = M*MTSUN_SI
 
 		#PN evaluator
 		epsilon = float(mu/M)
 		self.PNEvaluator = PN(M,mu,bhspin=a, DeltaEFlux = self.DeltaEFlux, DeltaLFlux = self.DeltaLFlux, FluxName=self.FluxName)
-		integrator = DOP853(self.PNEvaluator, 0.0, y0, T, max_step=T/npoints) #Explicit Runge-Kutta of order 8
-		#arrays to hold output values from integrator
-		t_out, p_out, e_out = [0.], [p0], [e0]
-		Phi_phi_out, Phi_r_out = [0.], [0.]
-
 		# run integrator down to T or separatrix
-		run=True
-		exit_reason=""
-		while integrator.t < T and run:
-			integrator.step()
-			p, e, Phi_phi, Phi_r = integrator.y
-			t_out.append(integrator.t * Msec)
-			p_out.append(p)
-			e_out.append(e)
-			Phi_phi_out.append(Phi_phi)
-			Phi_r_out.append(Phi_r)
+		t_span = (t_start, t_stop)
+		t_dom = np.arange(t_start, t_stop, t_res)
+		def __integration_event_tracker(t,y_vec):
+			p,e=y_vec[:2]
+			if e>=1.0 or e<0.:
+				self.__exit_reason = "Eccentricity exceeded bounds"
+				return 0
+			if p<self.__SEPARATRIX_CUTOFF+self.__initial_separatrix:
+				self.__exit_reason="Separatrix reached!"
+				return 0
+			return 1
+		__integration_event_tracker.terminal=True
 
-			#catch breaks from integrand function
-			run=self.PNEvaluator.IntegratorRun
-			exit_reason=self.PNEvaluator.IntegratorExitReason
+		result = solve_ivp(self.PNEvaluator,
+							t_span, #time range
+							y0, #initial values
+							method=self.__integration_method, #integration method
+							t_eval = t_dom, #time points to evaluate trajectory
+							dense_output=self.__dense_output, #compute interpolation over points
+							events = __integration_event_tracker #track boundaries of integration
+						)
 
-			#catch separatrix crossing and halt integration
-			if (p - get_separatrix(float(a),float(e),float(x0)))<SEPARATRIXCUTOFF:
-				run=False
-				exit_reason="Passed separatrix"
+		t_out = result["t"]
+		p_out = result["y"][0]
+		e_out = result["y"][1]
+		Phi_phi_out = result["y"][2]
+		Phi_r_out = result["y"][3]
 
-			if e<0 or e>=1:
-				run=False
-				exit_reason="Ecccentricity exceeded bounds"
-			if p_out[-1]>=p_out[-2]:
-				run=False
-				exit_reason="Semi-latus rectum failed to decrease. Possibly beyond validity of PN expressions for fluxes or proca flux drastically exceeds GW flux."
-
-
-
-
-		if exit_reason!="":
+		if self.__exit_reason!="":
 			print("Integration halted before ending time. Reasons: {0}".format(exit_reason))
 
-		#read data
+		if self.__dense_output:
+			new_time_domain = np.arange(t_out[0], t_out[-1], self.time_resolution)
+			interpolationfunction = result["sol"]
+			new_data = interpolationfunction(new_time_domain)
+			t_out = new_time_domain
+			p_out, e_out, Phi_phi_out, Phi_r_out = new_data
+
+		#add polar data
+		Phi_theta = (0)*np.ones_like(y[2])
+		x = np.ones_like(Phi_theta)
+
+		#cast to array objects
 		t = np.asarray(t_out)
 		p = np.asarray(p_out)
 		e = np.asarray(e_out)
 		Phi_phi = np.asarray(Phi_phi_out)
 		Phi_r = np.asarray(Phi_r_out)
 
-		#add polar data
-		Phi_theta = (0)*np.ones_like(Phi_phi)
-		x = np.ones_like(Phi_theta)
-
 		return (t, p, e, x, Phi_phi, Phi_theta, Phi_r)
+
+	@property
+	def integration_method(self):
+		return self.__integration_method
+	@integration_method.setter
+	def integration_method(self,newmeth):
+		self.__integration_method=newmeth
+
+	@property
+	def dense_output(self):
+		return self.__dense_output
+	@dense_output.setter
+	def dense_output(self,newmeth):
+		self.__dense_output=newmeth
+
+	#immutable property
+	@property
+	def exit_reason(self):
+		return self.__exit_reason
+
+	@property
+	def separatrix_cut(self):
+		return self.__SEPARATRIX_CUTOFF
+	@separatrix_cut.setter
+	def separatrix_cut(self,newval):
+		self.__SEPARATRIX_CUTOFF=newval
 
 
 
