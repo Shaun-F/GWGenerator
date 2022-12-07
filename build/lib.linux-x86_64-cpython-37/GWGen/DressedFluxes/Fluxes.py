@@ -10,7 +10,7 @@ import astropy.units as unit
 from GWGen.Utils import *
 import re
 
-pathToSolutionSet = os.path.abspath(os.path.dirname(__file__))+'/../../Analytic_Flux/ProcaEnDen/';
+pathToSolutionSet = os.path.abspath(os.path.dirname(__file__))+'/../../Analytic_Flux/ProcaEnDenCSVData/';
 
 class ProcaSolution():
 	def __init__(self, BHMass, BHSpin, ProcaMass, BosonSpin=1,CloudModel = "relativistic",units="physical"):
@@ -65,53 +65,54 @@ class ProcaSolution():
 		return ret
 
 	def FractionalEnergyDensity(self, r):
-		rstart = self.radial_data[0]
-		rmax = self.radial_data[-1]
-		thstart = self.theta_data[0]
-		thstop = self.theta_data[-1]
+		rstart = self.coorddata[0][0]
+		rmax = self.coorddata[0].dropna().values[-1]
+		thstart = self.coorddata[1][0]
+		thstop = self.coorddata[1].dropna().values[-1]
 		toten = lambda r: self.enden.integral(rstart, r, thstart, thstop)
 		val = toten(r)/toten(rmax)
 		return val
 
-	def GetEnergyDensity(self,mode=1,overtone=0):
-		enden = self._generate_interp(self.alpha,mode=1,overtone=0)
+	def GetEnergyDensity(self):
+		coordvals = self._get_closest_alpha_filename(self.alpha)
+		enden = self._generate_interp(coordvals)
 
 		return enden
 
-	def _get_closest_alpha_data(self, alpha,mode=1,overtone=0):
-
+	def _get_closest_alpha_filename(self, alpha):
 
 		#extract alpha value from filename
-		allfilenames = np.array(os.listdir(pathToSolutionSet))
-
-		modeovertonedata = allfilenames[[i[-21:-4]=="Mode_"+str(1)+"_Overtone_"+str(0) for i in allfilenames]]
-
+		allfilenames = os.listdir(pathToSolutionSet)
 		alpha_regex = re.compile('Alpha_\d+_\d+')
-		alpha_matches = [alpha_regex.findall(string) for string in modeovertonedata]
+		alpha_matches = [alpha_regex.findall(string) for string in allfilenames]
 		value_regex = re.compile('\d+')
 		numdoms = [list(map(float, value_regex.findall(st[0]))) for st in alpha_matches]
 		alphas = [i[0]/i[1] for i in numdoms]
 
 		#find closest alpha value to input parameter
 		tmp = np.abs(alpha-alphas)
-		self.MatchedAlpha = alpha-tmp.min()
 		indicies = np.where(tmp==tmp.min())
-		result = np.array(modeovertonedata)[indicies][0]
+		result = np.array(allfilenames)[indicies]
 
-		#import data
-		data = np.load(pathToSolutionSet+result)
+		#get coordinate and value data
+		sorting_inx = [st[13:19]=='COORDS' for st in result]
+		coordret = result[sorting_inx][0]
+		valueret = np.setdiff1d(result, coordret)[0]
 
-		return data
+		#return dictionary
+		return_value = {"COORDS":coordret, "VALUES":valueret}
 
-	def _generate_interp(self, alpha,mode=1,overtone=0):
-		data = self._get_closest_alpha_data(alpha,mode=mode, overtone=overtone)
+		return return_value
 
-		self.radial_data = data["RadialData"]
-		self.theta_data = data["ThetaData"]
-		energy_data = data["EnergyData"]
+	def _generate_interp(self, coordvaluefilenamedict):
+		self.coorddata = pd.read_csv(pathToSolutionSet+coordvaluefilenamedict["COORDS"], header=None, na_values="None")
+		self.valuedata = pd.read_csv(pathToSolutionSet+coordvaluefilenamedict["VALUES"], header=None, na_values="None")
+
+		radial_data = self.coorddata[0].dropna()
+		theta_data = self.coorddata[1].dropna()
 
 
-		interp = spint.RectBivariateSpline(self.radial_data, self.theta_data, energy_data)
+		interp = spint.RectBivariateSpline(radial_data, theta_data, self.valuedata)
 		return interp
 
 

@@ -11,4 +11,4 @@ def pyKerrGeoCoordinateFrequencies(double a, double p, double e, double x):
 
     KerrGeoCoordinateFrequencies(&OmegaPhi, &OmegaTheta, &OmegaR, a, p, e, x)
 
-    return (OmegaPhi, OmegaTheta, OmegaR)
+    return {"OmegaPhi":OmegaPhi, "OmegaTheta":OmegaTheta, "OmegaR":OmegaR}

@@ -37,7 +37,13 @@ setup(
     version="0.1",
     description="Calculating modified waveform due to precense of Proca cloud around spinning black hole",
     author="Shaun Fell",
-    packages=["GWGen"],
+    packages=["GWGen",
+                "GWGen.WFGenerator",
+                "GWGen.Utils",
+                "GWGen.UndressedFluxes",
+                "GWGen.NumericalData",
+                "GWGen.DressedFluxes"
+                ],
     ext_modules=extensions,
 
 )

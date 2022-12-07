@@ -1317,8 +1317,6 @@ static PyObject *__pyx_pf_11pyKerrFreqs_pyKerrGeoCoordinateFrequencies(CYTHON_UN
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
-  PyObject *__pyx_t_3 = NULL;
-  PyObject *__pyx_t_4 = NULL;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -1356,35 +1354,32 @@ static PyObject *__pyx_pf_11pyKerrFreqs_pyKerrGeoCoordinateFrequencies(CYTHON_UN
  * 
  *     KerrGeoCoordinateFrequencies(&OmegaPhi, &OmegaTheta, &OmegaR, a, p, e, x)             # <<<<<<<<<<<<<<
  * 
- *     return (OmegaPhi, OmegaTheta, OmegaR)
+ *     return {"OmegaPhi":OmegaPhi, "OmegaTheta":OmegaTheta, "OmegaR":OmegaR}
  */
   KerrGeoCoordinateFrequencies((&__pyx_v_OmegaPhi), (&__pyx_v_OmegaTheta), (&__pyx_v_OmegaR), __pyx_v_a, __pyx_v_p, __pyx_v_e, __pyx_v_x);
 
   /* "src/UtilityFuncs.pyx":14
  *     KerrGeoCoordinateFrequencies(&OmegaPhi, &OmegaTheta, &OmegaR, a, p, e, x)
  * 
- *     return (OmegaPhi, OmegaTheta, OmegaR)             # <<<<<<<<<<<<<<
+ *     return {"OmegaPhi":OmegaPhi, "OmegaTheta":OmegaTheta, "OmegaR":OmegaR}             # <<<<<<<<<<<<<<
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_OmegaPhi); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 14, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 14, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_OmegaPhi); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 14, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_OmegaPhi, __pyx_t_2) < 0) __PYX_ERR(0, 14, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_2 = PyFloat_FromDouble(__pyx_v_OmegaTheta); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 14, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_OmegaR); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 14, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = PyTuple_New(3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 14, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_GIVEREF(__pyx_t_1);
-  PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
-  __Pyx_GIVEREF(__pyx_t_2);
-  PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_2);
-  __Pyx_GIVEREF(__pyx_t_3);
-  PyTuple_SET_ITEM(__pyx_t_4, 2, __pyx_t_3);
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_OmegaTheta, __pyx_t_2) < 0) __PYX_ERR(0, 14, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_OmegaR); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 14, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_OmegaR, __pyx_t_2) < 0) __PYX_ERR(0, 14, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
-  __pyx_t_2 = 0;
-  __pyx_t_3 = 0;
-  __pyx_r = __pyx_t_4;
-  __pyx_t_4 = 0;
   goto __pyx_L0;
 
   /* "src/UtilityFuncs.pyx":6
@@ -1399,8 +1394,6 @@ static PyObject *__pyx_pf_11pyKerrFreqs_pyKerrGeoCoordinateFrequencies(CYTHON_UN
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_XDECREF(__pyx_t_4);
   __Pyx_AddTraceback("pyKerrFreqs.pyKerrGeoCoordinateFrequencies", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
