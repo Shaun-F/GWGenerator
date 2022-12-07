@@ -68,16 +68,6 @@ class PN(Kerr, FluxFunction):
 		self.dedpUnit = (self.epsilon*cons.c**4/cons.G).decompose()
 		self.dedeUnit = (self.SecondaryMass*unit.Msun*cons.c**2).decompose()
 
-		self.__separatrix_cutoff=6
-
-	@property
-	def separatrix_cutoff(self):
-		return self.__separatrix_cutoff
-
-	@separatrix_cutoff.setter
-	def separatrix_cutoff(self,newval):
-		self.__separatrix_cutoff=newval
-
 	def __call__(self, t, y):
 		"""
 		y is array holding parameters to integrate y=[p,e,Phi_phi, Phi_r]
@@ -95,8 +85,7 @@ class PN(Kerr, FluxFunction):
 		radial_phase = float(y[3])
 
 		#setup guard for bad integration steps
-
-		if ecc>=1.0 or ecc<0 or semimaj<self.separatrix_cutoff:
+		if ecc>=1.0  or (semimaj-get_separatrix(self.a, ecc,1.)) < SEPARATRIXCUTOFF or ecc<0:
 			return [0.0, 0.0,0.0,0.0]
 
 		if ecc==0.0:
@@ -123,8 +112,6 @@ class PN(Kerr, FluxFunction):
 			Lcorr = self.LFluxModification(t*self.SMBHMass*MTSUN_SI, ecc, semimaj)
 		except TypeError:
 			raise ValueError("ERROR: type error in frequency and flux generation as (e,p)=({0},{1})".format(ecc,semimaj))
-		except SystemError as errmsg:
-			raise SystemError("Error at parameter point (p,e)=({0},{1}). \n {2}".format(semimaj, ecc, errmsg))
 
 
 		#(see: http://arxiv.org/abs/gr-qc/0702054, eq 4.3)
