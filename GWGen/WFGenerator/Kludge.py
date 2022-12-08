@@ -70,6 +70,8 @@ class PN(Kerr, FluxFunction):
 
 		self.__SEPARATRIX=6+SEPARATRIXDELTA
 		self.__SEPARATRIX_CUT =	self.__SEPARATRIX+SEPARATRIXDELTA
+		self.__EdotN = -100 #set inital value to some random negative number for integration termination event handling
+		self.__LdotN = -100 #set inital value to some random negative number for integration termination event handling
 	@property
 	def separatrix_cutoff(self):
 		return self.__SEPARATRIX_CUT
@@ -77,6 +79,14 @@ class PN(Kerr, FluxFunction):
 	@separatrix_cutoff.setter
 	def separatrix_cutoff(self, newval):
 		self.__SEPARATRIX_CUT=newval
+
+	@property
+	def EdotN(self):
+		return self.__EdotN
+
+	@property
+	def LdotN(self):
+		return self.__LdotN
 
 	def __call__(self, t, y):
 		"""
@@ -110,10 +120,11 @@ class PN(Kerr, FluxFunction):
 			Omega_r = orb_freqs["OmegaR"];
 
 			#Energy flux
-			EdotN = self.UndressedEFlux(ecc,semimaj) #this is negative
+			## set fluxes to instance attributes for integration termination events
+			self.__EdotN = self.UndressedEFlux(ecc,semimaj) #this is negative
 
 			#Angular momentum
-			LdotN = self.UndressedLFlux(ecc,semimaj) #this is negative
+			self.__LdotN = self.UndressedLFlux(ecc,semimaj) #this is negative
 
 			#Energy correction
 			Ecorr = self.EFluxModification(t*self.SMBHMass*MTSUN_SI, ecc, semimaj)
@@ -128,19 +139,17 @@ class PN(Kerr, FluxFunction):
 			self.IntegratorExitReason=errmsg
 			return [0.,0.,0.,0.]
 
-		print("EdotN {0}    EdotN>0 {1}".format(EdotN,EdotN>0))
-
-		if EdotN>0:
+		if self.__EdotN>0:
 			self.IntegratorRun=False
 			self.IntegratorExitReason="PN Energy flux larger than zero! Breaking."
-		elif LdotN>0:
+		elif self.__LdotN>0:
 			self.IntegratorRun=False
 			self.IntegratorExitReason="PN Angular Momentum flux larger than zero! Breaking."
 
 
 		#(see: http://arxiv.org/abs/gr-qc/0702054, eq 4.3)
-		Edot = EdotN + Ecorr #units: kg m**2/s**3
-		Ldot = LdotN + Lcorr #units: kg m**2/s**2
+		Edot = self.__EdotN + Ecorr #units: kg m**2/s**3
+		Ldot = self.__LdotN + Lcorr #units: kg m**2/s**2
 
 
 		dldp = self.dLdp()(ecc,semimaj)*self.dldpUnit
@@ -157,7 +166,6 @@ class PN(Kerr, FluxFunction):
 		else:
 			edot = (dldp*Edot - dedp*Ldot)/norm
 
-		print("1 Edot {0}     EdotN {1}".format(Edot, EdotN))
 
 
 		#adimensionlize
@@ -221,29 +229,59 @@ class PNTraj(TrajectoryBase):
 
 		# run integrator down to T or separatrix
 		t_span = (t_start, t_stop)
-		t_dom = np.arange(t_start, t_stop, t_res)
-		def __integration_event_tracker(t,y_vec):
-			p,e=y_vec[:2]
-			if e>=1.0 or e<0.:
+		self.t_dom = np.arange(t_start, t_stop, t_res)
+
+		def __integration_event_tracker_eccentricity(_, y_vec):
+			e = y_vec[1]
+			#define a function which is has a zero at e=1, a zero at the smallest negative float, and positive on the range [0,1)
+			eps = np.finfo(float).eps
+			x_shift = (1-eps**2)/(2*(eps+1))
+			y_shift = (eps+x_shift)**2
+			res = y_shift - (e-x_shift)**2
+			if res<=0:
 				self.__exit_reason = "Eccentricity exceeded bounds"
-				return 0
-			elif p<=self.__SEPARATRIX_CUTOFF:
-				self.__exit_reason="Separatrix reached!"
-				return 0
-			elif not self.PNEvaluator.IntegratorRun:
-				self.__exit_reason = self.PNEvaluator.IntegratorExitReason
-				return 0
-			else:
-				return 1
-		__integration_event_tracker.terminal=True
+			return res
+
+		def __integration_event_tracker_semilatus_rectum(_, y_vec):
+			p = y_vec[0]
+			res = p-self.__SEPARATRIX_CUTOFF
+			if res<=0:
+				self.__exit_reason = "Separatrix reached!"
+			return res
+
+		def __integration_event_tracker_EFlux(_, y_vec):
+			Eflux = self.PNEvaluator.UndressedEFlux(y_vec[1], y_vec[0]).value
+			res = -Eflux
+			if res<=0:
+				self.__exit_reason="PN Energy flux larger than zero! Breaking."
+			return res
+		def __integration_event_tracker_LFlux(_, y_vec):
+			Lflux = self.PNEvaluator.UndressedLFlux(y_vec[1], y_vec[0]).value
+			res = -Lflux
+			if res<=0:
+				self.__exit_reason="PN Angular Momentum flux larger than zero! Breaking."
+			return res
+
+		__integration_event_tracker_eccentricity.terminal=True
+		__integration_event_tracker_semilatus_rectum.terminal=True
+		__integration_event_tracker_EFlux.terminal=True
+		__integration_event_tracker_LFlux.terminal=True
+
+		self.__integration_event_trackers = [__integration_event_tracker_eccentricity,
+										__integration_event_tracker_semilatus_rectum,
+										__integration_event_tracker_EFlux,
+										__integration_event_tracker_LFlux]
+
+		max_step_size = t_span[-1]/npoints
 
 		result = solve_ivp(self.PNEvaluator,
 							t_span, #time range
 							y0, #initial values
 							method=self.__integration_method, #integration method
-							t_eval = t_dom, #time points to evaluate trajectory
+							t_eval = self.t_dom, #time points to evaluate trajectory
 							dense_output=self.__dense_output, #compute interpolation over points
-							events = __integration_event_tracker #track boundaries of integration
+							events = self.__integration_event_trackers, #track boundaries of integration
+							max_step = max_step_size #dimensionless seconds
 						)
 
 		t_out = result["t"]
