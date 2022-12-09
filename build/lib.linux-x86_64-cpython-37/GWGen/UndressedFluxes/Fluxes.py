@@ -9,6 +9,8 @@ class FluxFunction():
         if name=="analytic":
             self.EFlux = AnalyticFEWEFlux
             self.LFlux = AnalyticFEWLFlux
+            self.pFlux = AnalyticFEWPFlux
+            self.eFlux = AnalyticFEWeFlux
         elif name=="numerical":
             self.EFlux = GenerateNumericalEInterpolation()
             self.LFlux = GenerateNumericalLInterpolation()
@@ -23,6 +25,11 @@ def AnalyticFEWEFlux(q,e,p,Y=1):
 
 def AnalyticFEWLFlux(q,e,p,Y=1):
     return Fluxes.pydLdt(q,p,e,Y,10,10)
+
+def AnalyticFEWPFlux(q,e,p,Y=1):
+    return Fluxes.pydpdt(q,p,e,Y,10,10)
+def AnalyticFEWeFlux(q,e,p,Y=1):
+    return Fluxes.pydedt(q,p,e,Y,8,10) #validity of de/dt
 
 
 #My own implementation of 5PN fluxes

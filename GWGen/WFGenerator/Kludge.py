@@ -27,6 +27,8 @@ class PN(Kerr, FluxFunction):
 
 		EFluxUnit = unit.kg*unit.m**2/(unit.s**3)
 		LFluxUnit = unit.kg*unit.m**2/(unit.s**2)
+		pFluxUnit = unit.m/unit.s
+		eFluxUnit = 1/unit.s
 
 		#convert delta fluxes to anonymous functions
 		if type(DeltaEFlux) == unit.quantity.Quantity:
@@ -53,25 +55,38 @@ class PN(Kerr, FluxFunction):
 		self.OrbitFrequencies = self.OrbitalFrequencies()
 		self.FluxName = FluxName
 
-		efluxUnitConv = (self.epsilon**2*(cons.c**5)/cons.G).to(EFluxUnit)
-		lfluxUnitConv = (self.epsilon * self.SecondaryMass * unit.Msun * cons.c**2).to(LFluxUnit)
-		self.UndressedEFlux = lambda e,p: self.EFlux(self.a,e,p)*efluxUnitConv #dimensionfull
-		self.UndressedLFlux = lambda e,p: self.LFlux(self.a,e,p)*lfluxUnitConv #dimensionfull
+
+		#see, e.g., phys rev D 66, 044002  page 16
+		EfluxUnitConv = (self.epsilon**2*(cons.c**5)/cons.G).to(EFluxUnit)
+		LfluxUnitConv = (self.epsilon * self.SecondaryMass * unit.Msun * cons.c**2).to(LFluxUnit)
+		pfluxUnitConv = (self.epsilon*cons.c).to(pFluxUnit)
+		efluxUnitConv = (self.epsilon*cons.c**3/(cons.G*self.SMBHMass*unit.M_sun)).to(eFluxUnit)
+
+		self.UndressedEFlux = lambda e,p: self.EFlux(self.a,e,p)*EfluxUnitConv #dimensionfull
+		self.UndressedLFlux = lambda e,p: self.LFlux(self.a,e,p)*LfluxUnitConv #dimensionfull
+		self.UndressedpFlux = lambda e,p: self.pFlux(self.a,e,p)*pfluxUnitConv #dimensionfull
+		self.UndressedeFlux = lambda e,p: self.eFlux(self.a,e,p)*efluxUnitConv #dimensionfull
+
+
+
 		self.EFluxModification = DeltaEFlux
 		self.LFluxModification = DeltaLFlux
+
+
 		self.IntegratorRun=True
 		self.IntegratorExitReason=""
 
 		#unit conversions
-		self.dldpUnit = (self.SecondaryMass*unit.Msun*cons.c).decompose()
-		self.dldeUnit = (self.SecondaryMass*unit.Msun*cons.G*self.SMBHMass*unit.Msun/cons.c).decompose()
-		self.dedpUnit = (self.epsilon*cons.c**4/cons.G).decompose()
-		self.dedeUnit = (self.SecondaryMass*unit.Msun*cons.c**2).decompose()
+		self.dLdpUnit = (self.SecondaryMass*unit.Msun*cons.c).decompose()
+		self.dLdeUnit = (self.SecondaryMass*unit.Msun*cons.G*self.SMBHMass*unit.Msun/cons.c).decompose()
+		self.dEdpUnit = (self.epsilon*cons.c**4/cons.G).decompose()
+		self.dEdeUnit = (self.SecondaryMass*unit.Msun*cons.c**2).decompose()
 
 		self.__SEPARATRIX=6+SEPARATRIXDELTA
 		self.__SEPARATRIX_CUT =	self.__SEPARATRIX+SEPARATRIXDELTA
-		self.__EdotN = -100 #set inital value to some random negative number for integration termination event handling
-		self.__LdotN = -100 #set inital value to some random negative number for integration termination event handling
+		self.__pdotN = -100 #set inital value to some random negative number for integration termination event handling
+		self.__edotN = -100 #set inital value to some random negative number for integration termination event handling
+
 	@property
 	def separatrix_cutoff(self):
 		return self.__SEPARATRIX_CUT
@@ -81,12 +96,12 @@ class PN(Kerr, FluxFunction):
 		self.__SEPARATRIX_CUT=newval
 
 	@property
-	def EdotN(self):
-		return self.__EdotN
+	def pdotN(self):
+		return self.__pdotN
 
 	@property
-	def LdotN(self):
-		return self.__LdotN
+	def edotN(self):
+		return self.__edotN
 
 	def __call__(self, t, y):
 		"""
@@ -108,7 +123,7 @@ class PN(Kerr, FluxFunction):
 		if ecc>=1.0 or ecc<0 or semimaj<self.separatrix_cutoff:
 			return [0.0, 0.0,0.0,0.0]
 
-		if ecc==0.0:
+		if ecc<1e-10:
 			#if eccentricity is zero, replace it by small number to guard against poles in integrals of motion
 			ecc=1e-10
 		try:
@@ -119,12 +134,12 @@ class PN(Kerr, FluxFunction):
 			# Radial Frequency
 			Omega_r = orb_freqs["OmegaR"];
 
-			#Energy flux
+			#semilatus rectum flux
 			## set fluxes to instance attributes for integration termination events
-			self.__EdotN = self.UndressedEFlux(ecc,semimaj) #this is negative
+			self.__pdotN = self.UndressedpFlux(ecc,semimaj) #this is negative
 
-			#Angular momentum
-			self.__LdotN = self.UndressedLFlux(ecc,semimaj) #this is negative
+			#Eccentricity flux
+			self.__edotN = self.UndressedeFlux(ecc,semimaj) #this is negative
 
 			#Energy correction
 			Ecorr = self.EFluxModification(t*self.SMBHMass*MTSUN_SI, ecc, semimaj)
@@ -139,32 +154,33 @@ class PN(Kerr, FluxFunction):
 			self.IntegratorExitReason=errmsg
 			return [0.,0.,0.,0.]
 
-		if self.__EdotN>0:
+		if self.__pdotN>0:
 			self.IntegratorRun=False
-			self.IntegratorExitReason="PN Energy flux larger than zero! Breaking."
-		elif self.__LdotN>0:
+			self.IntegratorExitReason="PN Semilatus Rectum flux larger than zero! Breaking."
+		elif self.__edotN>0:
 			self.IntegratorRun=False
-			self.IntegratorExitReason="PN Angular Momentum flux larger than zero! Breaking."
+			self.IntegratorExitReason="PN Eccentricity flux larger than zero! Breaking."
 
+
+		pdotN = self.__pdotN
+		edotN = self.__edotN
 
 		#(see: http://arxiv.org/abs/gr-qc/0702054, eq 4.3)
-		Edot = self.__EdotN + Ecorr #units: kg m**2/s**3
-		Ldot = self.__LdotN + Lcorr #units: kg m**2/s**2
-
-
-		dldp = self.dLdp()(ecc,semimaj)*self.dldpUnit
-		dlde = self.dLde()(ecc,semimaj)*self.dldeUnit
-		dedp = self.dEdp()(ecc,semimaj)*self.dedpUnit
-		dede = self.dEde()(ecc,semimaj)*self.dedeUnit
-
-
+		dldp = self.dLdp()(ecc,semimaj)*self.dLdpUnit
+		dlde = self.dLde()(ecc,semimaj)*self.dLdeUnit
+		dedp = self.dEdp()(ecc,semimaj)*self.dEdpUnit
+		dede = self.dEde()(ecc,semimaj)*self.dEdeUnit
 		norm = (dldp*dede - dlde*dedp)
-		pdot = (dede*Ldot - dlde*Edot)/norm #units: m/s
 
-		if ecc<10**(-5):
+		pdotCorr = (1/norm)*(dede*Lcorr - dlde*Ecorr)
+		edotCorr = (1/norm)*(dldp*Ecorr - dedp*Lcorr)
+
+		if ecc<=10**(-10):
 			edot=0
 		else:
-			edot = (dldp*Edot - dedp*Ldot)/norm
+			edot = edotN + edotCorr
+
+		pdot = pdotN + pdotCorr
 
 
 
@@ -207,6 +223,8 @@ class PNTraj(TrajectoryBase):
 		self.FluxName = kwargs.get("FluxName","analytic")
 		self.SMBHMass = M
 		#boundary values
+		if e0<10**(-10): #guard against poles in analytic expressions
+			e0=10**(-10)
 		y0 = [p0, e0, 0.0, 0.0] #zero mean anomaly initially
 
 		#compute separatrix of initial parameters
@@ -229,7 +247,6 @@ class PNTraj(TrajectoryBase):
 
 		# run integrator down to T or separatrix
 		t_span = (t_start, t_stop)
-		self.t_dom = np.arange(t_start, t_stop, t_res)
 
 		def __integration_event_tracker_eccentricity(_, y_vec):
 			e = y_vec[1]
@@ -249,28 +266,27 @@ class PNTraj(TrajectoryBase):
 				self.__exit_reason = "Separatrix reached!"
 			return res
 
-		def __integration_event_tracker_EFlux(_, y_vec):
-			Eflux = self.PNEvaluator.UndressedEFlux(y_vec[1], y_vec[0]).value
+		def __integration_event_tracker_eFlux(_, y_vec):
+			Eflux = self.PNEvaluator.UndressedeFlux(y_vec[1], y_vec[0]).value
 			res = -Eflux
 			if res<=0:
-				self.__exit_reason="PN Energy flux larger than zero! Breaking."
+				self.__exit_reason="PN Eccentricity flux larger than zero! Breaking."
 			return res
-		def __integration_event_tracker_LFlux(_, y_vec):
-			Lflux = self.PNEvaluator.UndressedLFlux(y_vec[1], y_vec[0]).value
+		def __integration_event_tracker_pFlux(_, y_vec):
+			Lflux = self.PNEvaluator.UndressedpFlux(y_vec[1], y_vec[0]).value
 			res = -Lflux
 			if res<=0:
-				self.__exit_reason="PN Angular Momentum flux larger than zero! Breaking."
+				self.__exit_reason="PN Semilatus Rectum flux larger than zero! Breaking."
 			return res
 
 		__integration_event_tracker_eccentricity.terminal=True
 		__integration_event_tracker_semilatus_rectum.terminal=True
-		__integration_event_tracker_EFlux.terminal=True
-		__integration_event_tracker_LFlux.terminal=True
+		__integration_event_tracker_eFlux.terminal=True
+		__integration_event_tracker_pFlux.terminal=True
 
 		self.__integration_event_trackers = [__integration_event_tracker_eccentricity,
 										__integration_event_tracker_semilatus_rectum,
-										__integration_event_tracker_EFlux,
-										__integration_event_tracker_LFlux]
+										__integration_event_tracker_pFlux]
 
 		max_step_size = t_span[-1]/npoints
 
@@ -278,7 +294,6 @@ class PNTraj(TrajectoryBase):
 							t_span, #time range
 							y0, #initial values
 							method=self.__integration_method, #integration method
-							t_eval = self.t_dom, #time points to evaluate trajectory
 							dense_output=self.__dense_output, #compute interpolation over points
 							events = self.__integration_event_trackers, #track boundaries of integration
 							max_step = max_step_size #dimensionless seconds
