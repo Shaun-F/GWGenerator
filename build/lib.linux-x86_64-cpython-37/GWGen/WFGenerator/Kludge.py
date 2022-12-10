@@ -56,36 +56,37 @@ class PN(Kerr, FluxFunction):
 		self.FluxName = FluxName
 
 
-		#see, e.g., phys rev D 66, 044002  page 16
-		EfluxUnitConv = (self.epsilon**2*(cons.c**5)/cons.G).to(EFluxUnit)
-		LfluxUnitConv = (self.epsilon * self.SecondaryMass * unit.Msun * cons.c**2).to(LFluxUnit)
-		pfluxUnitConv = (self.epsilon*cons.c).to(pFluxUnit)
-		efluxUnitConv = (self.epsilon*cons.c**3/(cons.G*self.SMBHMass*unit.M_sun)).to(eFluxUnit)
+		#see, e.g., phys rev D 66, 044002  page 16   or PTEP 2015, 073E03 page 28-29
+		EfluxUnitConv = (self.epsilon**2)#*(cons.c**5)/cons.G).to(EFluxUnit)
+		LfluxUnitConv = (self.epsilon * self.SecondaryMass)# * unit.Msun * cons.c**2).to(LFluxUnit)
+		pfluxUnitConv = (self.epsilon)#*cons.c).to(pFluxUnit)  #w.r.t. dimensionless time
+		efluxUnitConv = (self.epsilon)#*cons.c**3/(cons.G*self.SMBHMass*unit.M_sun)).to(eFluxUnit)   #w.r.t. dimensionless time
 
-		self.UndressedEFlux = lambda e,p: self.EFlux(self.a,e,p)*EfluxUnitConv #dimensionfull
-		self.UndressedLFlux = lambda e,p: self.LFlux(self.a,e,p)*LfluxUnitConv #dimensionfull
-		self.UndressedpFlux = lambda e,p: self.pFlux(self.a,e,p)*pfluxUnitConv #dimensionfull
-		self.UndressedeFlux = lambda e,p: self.eFlux(self.a,e,p)*efluxUnitConv #dimensionfull
+		self.UndressedEFlux = lambda e,p: self.EFlux(self.a,e,p)*EfluxUnitConv #dimensionless
+		self.UndressedLFlux = lambda e,p: self.LFlux(self.a,e,p)*LfluxUnitConv #dimensionless
+		self.UndressedpFlux = lambda e,p: self.pFlux(self.a,e,p)*pfluxUnitConv #dimensionless
+		self.UndressedeFlux = lambda e,p: self.eFlux(self.a,e,p)*efluxUnitConv #dimensionless
 
 
-
-		self.EFluxModification = DeltaEFlux
-		self.LFluxModification = DeltaLFlux
+		#dimensionless
+		self.EFluxModification = lambda t,e,p: (DeltaEFlux(t,e,p)*(cons.G/(cons.c**5 * self.epsilon))).decompose() #convert energy to units of secondary BH and time to units of SMBH gravitational time
+		self.LFluxModification = lambda t,e,p: (DeltaLFlux(t,e,p)*(1/(self.SecondaryMass*unit.Msun*cons.c**2))).decompose() #convert angular momentumt to units of secondary BH and time to units of SMBH gravitational time
 
 
 		self.IntegratorRun=True
 		self.IntegratorExitReason=""
 
 		#unit conversions
-		self.dLdpUnit = (self.SecondaryMass*unit.Msun*cons.c).decompose()
-		self.dLdeUnit = (self.SecondaryMass*unit.Msun*cons.G*self.SMBHMass*unit.Msun/cons.c).decompose()
-		self.dEdpUnit = (self.epsilon*cons.c**4/cons.G).decompose()
-		self.dEdeUnit = (self.SecondaryMass*unit.Msun*cons.c**2).decompose()
+		self.dLdpUnit = (self.epsilon)#*cons.c**3/cons.G).decompose()
+		self.dLdeUnit = (self.SecondaryMass*self.SMBHMass)#*unit.Msun*cons.G*unit.Msun/cons.c).decompose()
+		self.dEdpUnit = (self.epsilon)#*cons.c**4/cons.G).decompose()
+		self.dEdeUnit = (self.SecondaryMass)#*unit.Msun*cons.c**2).decompose()
 
 		self.__SEPARATRIX=6+SEPARATRIXDELTA
 		self.__SEPARATRIX_CUT =	self.__SEPARATRIX+SEPARATRIXDELTA
-		self.__EdotN = -100 #set inital value to some random negative number for integration termination event handling
-		self.__LdotN = -100 #set inital value to some random negative number for integration termination event handling
+		self.__pdotN = -100 #set inital value to some random negative number for integration termination event handling
+		self.__edotN = -100 #set inital value to some random negative number for integration termination event handling
+
 	@property
 	def separatrix_cutoff(self):
 		return self.__SEPARATRIX_CUT
@@ -95,12 +96,12 @@ class PN(Kerr, FluxFunction):
 		self.__SEPARATRIX_CUT=newval
 
 	@property
-	def EdotN(self):
-		return self.__EdotN
+	def pdotN(self):
+		return self.__pdotN
 
 	@property
-	def LdotN(self):
-		return self.__LdotN
+	def edotN(self):
+		return self.__edotN
 
 	def __call__(self, t, y):
 		"""
@@ -182,10 +183,11 @@ class PN(Kerr, FluxFunction):
 		pdot = pdotN + pdotCorr
 
 
-
+		"""
 		#adimensionlize
 		pdot = (pdot/cons.c).decompose().value
 		edot = (edot*cons.G*self.SMBHMass*unit.Msun/(cons.c**3)).decompose().value
+		"""
 
 		#rate of change of azimuthal phase
 		Phi_phi_dot = Omega_phi
@@ -195,6 +197,7 @@ class PN(Kerr, FluxFunction):
 
 		dydt = [pdot, edot, Phi_phi_dot, Phi_r_dot]
 
+		print("dpdt {0}        dedt {1}".format(pdot, edot))
 		return dydt
 
 class PNTraj(TrajectoryBase):
@@ -266,13 +269,13 @@ class PNTraj(TrajectoryBase):
 			return res
 
 		def __integration_event_tracker_eFlux(_, y_vec):
-			Eflux = self.PNEvaluator.UndressedeFlux(y_vec[1], y_vec[0]).value
+			Eflux = self.PNEvaluator.UndressedeFlux(y_vec[1], y_vec[0])
 			res = -Eflux
 			if res<=0:
 				self.__exit_reason="PN Eccentricity flux larger than zero! Breaking."
 			return res
 		def __integration_event_tracker_pFlux(_, y_vec):
-			Lflux = self.PNEvaluator.UndressedpFlux(y_vec[1], y_vec[0]).value
+			Lflux = self.PNEvaluator.UndressedpFlux(y_vec[1], y_vec[0])
 			res = -Lflux
 			if res<=0:
 				self.__exit_reason="PN Semilatus Rectum flux larger than zero! Breaking."
