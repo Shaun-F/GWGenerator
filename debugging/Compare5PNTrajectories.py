@@ -35,17 +35,24 @@ Phi_r0 = 0.0
 
 ########### Few Trajectory###########
 # initialize trajectory class
+print("*********************** Generating FEW trajectory **************************")
+aa=time.time()
 fewtraj = EMRIInspiral(func="pn5", enforce_schwarz_sep=False)
 
 # run trajectory
 tf, pf, ef, Yf, Phi_phif, Phi_rf, Phi_thetaf = fewtraj(M, mu, a, p0, e0, Y0, T=T)
-
+bb=time.time()
+print("time to generate FEW trajectory: {}".format(bb-aa))
 
 
 ########### My Trajectory ###########
-traj = PNTraj(bhspin=1e-2, DeltaEFlux=-8e-12)
-t,p,e,x,phiphi,phitheta,phir = traj(M,mu,a, p0,e0,Y0,T=T,npoints=100)
-
+print("*********************** Generating my waveform **************************")
+traj = PNTraj()
+traj.dense_output=True
+t,p,e,x,phiphi,phitheta,phir = traj(M,mu,a, p0,e0,Y0,T=T,npoints=10)
+cc=time.time()
+print("time to generate my waveform: {}".format(cc-bb))
+print("Size of trajectory {0}".format(len(t)))
 
 fig,axes=plt.subplots(2,2)
 plt.subplots_adjust(wspace=0.5)

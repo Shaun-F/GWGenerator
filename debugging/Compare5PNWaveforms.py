@@ -17,7 +17,7 @@ from GWGen.WFGenerator import *
 # set initial parameters
 M = 1e6
 mu = 1e1
-a = .2
+a = 1e-6
 p0 = 10.0
 e0 = 0.7
 iota0 = 0.

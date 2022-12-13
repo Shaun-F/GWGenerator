@@ -132,6 +132,9 @@ class PN(Kerr, FluxFunction):
 			# Radial Frequency
 			Omega_r = orb_freqs["OmegaR"];
 
+			# Polar Frequency
+			Omega_theta = orb_freqs["OmegaTheta"]
+
 			#semilatus rectum flux
 			## set fluxes to instance attributes for integration termination events
 			self.__pdotN = self.UndressedpFlux(ecc,semimaj) #this is negative
@@ -193,7 +196,10 @@ class PN(Kerr, FluxFunction):
 		#rate of change of radial phase
 		Phi_r_dot =  Omega_r
 
-		dydt = [pdot, edot, Phi_phi_dot, Phi_r_dot]
+		#rate of change of polar phase
+		Phi_theta_dot = Omega_theta
+
+		dydt = [pdot, edot, Phi_phi_dot, Phi_theta_dot, Phi_r_dot]
 
 		return dydt
 
@@ -221,10 +227,12 @@ class PNTraj(TrajectoryBase):
 		self.DeltaLFlux = kwargs.get("DeltaLFlux", 0.0*unit.kg*unit.m**2/(unit.s**2))
 		self.FluxName = kwargs.get("FluxName","analytic")
 		self.SMBHMass = M
+
+		assert int(x0)==1, "Error: Only equatorial orbits are currently implemented."
 		#boundary values
 		if e0<10**(-10): #guard against poles in analytic expressions
 			e0=10**(-10)
-		y0 = [p0, e0, 0.0, 0.0] #zero mean anomaly initially
+		y0 = [p0, e0, 0.0, 0.0, 0.0] #zero mean anomaly initially
 
 		#compute separatrix of initial parameters
 		self.__initial_separatrix = get_separatrix(float(a), float(e0), 1.)
@@ -302,7 +310,8 @@ class PNTraj(TrajectoryBase):
 		p_out = result["y"][0]
 		e_out = result["y"][1]
 		Phi_phi_out = result["y"][2]
-		Phi_r_out = result["y"][3]
+		Phi_theta_out = result["y"][3]
+		Phi_r_out = result["y"][4]
 
 		if self.__exit_reason!="":
 			print("Integration halted before ending time. Reasons: {0}".format(self.__exit_reason))
@@ -314,18 +323,19 @@ class PNTraj(TrajectoryBase):
 			interpolationfunction = result["sol"]
 			new_data = interpolationfunction(new_time_domain)
 			t_out = new_time_domain
-			p_out, e_out, Phi_phi_out, Phi_r_out = new_data
+			p_out, e_out, Phi_phi_out, Phi_theta_out, Phi_r_out = new_data
 
 		#add polar data
-		Phi_theta = (0)*np.ones_like(Phi_phi_out)
-		x = np.ones_like(Phi_theta)
+		#### Only equatorial orbits implemented.
+		x = np.ones_like(Phi_theta_out)
 
-		#cast to array objects
-		t = np.asarray(t_out)*SMBHSeconds
-		p = np.asarray(p_out)
-		e = np.asarray(e_out)
-		Phi_phi = np.asarray(Phi_phi_out)
-		Phi_r = np.asarray(Phi_r_out)
+		#cast to array objects compatible with c code
+		t = np.ascontiguousarray(t_out*SMBHSeconds,dtype=np.float64)
+		p = np.ascontiguousarray(p_out,dtype=np.float64)
+		e = np.ascontiguousarray(e_out,dtype=np.float64)
+		Phi_phi = np.ascontiguousarray(Phi_phi_out,dtype=np.float64)
+		Phi_theta = np.ascontiguousarray(Phi_theta_out,dtype=np.float64)
+		Phi_r = np.ascontiguousarray(Phi_r_out,dtype=np.float64)
 
 		return (t, p, e, x, Phi_phi, Phi_theta, Phi_r)
 
