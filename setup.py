@@ -27,7 +27,6 @@ flux_ext = Extension(
             sources=["src/dIdt8H_5PNe10.cc", "src/dIdt.pyx"],
             **cpu_extensions
 )
-print(cpu_extensions)
 
 extensions = [flux_ext, frequency_ext]
 

@@ -29,7 +29,7 @@ def AnalyticFEWLFlux(q,e,p,Y=1):
 def AnalyticFEWPFlux(q,e,p,Y=1):
     return Fluxes.pydpdt(q,p,e,Y,10,10)
 def AnalyticFEWeFlux(q,e,p,Y=1):
-    return Fluxes.pydedt(q,p,e,Y,8,10) #validity of de/dt
+    return Fluxes.pydedt(q,p,e,Y,10,8) #validity of de/dt
 
 
 #My own implementation of 5PN fluxes

@@ -18,9 +18,9 @@ from GWGen.WFGenerator import *
 
 # set initial parameters
 M = 1e6
-mu = 1e0
+mu = 1e1
 a = .5
-p0 = 14.0
+p0 = 10.0
 e0 = 0.3
 iota0 = 0.
 Y0 = np.cos(iota0)

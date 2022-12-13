@@ -84,8 +84,6 @@ class PN(Kerr, FluxFunction):
 
 		self.__SEPARATRIX=6+SEPARATRIXDELTA
 		self.__SEPARATRIX_CUT =	self.__SEPARATRIX+SEPARATRIXDELTA
-		self.__pdotN = -100 #set inital value to some random negative number for integration termination event handling
-		self.__edotN = -100 #set inital value to some random negative number for integration termination event handling
 
 	@property
 	def separatrix_cutoff(self):
@@ -197,17 +195,16 @@ class PN(Kerr, FluxFunction):
 
 		dydt = [pdot, edot, Phi_phi_dot, Phi_r_dot]
 
-		print("dpdt {0}        dedt {1}".format(pdot, edot))
 		return dydt
 
 class PNTraj(TrajectoryBase):
-	def __init__(self):
-		self.__integration_method = "DOP853"
-		self.__dense_output=True
-		self.__SEPARATRIX_DELTA=SEPARATRIXDELTA
-		self.__exit_reason=""
+	def __init__(self,**kwargs):
+		self.__integration_method = kwargs.get("integration_method","DOP853")
+		self.__dense_output = kwargs.get("dense_output", True)
+		self.__SEPARATRIX_DELTA = kwargs.get("SEPARATRIX_DELTA", SEPARATRIXDELTA)
+		self.__exit_reason = ""
 
-		self.time_resolution=100 #seconds
+		self.__time_resolution = kwargs.get("time_resolution", 100) #seconds
 
 
 	def get_inspiral(self, M, mu, a, p0, e0, x0, T=1.0, npoints=100, **kwargs):
@@ -240,7 +237,7 @@ class PNTraj(TrajectoryBase):
 		t_stop = T * YRSID_SI / (M * MTSUN_SI)
 		t_res = t_stop/npoints
 
-		Msec = M*MTSUN_SI
+		SMBHSeconds = M*MTSUN_SI
 
 		#PN evaluator
 		epsilon = float(mu/M)
@@ -313,7 +310,7 @@ class PNTraj(TrajectoryBase):
 			self.__exit_reason = "Integration reached boundary. Boundary location t = {0:0.2f}".format(t_out[-1])
 
 		if self.__dense_output:
-			new_time_domain = np.arange(t_out[0], t_out[-1], self.time_resolution)
+			new_time_domain = np.arange(t_out[0], t_out[-1], self.__time_resolution)
 			interpolationfunction = result["sol"]
 			new_data = interpolationfunction(new_time_domain)
 			t_out = new_time_domain
@@ -324,7 +321,7 @@ class PNTraj(TrajectoryBase):
 		x = np.ones_like(Phi_theta)
 
 		#cast to array objects
-		t = np.asarray(t_out)
+		t = np.asarray(t_out)*SMBHSeconds
 		p = np.asarray(p_out)
 		e = np.asarray(e_out)
 		Phi_phi = np.asarray(Phi_phi_out)
@@ -332,6 +329,7 @@ class PNTraj(TrajectoryBase):
 
 		return (t, p, e, x, Phi_phi, Phi_theta, Phi_r)
 
+	#mutable properties
 	@property
 	def integration_method(self):
 		return self.__integration_method
@@ -346,10 +344,12 @@ class PNTraj(TrajectoryBase):
 	def dense_output(self,newmeth):
 		self.__dense_output=newmeth
 
-	#immutable property
 	@property
-	def exit_reason(self):
-		return self.__exit_reason
+	def time_resolution(self):
+		return self.__time_resolution
+	@time_resolution.setter
+	def time_resolution(self,newtimeres):
+		self.__time_resolution=newtimeres
 
 	@property
 	def separatrix_delta(self):
@@ -358,6 +358,13 @@ class PNTraj(TrajectoryBase):
 	def separatrix_delta(self,newval):
 		self.__SEPARATRIX_DELTA=newval
 
+
+
+	#immutable properties
+	@property
+	def exit_reason(self):
+		return self.__exit_reason
+
 	@property
 	def separatrix_cut(self):
 		if hasattr(self, "_PNTraj__SEPARATRIX_CUTOFF"):
@@ -365,8 +372,6 @@ class PNTraj(TrajectoryBase):
 		else:
 			print("Run trajectory method to generate this property")
 			return None
-
-
 
 
 class EMRIWaveform(AAKWaveformBase):

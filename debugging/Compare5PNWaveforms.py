@@ -11,18 +11,15 @@ from few.summation.aakwave import AAKSummation
 from few.waveform import Pn5AAKWaveform, AAKWaveformBase
 from few.utils.utility import *
 
-os.chdir("../")
-path = os.getcwd()
-sys.path.insert(0, path)
 import GWGen
 from GWGen.WFGenerator import *
 
 # set initial parameters
-M = 1e7
+M = 1e6
 mu = 1e1
-a = .9
-p0 = 14.0
-e0 = 0.2
+a = .2
+p0 = 10.0
+e0 = 0.7
 iota0 = 0.
 Y0 = np.cos(iota0)
 Phi_phi0 = 0.
@@ -30,22 +27,22 @@ Phi_theta0 = 0.
 Phi_r0 = 0.
 
 
-qS = 0.2
-phiS = 0.2
-qK = 0.8
-phiK = 0.8
+qS = np.pi/4 #sky location polar angle
+phiS = 0. #sky location azimuthal angle
+qK = 0. #inital BH spin polar angle
+phiK = 0. #initial BH spin azimuthal angle
 dist = 1.0
 mich = False
 dt = 15
-T = 10.0
+T = 0.001
 
 use_gpu = False
 
 # keyword arguments for inspiral generator (RunKerrGenericPn5Inspiral)
 inspiral_kwargs = {
-    "DENSE_STEPPING": 0,  # we want a sparsely sampled trajectory
-    "max_init_len": int(1e3),  # all of the trajectories will be well under len = 1000
-    "DeltaEFlux":0
+    #"DENSE_STEPPING": 0,  # we want a sparsely sampled trajectory
+    #"max_init_len": int(1e3),  # all of the trajectories will be well under len = 1000
+    "npoints":11
 }
 
 # keyword arguments for summation generator (AAKSummation)
@@ -59,7 +56,7 @@ sum_kwargs = {
 
 
 ############### FEW Waveform with AAK ###############
-
+print("*********************** Generating FEW waveform **************************")
 aa = time.time()
 wave_generator = Pn5AAKWaveform(inspiral_kwargs=inspiral_kwargs, sum_kwargs=sum_kwargs, use_gpu=False)
 FEWwaveform = wave_generator(M, mu, a, p0, e0, Y0, qS, phiS, qK, phiK, dist,Phi_phi0=Phi_phi0, Phi_theta0=Phi_theta0, Phi_r0=Phi_r0, mich=mich, dt=dt, T=T)
@@ -68,6 +65,7 @@ print("time to generate FEW waveform: {}".format(bb-aa))
 
 ############### My Waveform ###############
 
+print("*********************** Generating my waveform **************************")
 wfgenerator = EMRIWaveform(inspiral_kwargs=inspiral_kwargs, sum_kwargs=sum_kwargs, use_gpu=False)
 mywf = wfgenerator(M, mu, a, p0, e0, Y0, qS, phiS, qK, phiK, dist,Phi_phi0=Phi_phi0, Phi_theta0=Phi_theta0, Phi_r0=Phi_r0, mich=mich, dt=dt, T=T)
 cc=time.time()
