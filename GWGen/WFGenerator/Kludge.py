@@ -409,14 +409,13 @@ class EMRIWaveform(AAKWaveformBase):
 
 
 	def __call__(self, SMBHMass, SecondaryMass, BHSpin, p0, e0, x0, qs, phis, qk, phik,dist, T=1, npoints=10, BosonSpin=1, CloudModel="relativistic", units="physical", FluxName="analytic", **kwargs):
-		massRatio = SecondaryMass/SMBHMass
 		Phi_phi0 = kwargs.get("Phi_phi0", 0)
 		Phi_theta0 = kwargs.get("Phi_theta0",0)
 		Phi_r0 = kwargs.get("Phi_r0", 0)
 		mich = kwargs.get("mich", False)
 		dt = kwargs.get("dt", 15)
 		if e0<1e-6:
-			warnings.warn("Eccentricity below safe threshold for FEW. Functions behave poorly for e<1e-6")
+			warnings.warn("Eccentricity below safe threshold for FEW. Functions behave poorly for e<1e-6. Enforcing e=1e-6 for all further computations")
 			e0=1e-6 #Certain functions in FEW are not well-behaved below this value
 
 		qS,phiS,qK,phiK = self.sanity_check_angles(qs,phis,qk,phik)

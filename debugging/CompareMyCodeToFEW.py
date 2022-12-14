@@ -4,7 +4,8 @@ import time
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-c", "--compare", help="what to compare")
+parser.add_argument("-c", "--compare", help="what to compare",default="Waveform")
+parser.add_argument("-g", "--gpu", action='store_true',default=False)
 args=parser.parse_args()
 
 import matplotlib.pyplot as plt
@@ -20,7 +21,7 @@ import GWGen
 from GWGen.WFGenerator import *
 
 # set initial parameters
-M = 1e7
+M = 1e6
 mu = 1e1
 a = .5
 p0 = 10.0
@@ -39,10 +40,12 @@ phiK = 0. #initial BH spin azimuthal angle
 dist = 1.0
 mich = False
 dt = 15
-T = 0.001
+T = 1.5
 
-use_gpu = True
-
+if args.gpu:
+    use_gpu = True
+else:
+    use_gpu = False
 # keyword arguments for inspiral generator (RunKerrGenericPn5Inspiral)
 inspiralkwargs = {
     #"DENSE_STEPPING": 0,
@@ -78,6 +81,11 @@ if args.compare=='Trajectory':
     cc=time.time()
     print("time to generate my waveform: {}".format(cc-bb))
     print("Size of trajectory {0}".format(len(t)))
+
+
+
+    ########### Plots ###########
+    print("*********************** Generating Plots **************************")
 
     fig,axes=plt.subplots(2,2)
     plt.subplots_adjust(wspace=0.5)
@@ -128,15 +136,18 @@ if args.compare=="Waveform":
 
     print("*********************** Generating my waveform **************************")
     wfgenerator = EMRIWaveform(inspiral_kwargs=inspiralkwargs.copy(), sum_kwargs=sumkwargs.copy(), use_gpu=use_gpu)
-    mywf =        wfgenerator(M, mu, a, p0, e0, Y0, qS, phiS, qK, phiK, dist,Phi_phi0=Phi_phi0, Phi_theta0=Phi_theta0, Phi_r0=Phi_r0, mich=mich, dt=dt, T=T)
+    mywf = wfgenerator(M, mu, a, p0, e0, Y0, qS, phiS, qK, phiK, dist,Phi_phi0=Phi_phi0, Phi_theta0=Phi_theta0, Phi_r0=Phi_r0, mich=mich, dt=dt, T=T)
     cc=time.time()
     print("time to generate my waveform: {}".format(cc-bb))
 
 
 
-    ############### plot #################
-    FEWwaveform = FEWwaveform.get()
-    mywf = mywf.get()
+    ########### Plots ###########
+    print("*********************** Generating Plots **************************")
+
+    if use_gpu:
+        FEWwaveform = FEWwaveform.get()
+        mywf = mywf.get()
     fig,axes = plt.subplots(2,2)
     plt.subplots_adjust(wspace=0.5)
     plt.subplots_adjust(hspace=0.5)

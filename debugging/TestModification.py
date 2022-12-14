@@ -20,7 +20,7 @@ from GWGen.WFGenerator import *
 M = 1e6
 m = 1e1
 mu = 1e-18
-a = 0.9
+a = 0.6
 p0 = 10.0
 e0 = 0.2
 iota0 = 0.1
