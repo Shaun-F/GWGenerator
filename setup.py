@@ -41,8 +41,10 @@ setup(
                 "GWGen.Utils",
                 "GWGen.UndressedFluxes",
                 "GWGen.NumericalData",
-                "GWGen.DressedFluxes"
+                "GWGen.DressedFluxes",
+                "GWGen.ProcaData"
                 ],
+    package_data={"GWGen": ['ProcaData/*.npz']},
     ext_modules=extensions,
 
 )

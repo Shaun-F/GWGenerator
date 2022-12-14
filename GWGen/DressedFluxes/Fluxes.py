@@ -10,7 +10,7 @@ import astropy.units as unit
 from GWGen.Utils import *
 import re
 
-pathToSolutionSet = os.path.abspath(os.path.dirname(__file__))+'/../../Analytic_Flux/ProcaEnDen/';
+pathToSolutionSet = os.path.abspath(os.path.dirname(__file__))+'/../ProcaData/';
 
 class ProcaSolution():
 	def __init__(self, BHMass, BHSpin, ProcaMass, BosonSpin=1,CloudModel = "relativistic",units="physical"):

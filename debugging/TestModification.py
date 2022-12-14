@@ -37,7 +37,7 @@ phiK = 0.8
 dist = 1.0
 mich = False
 dt = 15.0
-T = 5.0
+T = 1.5
 
 alphaval = alphavalue(M,mu)
 print(r"alpha = {0}".format(alphaval))
@@ -47,7 +47,7 @@ use_gpu = False
 
 # keyword arguments for inspiral generator (RunKerrGenericPn5Inspiral)
 inspiral_kwargs = {
-    "npoints": 50,  # we want a densely sampled trajectory
+    "npoints": 100,  # we want a densely sampled trajectory
     "max_init_len": int(1e3),  # all of the trajectories will be well under len = 1000
 }
 
