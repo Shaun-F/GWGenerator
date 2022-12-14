@@ -118,8 +118,8 @@ class PN(Kerr, FluxFunction):
 		radial_phase = float(y[3])
 
 		#setup guard for bad integration steps
-		if ecc>=1.0 or ecc<0 or semimaj<self.separatrix_cutoff:
-			return [0.0, 0.0,0.0,0.0]
+		if ecc>=1.0 or ecc<0 or semimaj<get_separatrix(self.a,y[1],1.):
+			return np.zeros_like(y)
 
 		if ecc<1e-10:
 			#if eccentricity is zero, replace it by small number to guard against poles in integrals of motion
@@ -153,7 +153,7 @@ class PN(Kerr, FluxFunction):
 			print("Error at parameter point (p,e)=({0},{1}). \n {2}".format(semimaj,ecc,errmsg))
 			self.IntegratorRun=False
 			self.IntegratorExitReason=errmsg
-			return [0.,0.,0.,0.]
+			return np.zeros_like(y)
 
 		if self.__pdotN>0:
 			self.IntegratorRun=False
@@ -199,21 +199,16 @@ class PN(Kerr, FluxFunction):
 		#rate of change of polar phase
 		Phi_theta_dot = Omega_theta
 
-		dydt = [pdot, edot, Phi_phi_dot, Phi_theta_dot, Phi_r_dot]
+		dydt = [pdot.value, edot.value, Phi_phi_dot, Phi_theta_dot, Phi_r_dot]
 
 		return dydt
 
 class PNTraj(TrajectoryBase):
 	def __init__(self,**kwargs):
-		self.__integration_method = kwargs.get("integration_method","DOP853")
-		self.__dense_output = kwargs.get("dense_output", True)
-		self.__SEPARATRIX_DELTA = kwargs.get("SEPARATRIX_DELTA", SEPARATRIXDELTA)
 		self.__exit_reason = ""
 
-		self.__time_resolution = kwargs.get("time_resolution", 100) #seconds
 
-
-	def get_inspiral(self, M, mu, a, p0, e0, x0, T=1.0, npoints=100, **kwargs):
+	def get_inspiral(self, M, mu, a, p0, e0, x0, T=1.0, **kwargs):
 		"""
 		M: mass of central SMBH
 		mu: mass of orbiting CO
@@ -223,6 +218,13 @@ class PNTraj(TrajectoryBase):
 		x0: initial inclination of orbital plane (NOTE: currently only considering equatorial orbits)
 		T: integration time (years)
 		"""
+
+		self.__integration_method = kwargs.get("integration_method","DOP853")
+		self.__dense_output = kwargs.get("dense_output", True)
+		self.__SEPARATRIX_DELTA = kwargs.get("SEPARATRIX_DELTA", SEPARATRIXDELTA)
+		self.__time_resolution = kwargs.get("time_resolution", 100) #seconds
+		npoints = kwargs.get("npoints", 100)
+
 		self.DeltaEFlux = kwargs.get("DeltaEFlux", 0.0*unit.kg*unit.m**2/(unit.s**3))
 		self.DeltaLFlux = kwargs.get("DeltaLFlux", 0.0*unit.kg*unit.m**2/(unit.s**2))
 		self.FluxName = kwargs.get("FluxName","analytic")
@@ -235,7 +237,7 @@ class PNTraj(TrajectoryBase):
 		y0 = [p0, e0, 0.0, 0.0, 0.0] #zero mean anomaly initially
 
 		#compute separatrix of initial parameters
-		self.__initial_separatrix = get_separatrix(float(a), float(e0), 1.)
+		self.__initial_separatrix = get_separatrix(float(a), 0., 1.)
 		self.__SEPARATRIX_CUTOFF = self.__initial_separatrix + self.__SEPARATRIX_DELTA
 
 
@@ -268,7 +270,7 @@ class PNTraj(TrajectoryBase):
 
 		def __integration_event_tracker_semilatus_rectum(_, y_vec):
 			p = y_vec[0]
-			res = p-self.__SEPARATRIX_CUTOFF
+			res = p-get_separatrix(a,y_vec[1],x0)
 			if res<=0:
 				self.__exit_reason = "Separatrix reached!"
 			return res
@@ -319,7 +321,7 @@ class PNTraj(TrajectoryBase):
 			self.__exit_reason = "Integration reached boundary. Boundary location t = {0:0.2f}".format(t_out[-1])
 
 		if self.__dense_output:
-			new_time_domain = np.arange(t_out[0], t_out[-1], self.__time_resolution)
+			new_time_domain = np.arange(t_out[0], t_out[-1], (t_out[-1]-t_out[0])/npoints)
 			interpolationfunction = result["sol"]
 			new_data = interpolationfunction(new_time_domain)
 			t_out = new_time_domain
@@ -330,12 +332,12 @@ class PNTraj(TrajectoryBase):
 		x = np.ones_like(Phi_theta_out)
 
 		#cast to array objects compatible with c code
-		t = np.ascontiguousarray(t_out*SMBHSeconds,dtype=np.float64)
-		p = np.ascontiguousarray(p_out,dtype=np.float64)
-		e = np.ascontiguousarray(e_out,dtype=np.float64)
-		Phi_phi = np.ascontiguousarray(Phi_phi_out,dtype=np.float64)
-		Phi_theta = np.ascontiguousarray(Phi_theta_out,dtype=np.float64)
-		Phi_r = np.ascontiguousarray(Phi_r_out,dtype=np.float64)
+		t = ConvertToCCompatibleArray(t_out*SMBHSeconds,newdtype=np.float64)
+		p = ConvertToCCompatibleArray(p_out,newdtype=np.float64)
+		e = ConvertToCCompatibleArray(e_out,newdtype=np.float64)
+		Phi_phi = ConvertToCCompatibleArray(Phi_phi_out,newdtype=np.float64)
+		Phi_theta = ConvertToCCompatibleArray(Phi_theta_out,newdtype=np.float64)
+		Phi_r = ConvertToCCompatibleArray(Phi_r_out,newdtype=np.float64)
 
 		return (t, p, e, x, Phi_phi, Phi_theta, Phi_r)
 
@@ -392,6 +394,8 @@ class EMRIWaveform(AAKWaveformBase):
 		self.sumkwargs = sum_kwargs
 		self.use_gpu = use_gpu
 		self.num_threads = num_threads
+
+		self.sanity_check_gpu(self.use_gpu)
 		#added a class method __call__ with should be run with
 		## EMRIWaveform()(SMBHMass, SecondaryMass, BHSpin, p0, e0, x0, qs,phis,qk,phik, dist, Phi_phi0=Phi_phi0, Phi_theta0=Phi_theta0, Phi_r0=Phi_r0, mich=mich, dt=dt, T=T)
 		AAKWaveformBase.__init__(self,
@@ -429,5 +433,6 @@ class EMRIWaveform(AAKWaveformBase):
 		if self.num_modes_kept < 4:
 			self.num_modes_kept = self.nmodes = 4
 
+		print("SMBHMass {0} BHSpin {1} SecMass {2} qS {3} phiS {4} qK {5} phiK {6} dist {7} nmodes {8}".format(SMBHMass, BHSpin, SecondaryMass, qS, phiS, qK, phiK, dist, self.nmodes))
 		self.waveform = self.create_waveform(t,SMBHMass,BHSpin,p,e,Y,pphi, ptheta, pr, SecondaryMass,qS,phiS, qK, phiK, dist, self.nmodes,mich=mich,dt=dt,T=T)
 		return self.waveform

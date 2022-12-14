@@ -11,6 +11,18 @@ mp.pretty=True
 
 import time
 
+def ConvertToCCompatibleArray(arr,newdtype=None):
+    if not newdtype==None:
+        if isinstance(arr,np.ndarray):
+            ret = np.require(arr, dtype=arr.dtype, requirements=["C", "O", "A", "E"])
+        elif isinstance(arr,list):
+            ret = np.require(arr, dtype=type(arr[0]), requirements=["C", "O", "A", "E"])
+        else:
+            raise TypeError("Input array must be either a list or a numpy array object")
+    else:
+        ret = np.require(arr, dtype=newdtype, requirements=["C", "O", "A", "E"])
+    return ret
+
 def WaveformInnerProduct(timedomain, h1,h2, fmin=0.0001, fmax=1):
     """
     complex waveforms h1 and h2 are in time-domain with time domain in units of seconds. Compute inner product defined in

@@ -29,6 +29,21 @@ Phi_phi0 = 0.
 Phi_theta0 = 0.0
 Phi_r0 = 0.0
 
+use_gpu = True
+
+# keyword arguments for inspiral generator (RunKerrGenericPn5Inspiral)
+inspiral_kwargs = {
+    #"DENSE_STEPPING": 0,  # we want a sparsely sampled trajectory
+    #"max_init_len": int(1e3),  # all of the trajectories will be well under len = 1000
+    "npoints":50,
+    "dense_output":False
+}
+
+# keyword arguments for summation generator (AAKSummation)
+sum_kwargs = {
+    "use_gpu": use_gpu,  # GPU is availabel for this type of summation
+    "pad_output": False,
+}
 
 
 
@@ -46,10 +61,10 @@ print("time to generate FEW trajectory: {}".format(bb-aa))
 
 
 ########### My Trajectory ###########
-print("*********************** Generating my waveform **************************")
-traj = PNTraj()
+print("*********************** Generating my trajectory **************************")
+traj = EMRIWaveform()
 traj.dense_output=True
-t,p,e,x,phiphi,phitheta,phir = traj(M,mu,a, p0,e0,Y0,T=T,npoints=10)
+t,p,e,x,phiphi,phitheta,phir = traj.inspiral_generator(M,mu,a, p0,e0,Y0,T=T,npoints=10)
 cc=time.time()
 print("time to generate my waveform: {}".format(cc-bb))
 print("Size of trajectory {0}".format(len(t)))

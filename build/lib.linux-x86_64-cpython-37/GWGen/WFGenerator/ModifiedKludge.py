@@ -78,6 +78,8 @@ class EMRIWithProcaWaveform(ProcaSolution,AAKWaveformBase, Kerr):
         if self.num_modes_kept < 4:
             self.num_modes_kept = self.nmodes = 4
 
+        print("final mass {0}".format(self.FinalBHMass))
+        print("final spin {0}".format(self.FinalBHSpin))
 
         self.waveform = self.create_waveform(t,self.FinalBHMass,self.FinalBHSpin,p,e,Y,pphi, ptheta, pr, SecondaryMass,qS,phiS, qK, phiK, dist, self.nmodes,mich=mich,dt=dt,T=T)
         return self.waveform
