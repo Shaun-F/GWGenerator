@@ -52,7 +52,7 @@ class EMRIWithProcaWaveform(ProcaSolution,AAKWaveformBase, Kerr):
             e0=1e-6 #Certain functions in FEW are not well-behaved below this value
 
         asymptoticBosonCloudEFlux = lambda t,e,p: self.ChangeInOrbitalEnergy(SecondaryMass=SecondaryMass,SMBHMass=self.FinalBHMass)(t,e,p) #Dimensionfull Flux. Mass Ratio prefactor comes from derivative of orbital energy wrt spacetime mass and factor of mass of the geodesic. Takes into account effective mass seen by secondary BH during its orbit
-        asymptoticBosonCloudLFlux = lambda t,e,p: asymptoticBosonCloudEFlux(t,e,p)*self.BosonWaveform.azimuthal_num()/(self.BosonWaveform.freq_gw(t)*unit.Hz) #assuming all energy emitted in 1 mode
+        asymptoticBosonCloudLFlux = lambda t,e,p: asymptoticBosonCloudEFlux(t,e,p)*self.BosonWaveform.azimuthal_num()/(self.BosonWaveform.freq_gw(t)) #assuming all energy emitted in 1 mode
 
 
         self.inspiralkwargs["DeltaEFlux"] = asymptoticBosonCloudEFlux

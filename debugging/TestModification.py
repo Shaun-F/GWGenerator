@@ -36,7 +36,7 @@ alphaval = alphavalue(M,mu)
 print(r"alpha = {0}".format(alphaval))
 
 
-use_gpu = True
+use_gpu = False
 
 # keyword arguments for inspiral generator (RunKerrGenericPn5Inspiral)
 insp_kwargs = {

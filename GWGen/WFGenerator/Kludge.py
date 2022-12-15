@@ -42,7 +42,6 @@ class PN(Kerr, FluxFunction):
 		assert inspect.isfunction(DeltaEFlux), "Error: Delta E Flux is not a function. Must be a function with argument (t,e,p)"
 		assert inspect.isfunction(DeltaLFlux), "Error: Delta L Flux is not a function. Must be a function with argument (t,e,p)"
 
-
 		self.epsilon=m/M
 		self.SMBHMass = M
 		self.SecondaryMass = m
@@ -66,7 +65,7 @@ class PN(Kerr, FluxFunction):
 
 
 		#dimensionless
-		#Unit of DeltaEFlux and DeltaLFlux must be SI units
+		#Unit of DeltaEFlux and DeltaLFlux must be SI units (but still floats)
 		self.EFluxModification = lambda t,e,p: DeltaEFlux(t,e,p)*self.InverseEnergyFlux * self.epsilon #convert energy to units of secondary BH and time to units of SMBH gravitational time
 		self.LFluxModification = lambda t,e,p: DeltaLFlux(t,e,p)*self.InverseAngularMomentumFlux #convert angular momentumt to units of secondary BH and time to units of SMBH gravitational time
 
