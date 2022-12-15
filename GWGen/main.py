@@ -36,7 +36,7 @@ phiK=0.
 dist=1.
 mich=False
 
-T=5 #LISA data run
+T=2 #LISA data run
 dt=15 #time resolution in seconds
 
 use_gpu=False #if CUDA or cupy is installed, this flag sets GPU parallelization
@@ -164,10 +164,10 @@ if __name__=='__main__':
     tmparr = np.arange(1,10,0.1)
     SMBHMasses = np.kron(tmparr,[1e6,1e7]) #solar masses
     SecondaryMass = 10 #solar masses
-    ProcaMasses = np.kron(tmparr, [1e-18,1e-19,1e-20]) #eV
+    ProcaMasses = np.kron(tmparr, [1e-17,1e-18,1e-19,1e-20]) #eV
 
 
 
-    PROCAALPHACUTOFF = 0.04 #cutoff for dimensionless gravitational coupling. values larger than this correspond to proca clouds whose GW fluxes approximately exceed that of the EMRI
+    PROCAALPHACUTOFF = 0.4 #cutoff for dimensionless gravitational coupling. values larger than this correspond to proca clouds whose GW fluxes approximately exceed that of the EMRI
 
     Parallel(n_jobs=NCPUs)(delayed(process)(bhmass, pmass,plot=PlotData, procacutoff=PROCAALPHACUTOFF,SecondaryMass=SecondaryMass) for bhmass in SMBHMasses for pmass in ProcaMasses)

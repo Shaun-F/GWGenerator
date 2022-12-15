@@ -13,7 +13,7 @@ import re
 pathToSolutionSet = os.path.abspath(os.path.dirname(__file__))+'/../ProcaData/';
 
 class ProcaSolution():
-	def __init__(self, BHMass, BHSpin, ProcaMass, BosonSpin=1,CloudModel = "relativistic",units="physical"):
+	def __init__(self, BHMass, BHSpin, ProcaMass, BosonSpin=1,CloudModel = "relativistic",units="physical", **kwargs):
 			if units=="natural":
 				raise NotImplementedError("natural units not yet implemented. Use physical units. See https://bitbucket.org/weast/superrad/src/master/ for definitions")
 			self.SMBHMass = BHMass
@@ -22,8 +22,14 @@ class ProcaSolution():
 			self.units = units
 			self.BosonSpin = BosonSpin
 			self.CloudModel = CloudModel
-			self.BosonCloud = SR.ultralight_boson.UltralightBoson(spin=self.BosonSpin, model=self.CloudModel)
 
+			#option to pass ultralightBoson instance to class instantiation so dont have to reinstantiate ultralightboson every time procasolution is instantiated
+			if "UltralightBoson" in kwargs.keys():
+				self.BosonCloud = kwargs["UltralightBoson"]
+			else:
+				print("UltralightBoson instance not provide. Instantiating class...")
+				SR.ultralight_boson.UltralightBoson(spin=self.BosonSpin, model=self.CloudModel)
+				print("done.")
 
 			self.mode_number=1
 

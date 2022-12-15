@@ -12,7 +12,7 @@ class EMRIWithProcaWaveform(ProcaSolution,AAKWaveformBase, Kerr):
                     inspiral_kwargs={},
                     sum_kwargs={},
                     use_gpu=False,
-                    num_threads=None
+                    num_threads=None,
                 ):
         self.inspiralkwargs = inspiral_kwargs
         self.sumkwargs = sum_kwargs
@@ -27,7 +27,7 @@ class EMRIWithProcaWaveform(ProcaSolution,AAKWaveformBase, Kerr):
                             use_gpu=self.use_gpu,
                             num_threads=self.num_threads)
 
-    def __call__(self, InitialSMBHMass, SecondaryMass, ProcaMass, InitialBHSpin, p0, e0, x0, T=1, npoints=10, BosonSpin=1, CloudModel="relativistic", units="physical", FluxName="analytic", **kwargs):
+    def __call__(self, InitialSMBHMass, SecondaryMass, ProcaMass, InitialBHSpin, p0, e0, x0, T=1, npoints=10, BosonSpin=1, CloudModel="relativistic", units="physical", FluxName="analytic", UltralightBoson=None, **kwargs):
         qs = kwargs.get("qS", 0)
         phis = kwargs.get("phiS", 0)
         qk = kwargs.get("qK", 0)
@@ -41,7 +41,7 @@ class EMRIWithProcaWaveform(ProcaSolution,AAKWaveformBase, Kerr):
 
 
         #Instantiates the propeties FinalBHMass and FinalBHSpin to EMRIWithProcaWaveform class
-        ProcaSolution.__init__(self,InitialSMBHMass, InitialBHSpin, ProcaMass, BosonSpin=BosonSpin, CloudModel=CloudModel, units=units) #How to use super() with multiple inheritance with different positional arguments for each __init__?
+        ProcaSolution.__init__(self,InitialSMBHMass, InitialBHSpin, ProcaMass, BosonSpin=BosonSpin, CloudModel=CloudModel, units=units,UltralightBoson=UltralightBoson) #How to use super() with multiple inheritance with different positional arguments for each __init__?
 
         MassRatio = SecondaryMass/self.FinalBHMass
         Kerr.__init__(self,BHSpin=self.FinalBHSpin)
@@ -64,7 +64,7 @@ class EMRIWithProcaWaveform(ProcaSolution,AAKWaveformBase, Kerr):
         self.sanity_check_init(self.FinalBHMass, SecondaryMass,self.FinalBHSpin,p0,e0,x0)
 
 
-        PrettyPrint("Generating Trajectory and Waveform for final black mass and spin {0} and {1}".format(self.FinalBHMass, self.FinalBHSpin))
+        PrettyPrint("Generating Trajectory for final black mass and spin {0} and {1}".format(self.FinalBHMass, self.FinalBHSpin))
 
         #get the Trajectory
         t,p,e,Y,pphi,ptheta,pr = self.inspiral_generator(self.FinalBHMass,SecondaryMass,self.FinalBHSpin,p0,e0,x0,T=T, dt=dt, Phi_phi0=Phi_phi0, Phi_theta0=Phi_theta0, Phi_r0=Phi_r0, **self.inspiralkwargs)
@@ -80,6 +80,7 @@ class EMRIWithProcaWaveform(ProcaSolution,AAKWaveformBase, Kerr):
 
         print("final mass {0}".format(self.FinalBHMass))
         print("final spin {0}".format(self.FinalBHSpin))
+        PrettyPrint("Generating Waveform")
 
         self.waveform = self.create_waveform(t,self.FinalBHMass,self.FinalBHSpin,p,e,Y,pphi, ptheta, pr, SecondaryMass,qS,phiS, qK, phiK, dist, self.nmodes,mich=mich,dt=dt,T=T)
         return self.waveform

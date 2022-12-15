@@ -30,22 +30,17 @@ class PN(Kerr, FluxFunction):
 		pFluxUnit = unit.m/unit.s
 		eFluxUnit = 1/unit.s
 
-		#convert delta fluxes to anonymous functions
+		#convert delta fluxes to anonymous functions and shave off units
 		if type(DeltaEFlux) == unit.quantity.Quantity:
 			val = DeltaEFlux.to(EFluxUnit).value
-			DeltaEFlux = lambda t,e,p: val*EFluxUnit
+			DeltaEFlux = lambda t,e,p: val
 		if type(DeltaLFlux) == unit.quantity.Quantity:
 			val = DeltaLFlux.to(LFluxUnit).value
-			DeltaLFlux = lambda t,e,p: val*LFluxUnit
+			DeltaLFlux = lambda t,e,p: val
 
 		#sanity checks
 		assert inspect.isfunction(DeltaEFlux), "Error: Delta E Flux is not a function. Must be a function with argument (t,e,p)"
 		assert inspect.isfunction(DeltaLFlux), "Error: Delta L Flux is not a function. Must be a function with argument (t,e,p)"
-
-		ranvals = [0.1 for i in inspect.signature(DeltaEFlux).parameters]
-		ranvals[-1]=10
-		assert DeltaEFlux(*ranvals).unit == EFluxUnit, "Error: DeltaEFlux must have units kg m**2/s**3"
-		assert DeltaLFlux(*ranvals).unit == LFluxUnit, "Error: DeltaLFlux must have units kg m**2/s**2"
 
 
 		self.epsilon=m/M
@@ -66,11 +61,14 @@ class PN(Kerr, FluxFunction):
 		self.UndressedLFlux = lambda e,p: self.LFlux(self.a,e,p)*LfluxUnitConv #dimensionless
 		self.UndressedpFlux = lambda e,p: self.pFlux(self.a,e,p)*pfluxUnitConv #dimensionless
 		self.UndressedeFlux = lambda e,p: self.eFlux(self.a,e,p)*efluxUnitConv #dimensionless
+		self.InverseEnergyFlux = (cons.G/(cons.c**5)).to(unit.s**3/(unit.kg*unit.m**2)).value
+		self.InverseAngularMomentumFlux = (1/(self.SecondaryMass*unit.Msun*cons.c**2)).to(unit.s**2/(unit.kg*unit.m**2)).value
 
 
 		#dimensionless
-		self.EFluxModification = lambda t,e,p: (DeltaEFlux(t,e,p)*(cons.G/(cons.c**5 * self.epsilon))).decompose() #convert energy to units of secondary BH and time to units of SMBH gravitational time
-		self.LFluxModification = lambda t,e,p: (DeltaLFlux(t,e,p)*(1/(self.SecondaryMass*unit.Msun*cons.c**2))).decompose() #convert angular momentumt to units of secondary BH and time to units of SMBH gravitational time
+		#Unit of DeltaEFlux and DeltaLFlux must be SI units
+		self.EFluxModification = lambda t,e,p: DeltaEFlux(t,e,p)*self.InverseEnergyFlux * self.epsilon #convert energy to units of secondary BH and time to units of SMBH gravitational time
+		self.LFluxModification = lambda t,e,p: DeltaLFlux(t,e,p)*self.InverseAngularMomentumFlux #convert angular momentumt to units of secondary BH and time to units of SMBH gravitational time
 
 
 		self.IntegratorRun=True
@@ -199,7 +197,7 @@ class PN(Kerr, FluxFunction):
 		#rate of change of polar phase
 		Phi_theta_dot = Omega_theta
 
-		dydt = [pdot.value, edot.value, Phi_phi_dot, Phi_theta_dot, Phi_r_dot]
+		dydt = [pdot, edot, Phi_phi_dot, Phi_theta_dot, Phi_r_dot]
 
 		return dydt
 
@@ -219,10 +217,13 @@ class PNTraj(TrajectoryBase):
 		T: integration time (years)
 		"""
 
+
+
+
+
 		self.__integration_method = kwargs.get("integration_method","DOP853")
 		self.__dense_output = kwargs.get("dense_output", True)
 		self.__SEPARATRIX_DELTA = kwargs.get("SEPARATRIX_DELTA", SEPARATRIXDELTA)
-		self.__time_resolution = kwargs.get("time_resolution", 100) #seconds
 		npoints = kwargs.get("npoints", 100)
 
 		self.DeltaEFlux = kwargs.get("DeltaEFlux", 0.0*unit.kg*unit.m**2/(unit.s**3))
@@ -244,7 +245,7 @@ class PNTraj(TrajectoryBase):
 		#MTSUN_SI converts solar masses to seconds and is equal to G/(c^3)
 		#YRSID_SI converts years into seconds
 		t_start = 0
-		t_stop = T * YRSID_SI / (M * MTSUN_SI)
+		t_stop = T * YRSID_SI / (M * MTSUN_SI) #dimensionless time
 		t_res = t_stop/npoints
 
 		SMBHSeconds = M*MTSUN_SI
@@ -356,12 +357,6 @@ class PNTraj(TrajectoryBase):
 	def dense_output(self,newmeth):
 		self.__dense_output=newmeth
 
-	@property
-	def time_resolution(self):
-		return self.__time_resolution
-	@time_resolution.setter
-	def time_resolution(self,newtimeres):
-		self.__time_resolution=newtimeres
 
 	@property
 	def separatrix_delta(self):
@@ -432,6 +427,5 @@ class EMRIWaveform(AAKWaveformBase):
 		if self.num_modes_kept < 4:
 			self.num_modes_kept = self.nmodes = 4
 
-		print("SMBHMass {0} BHSpin {1} SecMass {2} qS {3} phiS {4} qK {5} phiK {6} dist {7} nmodes {8}".format(SMBHMass, BHSpin, SecondaryMass, qS, phiS, qK, phiK, dist, self.nmodes))
 		self.waveform = self.create_waveform(t,SMBHMass,BHSpin,p,e,Y,pphi, ptheta, pr, SecondaryMass,qS,phiS, qK, phiK, dist, self.nmodes,mich=mich,dt=dt,T=T)
 		return self.waveform

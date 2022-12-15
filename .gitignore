@@ -1,5 +1,6 @@
 ProcaSolutions/
 Data/
+build/
 Analytic_Flux/ProcaEnDen
 GWGen/ProcaData
 Analytic_Flux/ProcaEnDenCSVData
