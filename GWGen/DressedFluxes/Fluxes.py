@@ -9,6 +9,7 @@ from GWGen.Utils import *
 import re
 
 pathToSolutionSet = os.path.abspath(os.path.dirname(__file__))+'/../ProcaData/';
+RadialDataTruncationFactor = 7
 
 class ProcaSolution():
 	def __init__(self, BHMass, BHSpin, ProcaMass, BosonSpin=1,CloudModel = "relativistic",units="physical", UltralightBoson=None,**kwargs):
@@ -46,13 +47,22 @@ class ProcaSolution():
 	def FinalBHSpin(self):
 		return self.BosonWaveform._abh
 
-	def ChangeInOrbitalEnergy(self, SecondaryMass=1, SMBHMass=1):
+	def ChangeInOrbitalConstants(self, SecondaryMass=1, SMBHMass=1):
 		MassRatio = SecondaryMass/SMBHMass
-		fractionalenden = self.FractionalGWEFlux() #anonymous function in (t,p)
+		fractionalEnergyFlux = self.FractionalGWEFlux() #anonymous function in (t,p)
+		fractionalAngularMomentumFlux = self.FractionalGWLFlux() #anonymous function in (t,p)
 		deltaEdeltaM = self.Kerr.dEdM() #anonymous function in (e,p)
-		DeltaOrbitalEnergy = lambda t,e,p: MassRatio*deltaEdeltaM(e,p)*fractionalenden(t,p)
+		deltaEdeltaa = self.Kerr.dEda() #anonymous function in (e,p)
+		deltaLdeltaM = self.Kerr.dLdM() #anonymous function in (e,p)
+		deltaLdeltaa = self.Kerr.dLda() #anonymous function in (e,p)
+		#Secondary Mass prefactor comes from expression for energy and angular momentum
+		#SMBH Mass inverse prefactor comes from full expression for derivatives of constants of motion
+		DeltaOrbitalEnergy = lambda t,e,p: MassRatio*(deltaEdeltaM(e,p)*fractionalEnergyFlux(t,p) + deltaEdeltaa(e,p)*fractionalAngularMomentumFlux(t,p))
+		DeltaOrbitalAngularMomentum = lambda t,e,p: MassRatio*(deltaLdeltaM(e,p)*fractionalEnergyFlux(t,p) + deltaLdeltaa(e,p)*fractionalAngularMomentumFlux(t,p))
 
-		return DeltaOrbitalEnergy
+		res = lambda t,e,p: {"E": DeltaOrbitalEnergy(t,e,p),"L": DeltaOrbitalAngularMomentum(t,e,p)}
+		return res
+
 
 	def FractionalGWEFlux(self):
 		FractionalFactor = lambda p:self.FractionalEnergyDensity(p)**2
@@ -68,6 +78,9 @@ class ProcaSolution():
 		return ret
 
 	def FractionalEnergyDensity(self, r):
+		"""
+			Fraction of total energy within a given radius
+		"""
 		rstart = self.radial_data[0]
 		rmax = self.radial_data[-1]
 		thstart = self.theta_data[0]
@@ -81,41 +94,61 @@ class ProcaSolution():
 
 		return enden
 
-	def _get_closest_alpha_data(self, alpha,mode=1,overtone=0):
+	def _get_closest_alpha_datasets(self, alpha,mode=1,overtone=0):
 
 
-		#extract alpha value from filename
-		allfilenames = np.array(os.listdir(pathToSolutionSet))
+		#import filenames
+		allfilenames = glob.glob(pathToSolutionSet+"BHSpin*")
+		modeovertonebool = [bool(re.search("Mode_1_Overtone_0", i)) for i in allfilenames]
+		newallfilenames=[]
+		for inx, boolval in enumerate(modeovertonebool):
+		    if boolval:
+		        newallfilenames.append(allfilenames[inx])
+		allfilenames = newallfilenames
 
-		modeovertonedata = allfilenames[[i[-21:-4]=="Mode_"+str(1)+"_Overtone_"+str(0) for i in allfilenames]]
+		#sort filenames
+		unsorted_alphavalues = list(map(AlphaValFromFilename, allfilenames))
+		index_sort = np.argsort(unsorted_alphavalues)
+		alphavalues = np.array(unsorted_alphavalues)[index_sort]
+		allfilenames = np.array(allfilenames)[index_sort]
 
-		alpha_regex = re.compile('Alpha_\d+_\d+')
-		alpha_matches = [alpha_regex.findall(string) for string in modeovertonedata]
-		value_regex = re.compile('\d+')
-		numdoms = [list(map(float, value_regex.findall(st[0]))) for st in alpha_matches]
-		alphas = [i[0]/i[1] for i in numdoms]
-
-		#find closest alpha value to input parameter
-		tmp = np.abs(alpha-alphas)
-		self.MatchedAlpha = alpha-tmp.min()
-		indicies = np.where(tmp==tmp.min())
-		result = np.array(modeovertonedata)[indicies][0]
+		#selected closest neighbors, assuming alpha values are monotonically increasing
+		minList = np.abs(alphavalues - self.alpha)
+		firstNeighbor = np.argmin(minList)
+		alphavaluesCopy = alphavalues.copy()
+		alphavaluesCopy[firstNeighbor]=np.inf
+		secondNeighbor = np.argmin(np.abs(alphavaluesCopy - self.alpha))
+		alphaNeighborsIndex = (min([firstNeighbor, secondNeighbor]), max([firstNeighbor, secondNeighbor]))
+		selectedfilenames = [allfilenames[i] for i in alphaNeighborsIndex]
+		selecteddata = [np.load(i) for i in selectedfilenames]
 
 		#import data
-		data = np.load(pathToSolutionSet+result)
+		selecteddata = [np.load(i) for i in selectedfilenames]
+		selectedalphas = alphavalues[[alphaNeighborsIndex[0],alphaNeighborsIndex[1]]]
 
-		return data
+		return selectedalphas, selecteddata
 
 	def _generate_interp(self, alpha,mode=1,overtone=0):
-		data = self._get_closest_alpha_data(alpha,mode=mode, overtone=overtone)
+		alphas, datas = self._get_closest_alpha_datasets(alpha,mode=mode, overtone=overtone)
 
-		self.radial_data = data["RadialData"]
-		self.theta_data = data["ThetaData"]
-		energy_data = data["EnergyData"]
+		RadialDataSet = [i["RadialData"] for i in datas]
+		ThetaDataSet = [i["ThetaData"][0:100] for i in datas]
+		NewShape = (int(min([len(i) for i in RadialDataSet])/RadialDataTruncationFactor), 100) #(radial data array shape, theta data array shape)
+		RadialDataSet = [i[:NewShape[0]] for i in RadialDataSet]
+		ThetaDataSet = [i[:NewShape[1]] for i in ThetaDataSet]
 
+		self.__RawEnergyData = [i["EnergyData"][:NewShape[0],:NewShape[1] ] for i in datas]
+		#generate 3d interpolation function over the radial data, theta data, and alpha data
+		interp = spint.RegularGridInterpolator((alphas, RadialDataSet[0], ThetaDataSet[0]), self.__RawEnergyData)
+		coords = cartesian_product(np.array([self.alpha]), RadialDataSet[0], ThetaDataSet[0])
+		InterpolatedEnergyValues = np.reshape(interp(coords), NewShape)
+		self.radial_data = RadialDataSet[0]
+		self.theta_data = ThetaDataSet[0]
 
-		interp = spint.RectBivariateSpline(self.radial_data, self.theta_data, energy_data)
-		return interp
+		#linear interpolation over radial data and theta data for given alpha value
+		InterpolationFunction = spint.RectBivariateSpline(self.radial_data, self.theta_data, InterpolatedEnergyValues)
+
+		return InterpolationFunction
 
 
 	def BosonCloudGWEFlux(self,t=0):

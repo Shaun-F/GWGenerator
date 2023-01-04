@@ -1,15 +1,49 @@
-import re
+import time
 import numpy as np
 import scipy as sp
 import scipy.fft
 import warnings
 from mpmath import *
+import re #must be imported after mpmath to override definitions in mpmath package
 import astropy.constants as cons
 import astropy.units as unit
+import glob
 mp.dps=25
 mp.pretty=True
 
-import time
+#predefined regex expressions
+alpha_match_1 = re.compile("Alpha_\d+_\d+")
+alpha_match_2 = re.compile("Alpha_\d+")
+modeovertonematch = re.compile("Mode_1_Overtone_0")
+alpha_rege = re.compile("\d+")
+
+
+#extract alpha value from filename
+def AlphaValFromFilename(filename):
+    alphastr = alpha_match_1.findall(filename)
+    if len(alphastr)==0:
+        alphastr = alpha_match_2.findall(filename)
+    if isinstance(alphastr,str):
+        pass
+    if isinstance(alphastr,list):
+        alphastr=alphastr[0]
+    alphapieces = alpha_rege.findall(alphastr)
+    if len(alphapieces)>1:
+        alphavalue = float(alphapieces[0])/float(alphapieces[1])
+    else:
+        alphavalue = float(alphapieces[0])
+    return alphavalue
+
+
+#efficient cartesian product of two arrays
+## https://stackoverflow.com/questions/11144513/cartesian-product-of-x-and-y-array-points-into-single-array-of-2d-points
+def cartesian_product(*arrays):
+    la = len(arrays)
+    dtype = np.result_type(*arrays)
+    arr = np.empty([len(a) for a in arrays] + [la], dtype=dtype)
+    for i, a in enumerate(np.ix_(*arrays)):
+        arr[...,i] = a
+    return arr.reshape(-1, la)
 
 def ConvertToCCompatibleArray(arr,newdtype=None):
     if not newdtype==None:
