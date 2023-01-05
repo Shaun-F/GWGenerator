@@ -14,7 +14,7 @@ from few.waveform import AAKWaveformBase
 from few.summation.aakwave import AAKSummation
 from few.utils.baseclasses import TrajectoryBase
 
-import astropy.units as unit;
+import astropy.units as unit
 import astropy.constants as cons
 
 SEPARATRIXDELTA=0.2;
@@ -22,51 +22,48 @@ SEPARATRIXDELTA=0.2;
 class PN(Kerr, FluxFunction):
 
 	def __init__(self, M,m, bhspin=0.9, DeltaEFlux=0.0*unit.kg*unit.m**2/(unit.s**3), DeltaLFlux=0.0*unit.kg*unit.m**2/(unit.s**2), FluxName="analytic"):
-		Kerr.__init__(self,BHSpin=bhspin) ###better to use super? How with multiple inheritance and multilpe arguments to inits?
+		Kerr.__init__(self,BHSpin=bhspin) ###better to use super()? How with multiple inheritance and multilpe arguments to inits?
 		FluxFunction.__init__(self, name=FluxName)
 
-		EFluxUnit = unit.kg*unit.m**2/(unit.s**3)
-		LFluxUnit = unit.kg*unit.m**2/(unit.s**2)
-		pFluxUnit = unit.m/unit.s
-		eFluxUnit = 1/unit.s
-
-		#convert delta fluxes to anonymous functions and shave off units
-		if type(DeltaEFlux) == unit.quantity.Quantity:
+		#convert delta fluxes to anonymous functions and discard units
+		if isinstance(DeltaEFlux, unit.quantity.Quantity):
+			EFluxUnit = unit.kg*unit.m**2/(unit.s**3)
 			val = DeltaEFlux.to(EFluxUnit).value
 			DeltaEFlux = lambda t,e,p: val
-		if type(DeltaLFlux) == unit.quantity.Quantity:
+		if isinstance(DeltaLFlux, unit.quantity.Quantity):
+			LFluxUnit = unit.kg*unit.m**2/(unit.s**2)
 			val = DeltaLFlux.to(LFluxUnit).value
 			DeltaLFlux = lambda t,e,p: val
 
 		#sanity checks
-		assert inspect.isfunction(DeltaEFlux), "Error: Delta E Flux is not a function. Must be a function with argument (t,e,p)"
-		assert inspect.isfunction(DeltaLFlux), "Error: Delta L Flux is not a function. Must be a function with argument (t,e,p)"
+		assert inspect.isfunction(DeltaEFlux), "Error: Delta E Flux is not a function or an astropy.unit.quantity.Quantity instance. Must be a function with argument (t,e,p) or an astropy.unit.quantity.Quantity instance"
+		assert inspect.isfunction(DeltaLFlux), "Error: Delta L Flux is not a function or an astropy.unit.quantity.Quantity instance. Must be a function with argument (t,e,p) or an astropy.unit.quantity.Quantity instance"
 
-		self.epsilon=m/M
 		self.SMBHMass = M
 		self.SecondaryMass = m
+		self.epsilon = self.SecondaryMass/self.SMBHMass
 		self.a = bhspin
 		self.OrbitFrequencies = self.OrbitalFrequencies()
 		self.FluxName = FluxName
 
+		"""
+		Note: Fluxes must be with respect to dimensionless time.
+		"""
 
+		#Below undressed fluxes are already in geometric units. Multiply by mass ratio to get full expression as
+		#	 analytic expressions in src code have mass dependence factored out
 		#see, e.g., phys rev D 66, 044002  page 16   or PTEP 2015, 073E03 page 28-29
-		EfluxUnitConv = (self.epsilon**2)#*(cons.c**5)/cons.G).to(EFluxUnit)
-		LfluxUnitConv = (self.epsilon * self.SecondaryMass)# * unit.Msun * cons.c**2).to(LFluxUnit)
-		pfluxUnitConv = (self.epsilon)#*cons.c).to(pFluxUnit)  #w.r.t. dimensionless time
-		efluxUnitConv = (self.epsilon)#*cons.c**3/(cons.G*self.SMBHMass*unit.M_sun)).to(eFluxUnit)   #w.r.t. dimensionless time
-
-		self.UndressedEFlux = lambda e,p: self.EFlux(self.a,e,p)*EfluxUnitConv #dimensionless
-		self.UndressedLFlux = lambda e,p: self.LFlux(self.a,e,p)*LfluxUnitConv #dimensionless
-		self.UndressedpFlux = lambda e,p: self.pFlux(self.a,e,p)*pfluxUnitConv #dimensionless
-		self.UndressedeFlux = lambda e,p: self.eFlux(self.a,e,p)*efluxUnitConv #dimensionless
-		self.InverseEnergyFlux = (cons.G/(cons.c**5)).to(unit.s**3/(unit.kg*unit.m**2)).value
-		self.InverseAngularMomentumFlux = (1/(self.SecondaryMass*unit.Msun*cons.c**2)).to(unit.s**2/(unit.kg*unit.m**2)).value
+		self.UndressedEFlux = lambda e,p: self.EFlux(self.a,e,p)*self.epsilon # eq. 128 of phys rev D 66, 044002
+		self.UndressedLFlux = lambda e,p: self.LFlux(self.a,e,p)*self.epsilon #eq. 129 of "
+		self.UndressedpFlux = lambda e,p: self.pFlux(self.a,e,p)*self.epsilon #eq. 137 of "
+		self.UndressedeFlux = lambda e,p: self.eFlux(self.a,e,p)*self.epsilon #eq. 138 of "
 
 
 		#dimensionless
 		#Unit of DeltaEFlux and DeltaLFlux must be SI units (but still floats, not astropy quantity objects)
-		self.EFluxModification = lambda t,e,p: DeltaEFlux(t,e,p)*self.InverseEnergyFlux * self.epsilon #convert energy to units of secondary BH and time to units of SMBH gravitational time
+		self.InverseEnergyFlux = (cons.G/(cons.c**5)).to(unit.s**3/(unit.kg*unit.m**2)).value #G/c**5
+		self.InverseAngularMomentumFlux = (1/(self.SMBHMass*unit.Msun*cons.c**2)).to(unit.s**2/(unit.kg*unit.m**2)).value #c**4 / G * (distance in units of SMBH Radius)
+		self.EFluxModification = lambda t,e,p: DeltaEFlux(t,e,p)*self.InverseEnergyFlux / self.epsilon #convert energy to units of secondary BH and time to units of SMBH gravitational time
 		self.LFluxModification = lambda t,e,p: DeltaLFlux(t,e,p)*self.InverseAngularMomentumFlux #convert angular momentumt to units of secondary BH and time to units of SMBH gravitational time
 
 
@@ -180,6 +177,8 @@ class PN(Kerr, FluxFunction):
 
 		pdot = pdotN + pdotCorr
 
+		print("pdotN: ", pdotN)
+		print("pdotCorr: ", pdotCorr)
 
 		"""
 		#adimensionlize
