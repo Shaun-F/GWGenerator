@@ -65,7 +65,7 @@ class PN(Kerr, FluxFunction):
 
 
 		#dimensionless
-		#Unit of DeltaEFlux and DeltaLFlux must be SI units (but still floats)
+		#Unit of DeltaEFlux and DeltaLFlux must be SI units (but still floats, not astropy quantity objects)
 		self.EFluxModification = lambda t,e,p: DeltaEFlux(t,e,p)*self.InverseEnergyFlux * self.epsilon #convert energy to units of secondary BH and time to units of SMBH gravitational time
 		self.LFluxModification = lambda t,e,p: DeltaLFlux(t,e,p)*self.InverseAngularMomentumFlux #convert angular momentumt to units of secondary BH and time to units of SMBH gravitational time
 

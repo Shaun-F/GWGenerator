@@ -25,7 +25,7 @@ class ProcaSolution():
 
 			#option to pass ultralightBoson instance to class instantiation so dont have to reinstantiate ultralightboson every time procasolution is instantiated
 			if self.BosonClass==None:
-				print("UltralightBoson instance not provide. Instantiating class...")
+				print("UltralightBoson instance not provided. Instantiating class...")
 				self.BosonClass=SR.ultralight_boson.UltralightBoson(spin=self.BosonSpin, model=self.CloudModel)
 				print("done.")
 
@@ -55,12 +55,12 @@ class ProcaSolution():
 		deltaEdeltaa = self.Kerr.dEda() #anonymous function in (e,p)
 		deltaLdeltaM = self.Kerr.dLdM() #anonymous function in (e,p)
 		deltaLdeltaa = self.Kerr.dLda() #anonymous function in (e,p)
-		#Secondary Mass prefactor comes from expression for energy and angular momentum
+		#Secondary Mass prefactor comes from expression for energy and angular momentum (converting specific constants to full constants)
 		#SMBH Mass inverse prefactor comes from full expression for derivatives of constants of motion
 		DeltaOrbitalEnergy = lambda t,e,p: MassRatio*(deltaEdeltaM(e,p)*fractionalEnergyFlux(t,p) + deltaEdeltaa(e,p)*fractionalAngularMomentumFlux(t,p))
 		DeltaOrbitalAngularMomentum = lambda t,e,p: MassRatio*(deltaLdeltaM(e,p)*fractionalEnergyFlux(t,p) + deltaLdeltaa(e,p)*fractionalAngularMomentumFlux(t,p))
 
-		res = lambda t,e,p: {"E": DeltaOrbitalEnergy(t,e,p),"L": DeltaOrbitalAngularMomentum(t,e,p)}
+		res = {"E": lambda t,e,p: DeltaOrbitalEnergy(t,e,p),"L": lambda t,e,p: DeltaOrbitalAngularMomentum(t,e,p)}
 		return res
 
 

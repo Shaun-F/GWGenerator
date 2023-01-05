@@ -51,8 +51,9 @@ class EMRIWithProcaWaveform(ProcaSolution,AAKWaveformBase, Kerr):
             warnings.warn("Eccentricity below safe threshold for FEW. Functions behave poorly for e<1e-6")
             e0=1e-6 #Certain functions in FEW are not well-behaved below this value
 
-        asymptoticBosonCloudEFlux = lambda t,e,p: self.ChangeInOrbitalEnergy(SecondaryMass=SecondaryMass,SMBHMass=InitialSMBHMass)(t,e,p) #Dimensionfull Flux. Mass Ratio prefactor comes from derivative of orbital energy wrt spacetime mass and factor of mass of the geodesic. Takes into account effective mass seen by secondary BH during its orbit
-        asymptoticBosonCloudLFlux = lambda t,e,p: asymptoticBosonCloudEFlux(t,e,p)*self.BosonWaveform.azimuthal_num()/(self.BosonWaveform.freq_gw(t)) #assuming all energy emitted in 1 mode
+        OrbitalConstantsChange = self.ChangeInOrbitalConstants(SecondaryMass=SecondaryMass, SMBHMass=InitialSMBHMass)
+        asymptoticBosonCloudEFlux = OrbitalConstantsChange["E"] #Dimensionfull Flux. Mass Ratio prefactor comes from derivative of orbital energy wrt spacetime mass and factor of mass of the geodesic. Takes into account effective mass seen by secondary BH during its orbit
+        asymptoticBosonCloudLFlux = OrbitalConstantsChange["L"]
 
 
         self.inspiralkwargs["DeltaEFlux"] = asymptoticBosonCloudEFlux
@@ -64,7 +65,7 @@ class EMRIWithProcaWaveform(ProcaSolution,AAKWaveformBase, Kerr):
         self.sanity_check_init(InitialSMBHMass, SecondaryMass,InitialBHSpin,p0,e0,x0)
 
 
-        PrettyPrint("Generating Trajectory for black mass {0} and {1}".format(InitialSMBHMass, InitialBHSpin))
+        PrettyPrint("Generating Trajectory for black mass {0} and spin {1}".format(InitialSMBHMass, InitialBHSpin))
 
         #get the Trajectory
         t,p,e,Y,pphi,ptheta,pr = self.inspiral_generator(InitialSMBHMass,SecondaryMass,InitialBHSpin,p0,e0,x0,T=T, dt=dt, Phi_phi0=Phi_phi0, Phi_theta0=Phi_theta0, Phi_r0=Phi_r0, **self.inspiralkwargs)
