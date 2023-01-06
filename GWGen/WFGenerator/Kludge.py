@@ -18,6 +18,7 @@ import astropy.units as unit
 import astropy.constants as cons
 
 SEPARATRIXDELTA=0.2;
+KGtoMsun = unit.kg.to(unit.Msun)
 
 class PN(Kerr, FluxFunction):
 
@@ -50,7 +51,7 @@ class PN(Kerr, FluxFunction):
 		Note: Fluxes must be with respect to dimensionless time.
 		"""
 
-		#Below undressed fluxes are already in geometric units. Multiply by mass ratio to get full expression as
+		#Below undressed fluxes are already in geometric units and expressed as derivatives w.r.t gravitational time. Multiply by mass ratio to get full expression as
 		#	 analytic expressions in src code have mass dependence factored out
 		#see, e.g., phys rev D 66, 044002  page 16   or PTEP 2015, 073E03 page 28-29
 		self.UndressedEFlux = lambda e,p: self.EFlux(self.a,e,p)*self.epsilon # eq. 128 of phys rev D 66, 044002
@@ -62,16 +63,17 @@ class PN(Kerr, FluxFunction):
 		#dimensionless
 		#Unit of DeltaEFlux and DeltaLFlux must be SI units (but still floats, not astropy quantity objects)
 		self.InverseEnergyFlux = (cons.G/(cons.c**5)).to(unit.s**3/(unit.kg*unit.m**2)).value #G/c**5
-		self.InverseAngularMomentumFlux = (1/(self.SMBHMass*unit.Msun*cons.c**2)).to(unit.s**2/(unit.kg*unit.m**2)).value #c**4 / G * (distance in units of SMBH Radius)
-		self.EFluxModification = lambda t,e,p: DeltaEFlux(t,e,p)*self.InverseEnergyFlux / self.epsilon #convert energy to units of secondary BH and time to units of SMBH gravitational time
-		self.LFluxModification = lambda t,e,p: DeltaLFlux(t,e,p)*self.InverseAngularMomentumFlux #convert angular momentumt to units of secondary BH and time to units of SMBH gravitational time
+		self.InverseAngularMomentumFlux = (1/(cons.c**2)).to((unit.s**2)/(unit.m**2)).value # (distance in units of SMBH Radius)
+
+		self.EFluxModification = lambda t,e,p: DeltaEFlux(t,e,p)*self.InverseEnergyFlux*self.SMBHMass #convert time to units of SMBH gravitational time and SI units to geometric units
+		self.LFluxModification = lambda t,e,p: DeltaLFlux(t,e,p)*KGtoMsun*self.InverseAngularMomentumFlux*self.SMBH #convert time to units of SMBH gravitational time and SI units to geometric units
 
 
 		self.IntegratorRun=True
 		self.IntegratorExitReason=""
 
 		#unit conversions
-		self.dLdpUnit = (self.epsilon)#*cons.c**3/cons.G).decompose()
+		self.dLdpUnit = (self.SecondaryMass)#*unit.M_sun*cons.c).decompose()
 		self.dLdeUnit = (self.SecondaryMass*self.SMBHMass)#*unit.Msun*cons.G*unit.Msun/cons.c).decompose()
 		self.dEdpUnit = (self.epsilon)#*cons.c**4/cons.G).decompose()
 		self.dEdeUnit = (self.SecondaryMass)#*unit.Msun*cons.c**2).decompose()
