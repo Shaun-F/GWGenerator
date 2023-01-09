@@ -44,7 +44,7 @@ class EMRIWithProcaWaveform(ProcaSolution,AAKWaveformBase, Kerr):
         ProcaSolution.__init__(self,InitialSMBHMass, InitialBHSpin, ProcaMass, BosonSpin=BosonSpin, CloudModel=CloudModel, units=units,UltralightBoson=UltralightBoson) #How to use super() with multiple inheritance with different positional arguments for each __init__?
 
         MassRatio = SecondaryMass/InitialSMBHMass
-        Kerr.__init__(self,BHSpin=InitalBHSpin)
+        Kerr.__init__(self,BHSpin=InitialBHSpin)
 
 
         if e0<1e-6:

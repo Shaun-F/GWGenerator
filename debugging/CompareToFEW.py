@@ -4,7 +4,8 @@ import time
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-c", "--compare", help="what to compare")
+parser.add_argument("-c", "--compare", help="what to compare", default="Waveform")
+parser.add_argument("-g", "--gpu", action='store_true',default=False)
 args=parser.parse_args()
 
 import matplotlib.pyplot as plt
@@ -20,7 +21,7 @@ import GWGen
 from GWGen.WFGenerator import *
 
 # set initial parameters
-M = 1e7
+M = 1e6
 mu = 1e1
 a = .5
 p0 = 10.0
@@ -39,15 +40,18 @@ phiK = 0. #initial BH spin azimuthal angle
 dist = 1.0
 mich = False
 dt = 15
-T = 0.001
+T = 5
 
-use_gpu = True
+if args.gpu:
+    use_gpu = True
+else:
+    use_gpu = False
 
 # keyword arguments for inspiral generator (RunKerrGenericPn5Inspiral)
 inspiralkwargs = {
     #"DENSE_STEPPING": 0,
     #"max_init_len": int(1e3),
-    "npoints":50,
+    "npoints":100,
     "dense_output":False
 }
 
@@ -65,6 +69,7 @@ if args.compare=='Trajectory':
     fewtraj = EMRIInspiral(func="pn5", enforce_schwarz_sep=False)
 
     # run trajectory
+    assert fewtraj.__module__ == 'few.trajectory.inspiral'
     tf, pf, ef, Yf, Phi_phif, Phi_rf, Phi_thetaf = fewtraj(M, mu, a, p0, e0, Y0, T=T)
     bb=time.time()
     print("time to generate FEW trajectory: {}".format(bb-aa))
@@ -73,8 +78,9 @@ if args.compare=='Trajectory':
     ########### My Trajectory ###########
     print("*********************** Generating my trajectory **************************")
     traj = EMRIWaveform()
+    assert traj.__module__ == 'GWGen.WFGenerator.Kludge'
     traj.dense_output=True
-    t,p,e,x,phiphi,phitheta,phir = traj.inspiral_generator(M,mu,a, p0,e0,Y0,T=T,npoints=10)
+    t,p,e,x,phiphi,phitheta,phir = traj.inspiral_generator(M,mu,a, p0,e0,Y0,T=T)
     cc=time.time()
     print("time to generate my waveform: {}".format(cc-bb))
     print("Size of trajectory {0}".format(len(t)))
@@ -87,6 +93,7 @@ if args.compare=='Trajectory':
     axes[0,0].set_xlabel("t")
     axes[0,0].plot(tf,pf, label="FEW")
     axes[0,0].plot(t,p, label="Mine")
+    axes[0,0].text(t[-1]/5, p[0]/2, "My final p: {0}\nFew Final p: {1}".format(p[-1], pf[-1]))
     axes[0,0].legend()
 
     axes[0,1].set_title("My trajectory")

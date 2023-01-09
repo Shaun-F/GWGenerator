@@ -170,7 +170,7 @@ class PN(Kerr, FluxFunction):
 		dede = self.dEde()(ecc,semimaj)*self.dEdeUnit
 		norm = (dldp*dede - dlde*dedp)
 
-		pdotCorr = (1/norm)*(dede*Lcorr - dlde*Ecorr) # divide by M to adimensionalize semi-latus rectum
+		pdotCorr = (1/norm)*(dede*Lcorr - dlde*Ecorr)
 		edotCorr = (1/norm)*(dldp*Ecorr - dedp*Lcorr)
 
 		if ecc<=10**(-10):
@@ -179,9 +179,6 @@ class PN(Kerr, FluxFunction):
 			edot = edotN + edotCorr
 
 		pdot = pdotN + pdotCorr
-
-		print("pdotN: ", pdotN)
-		print("pdotCorr: ", pdotCorr)
 
 		"""
 		#adimensionlize
@@ -404,7 +401,7 @@ class EMRIWaveform(AAKWaveformBase):
 	            				)
 
 
-	def __call__(self, SMBHMass, SecondaryMass, BHSpin, p0, e0, x0, qs, phis, qk, phik,dist, T=1, npoints=10, BosonSpin=1, CloudModel="relativistic", units="physical", FluxName="analytic", **kwargs):
+	def __call__(self, SMBHMass, SecondaryMass, BHSpin, p0, e0, x0, qs, phis, qk, phik,dist, T=1, npoints=10, FluxName="analytic", **kwargs):
 		Phi_phi0 = kwargs.get("Phi_phi0", 0)
 		Phi_theta0 = kwargs.get("Phi_theta0",0)
 		Phi_r0 = kwargs.get("Phi_r0", 0)
