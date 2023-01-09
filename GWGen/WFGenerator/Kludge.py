@@ -54,8 +54,8 @@ class PN(Kerr, FluxFunction):
 		#Below undressed fluxes are already in geometric units and expressed as derivatives w.r.t gravitational time. Multiply by mass ratio to get full expression as
 		#	 analytic expressions in src code have mass dependence factored out
 		#see, e.g., phys rev D 66, 044002  page 16   or PTEP 2015, 073E03 page 28-29
-		self.UndressedEFlux = lambda e,p: self.EFlux(self.a,e,p)*self.epsilon # eq. 128 of phys rev D 66, 044002
-		self.UndressedLFlux = lambda e,p: self.LFlux(self.a,e,p)*self.epsilon #eq. 129 of "
+		self.UndressedEFlux = lambda e,p: self.EFlux(self.a,e,p)*self.epsilon**2 * self.SMBHMass # eq. 128 of phys rev D 66, 044002 and convert to gravitational time
+		self.UndressedLFlux = lambda e,p: self.LFlux(self.a,e,p)*self.epsilon*self.SecondaryMass*self.SMBHMass #eq. 129 of "
 		self.UndressedpFlux = lambda e,p: self.pFlux(self.a,e,p)*self.epsilon #eq. 137 of "
 		self.UndressedeFlux = lambda e,p: self.eFlux(self.a,e,p)*self.epsilon #eq. 138 of "
 
@@ -66,16 +66,17 @@ class PN(Kerr, FluxFunction):
 		self.InverseAngularMomentumFlux = (1/(cons.c**2)).to((unit.s**2)/(unit.m**2)).value # (distance in units of SMBH Radius)
 
 		self.EFluxModification = lambda t,e,p: DeltaEFlux(t,e,p)*self.InverseEnergyFlux*self.SMBHMass #convert time to units of SMBH gravitational time and SI units to geometric units
-		self.LFluxModification = lambda t,e,p: DeltaLFlux(t,e,p)*KGtoMsun*self.InverseAngularMomentumFlux*self.SMBH #convert time to units of SMBH gravitational time and SI units to geometric units
+		self.LFluxModification = lambda t,e,p: DeltaLFlux(t,e,p)*KGtoMsun*self.InverseAngularMomentumFlux*self.SMBHMass #convert time to units of SMBH gravitational time and SI units to geometric units
 
 
 		self.IntegratorRun=True
 		self.IntegratorExitReason=""
 
 		#unit conversions
-		self.dLdpUnit = (self.SecondaryMass)#*unit.M_sun*cons.c).decompose()
+		##semi-latus rectum is dimensionless w.r.t smbh mass
+		self.dLdpUnit = (self.SecondaryMass*self.SMBHMass)#*unit.M_sun*cons.c/self.SMBHMass).decompose()
 		self.dLdeUnit = (self.SecondaryMass*self.SMBHMass)#*unit.Msun*cons.G*unit.Msun/cons.c).decompose()
-		self.dEdpUnit = (self.epsilon)#*cons.c**4/cons.G).decompose()
+		self.dEdpUnit = (self.SecondaryMass) #*cons.c**4/cons.G/self.SMBHMass).decompose()
 		self.dEdeUnit = (self.SecondaryMass)#*unit.Msun*cons.c**2).decompose()
 
 		self.__SEPARATRIX=6+SEPARATRIXDELTA
@@ -169,7 +170,7 @@ class PN(Kerr, FluxFunction):
 		dede = self.dEde()(ecc,semimaj)*self.dEdeUnit
 		norm = (dldp*dede - dlde*dedp)
 
-		pdotCorr = (1/norm)*(dede*Lcorr - dlde*Ecorr)
+		pdotCorr = (1/norm)*(dede*Lcorr - dlde*Ecorr) # divide by M to adimensionalize semi-latus rectum
 		edotCorr = (1/norm)*(dldp*Ecorr - dedp*Lcorr)
 
 		if ecc<=10**(-10):
