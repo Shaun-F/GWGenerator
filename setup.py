@@ -1,5 +1,7 @@
 from setuptools import setup
 from distutils.extension import Extension
+import os
+import subprocess
 
 
 cpu_extensions=dict(
@@ -29,6 +31,13 @@ flux_ext = Extension(
 )
 
 extensions = [flux_ext, frequency_ext]
+
+
+##Verify proca data directory exists. If not, download from Zenodo
+ProcaDataExists = os.path.abspath(os.path.dirname(__file__))+"/GWGen/ProcaData"
+if not ProcaDataExists:
+    ZenodoURL = "https://zenodo.org/record/7439398"
+    subprocess.run(["wget", "--no-check-certificate", ])
 
 
 setup(
