@@ -15,7 +15,7 @@ from superrad import ultralight_boson
 NCPUs = 4
 
 #data directory relative to local parent GWGen
-DataDirectory = "/../Data/Output/"
+DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/../Data/Output/"
 
 #generate plots
 PlotData = False
@@ -105,7 +105,7 @@ def process(BHMASS, PROCAMASS, plot=False,alphauppercutoff=0.335, alphalowercuto
 
     #output data to disk
     jsondata = json.dumps(data)
-    filename = os.path.abspath(os.path.dirname(__file__)) + DataDirectory + "SMBHMass{0}_SecMass{1}_ProcMass{2}_ProcSpin{3}.json".format(BHMASS,SecondaryMass,PROCAMASS,spin)
+    filename = DataDirectory + "SMBHMass{0}_SecMass{1}_ProcMass{2}_ProcSpin{3}.json".format(BHMASS,SecondaryMass,PROCAMASS,spin)
     with open(filename, "w") as file:
         file.write(jsondata)
 
