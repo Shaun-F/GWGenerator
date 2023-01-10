@@ -2,6 +2,8 @@ from setuptools import setup
 from distutils.extension import Extension
 import os
 import subprocess
+from bs4 import BeautifulSoup
+import urllib.request
 
 
 cpu_extensions=dict(
@@ -34,10 +36,18 @@ extensions = [flux_ext, frequency_ext]
 
 
 ##Verify proca data directory exists. If not, download from Zenodo
-ProcaDataExists = os.path.abspath(os.path.dirname(__file__))+"/GWGen/ProcaData"
-if not ProcaDataExists:
+ProcaDataPath = os.path.abspath(os.path.dirname(__file__))+"/GWGen/ProcaData"
+if not os.path.exists(ProcaDataPath):
     ZenodoURL = "https://zenodo.org/record/7439398"
-    subprocess.run(["wget", "--no-check-certificate", ])
+    page = urllib.request.open(ZenodoURL)
+    soup = BeautifulSoup(page, "html.parser")
+    hreflinks = [link.get("href") for link in soup.findAll("link")]
+    datasetUrls = [str for str in hreflinks if "Mode_1_Overtone_0" in str] #take only m=1, n=0 datasets
+    basefilenames = [os.path.basename(i) for i in datasetUrls]
+    datasetTargetFilenames = [ProcaDataPath+"/"+i for i in basefilenames]
+    for inx, url in enumerate(datasetUrls):
+        subprocess.run(["wget", "--no-check-certificate", "--output-file="+datasetTargetFilenames[inx], datasetUrls[inx]])
+        
 
 
 setup(
