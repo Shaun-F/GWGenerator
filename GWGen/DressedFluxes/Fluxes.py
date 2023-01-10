@@ -7,6 +7,7 @@ import superrad as SR
 from superrad import ultralight_boson
 from GWGen.Utils import *
 import re
+from bisect import bisect_right
 
 pathToSolutionSet = os.path.abspath(os.path.dirname(__file__))+'/../ProcaData/';
 RadialDataTruncationFactor = 7
@@ -113,12 +114,14 @@ class ProcaSolution():
 		allfilenames = np.array(allfilenames)[index_sort]
 
 		#selected closest neighbors, assuming alpha values are monotonically increasing
-		minList = np.abs(alphavalues - self.alpha)
-		firstNeighbor = np.argmin(minList)
-		alphavaluesCopy = alphavalues.copy()
-		alphavaluesCopy[firstNeighbor]=np.inf
-		secondNeighbor = np.argmin(np.abs(alphavaluesCopy - self.alpha))
-		alphaNeighborsIndex = (min([firstNeighbor, secondNeighbor]), max([firstNeighbor, secondNeighbor]))
+		##First assert requested alpha value in range of available proca data
+		assert np.logical_and(alpha>alphavalues[0], alpha<alphavalues[-1]), "Error: Alpha value out of range of available data."
+		larger_alpha_index = bisect_right(alphavalues, alpha)
+		if larger_alpha_index == 0:
+			smaller_alpha_index = 0
+		else:
+			smaller_alpha_index = larger_alpha_index - 1
+		alphaNeighborsIndex = (smaller_alpha_index, larger_alpha_index)
 		selectedfilenames = [allfilenames[i] for i in alphaNeighborsIndex]
 		selecteddata = [np.load(i) for i in selectedfilenames]
 

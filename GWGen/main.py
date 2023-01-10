@@ -1,9 +1,6 @@
 import os
 import sys
 import json
-os.chdir("../")
-path = os.getcwd()
-sys.path.insert(0, path)
 import GWGen
 from GWGen.WFGenerator import *
 import numpy as np
@@ -11,12 +8,14 @@ import matplotlib.pyplot as plt
 plt.rcParams['text.usetex'] = True
 import joblib
 from joblib import Parallel, delayed
+import superrad
+from superrad import ultralight_boson
 
 #number of cpus to use for parallelization
-NCPUs = 2
+NCPUs = 4
 
 #data directory relative to local parent GWGen
-DataDirectory = "/Data/"
+DataDirectory = "/../Data/Output/"
 
 #generate plots
 PlotData = False
@@ -26,17 +25,17 @@ spin=1
 
 #parameters
 BHSpin=0.9
-p0=10
+p0=10.
 e0=0.2
-x0=1
-qS=0.2
+x0=1.
+qS=1e-20
 phiS=0.
 qK=0.
 phiK=0.
 dist=1.
 mich=False
 
-T=2 #LISA data run
+T=5 #LISA data run
 dt=15 #time resolution in seconds
 
 use_gpu=False #if CUDA or cupy is installed, this flag sets GPU parallelization
@@ -56,20 +55,26 @@ sum_kwargs = {
 
 unmoddedwvcl = EMRIWaveform(inspiral_kwargs=inspiral_kwargs, sum_kwargs=sum_kwargs, use_gpu=False)
 moddedwvcl = EMRIWithProcaWaveform(inspiral_kwargs=inspiral_kwargs, sum_kwargs=sum_kwargs, use_gpu=False)
+ulb = superrad.ultralight_boson.UltralightBoson(spin=1, model="relativistic")
 
 
+def process(BHMASS, PROCAMASS, plot=False,alphauppercutoff=0.335, alphalowercutoff=0.06,SecondaryMass=10):
 
-def process(BHMASS, PROCAMASS, plot=False,procacutoff=0.4, SecondaryMass=10):
+    alphaval = alphavalue(BHMASS, PROCAMASS)
+    print("Alpha Value: {0}".format(alphaval))
     #alpha values larger than 0.02 produce energy fluxes larger than the undressed flux
-    if alphavalue(BHMASS,PROCAMASS)>procacutoff and spin==1:
-        print("alpha>{0}. skipping loop".format(procacutoff))
+    if alphaval>alphauppercutoff and spin==1:
+        print("alpha>{0}. skipping loop".format(alphauppercutoff))
+        return None
+    if alphaval<alphalowercutoff and spin==1:
+        print("alpha<{0}. skipping loop".format(alphalowercutoff))
         return None
 
     print("SMBH Mass: {0}\nProca Mass: {1}".format(BHMASS, PROCAMASS))
     unmoddedwv = unmoddedwvcl(BHMASS, SecondaryMass, BHSpin, p0, e0, x0, qS, phiS, qK, phiK, dist, mich=mich, dt=dt,T=T)
     unmoddedtraj = unmoddedwvcl.Trajectory
 
-    moddedwv = moddedwvcl(BHMASS, SecondaryMass, PROCAMASS, BHSpin,p0,e0,x0,T=T, qS=qS, phiS=phiS, qK=qK, phiK=phiK, dist=dist,mich=mich,dt=dt, BosonSpin=spin)
+    moddedwv = moddedwvcl(BHMASS, SecondaryMass, PROCAMASS, BHSpin,p0,e0,x0,T=T, qS=qS, phiS=phiS, qK=qK, phiK=phiK, dist=dist,mich=mich,dt=dt, BosonSpin=spin, UltralightBoson = ulb)
     moddedtraj = moddedwvcl.Trajectory
 
     #azimuthal phase difference
@@ -161,13 +166,37 @@ def process(BHMASS, PROCAMASS, plot=False,procacutoff=0.4, SecondaryMass=10):
 if __name__=='__main__':
     #run analysis
 
-    tmparr = np.arange(1,10,0.1)
+    tmparr = np.arange(1,10,.1)
     SMBHMasses = np.kron(tmparr,[1e6,1e7]) #solar masses
     SecondaryMass = 10 #solar masses
-    ProcaMasses = np.kron(tmparr, [1e-17,1e-18,1e-19,1e-20]) #eV
+    ProcaMasses = np.kron(tmparr, [1e-17,1e-18]) #eV
+
+    Parallel(n_jobs=NCPUs, prefer="threads")(delayed(process)(bhmass, pmass,plot=PlotData, SecondaryMass=SecondaryMass) for bhmass in SMBHMasses for pmass in ProcaMasses)
 
 
 
-    PROCAALPHACUTOFF = 0.4 #cutoff for dimensionless gravitational coupling. values larger than this correspond to proca clouds whose GW fluxes approximately exceed that of the EMRI
 
-    Parallel(n_jobs=NCPUs)(delayed(process)(bhmass, pmass,plot=PlotData, procacutoff=PROCAALPHACUTOFF,SecondaryMass=SecondaryMass) for bhmass in SMBHMasses for pmass in ProcaMasses)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""
+alpha values for mode = 1 overtone = 0
+[0.06, 0.07, 0.08, 0.09, 0.1, 0.11, 0.12, 0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 0.19, 0.2, 0.21, 0.22, 0.23, 0.24, 0.25, 0.26, 0.27, 0.28, 0.29, 0.3, 0.31, 0.315, 0.32, 0.325, 0.33, 0.335]
+
+"""
