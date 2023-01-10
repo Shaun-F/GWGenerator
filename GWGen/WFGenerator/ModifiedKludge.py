@@ -64,9 +64,6 @@ class EMRIWithProcaWaveform(ProcaSolution,AAKWaveformBase, Kerr):
         qS,phiS,qK,phiK = self.sanity_check_angles(qs,phis,qk,phik)
         self.sanity_check_init(InitialSMBHMass, SecondaryMass,InitialBHSpin,p0,e0,x0)
 
-
-        PrettyPrint("Generating Trajectory for black mass {0} and spin {1}".format(InitialSMBHMass, InitialBHSpin))
-
         #get the Trajectory
         t,p,e,Y,pphi,ptheta,pr = self.inspiral_generator(InitialSMBHMass,SecondaryMass,InitialBHSpin,p0,e0,x0,T=T, dt=dt, Phi_phi0=Phi_phi0, Phi_theta0=Phi_theta0, Phi_r0=Phi_r0, **self.inspiralkwargs)
         self.Trajectory = {"t":t, "p":p, "e":e, "Y":Y, "Phi_phi":pphi, "Phi_theta":ptheta, "Phi_r":pr}
@@ -79,8 +76,6 @@ class EMRIWithProcaWaveform(ProcaSolution,AAKWaveformBase, Kerr):
         if self.num_modes_kept < 4:
             self.num_modes_kept = self.nmodes = 4
 
-        print("final mass {0}".format(self.FinalBHMass))
-        print("final spin {0}".format(self.FinalBHSpin))
         PrettyPrint("Generating Waveform")
 
         self.waveform = self.create_waveform(t,InitialSMBHMass,InitialBHSpin,p,e,Y,pphi, ptheta, pr, SecondaryMass,qS,phiS, qK, phiK, dist, self.nmodes,mich=mich,dt=dt,T=T)

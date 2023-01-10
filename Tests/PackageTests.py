@@ -10,7 +10,7 @@ class TestMethods(unittest.TestCase):
     def test_LowEnergyLimit(self):
         M = 1e6
         m = 10
-        murange = [0.81e-17, 4.47e-17]
+        murange = [0.81e-17, 1.81e-17]
         mudelta = 0.1
         bhspin = 0.9
         p0=10
@@ -29,12 +29,13 @@ class TestMethods(unittest.TestCase):
         procawvcls = EMRIWithProcaWaveform(inspiral_kwargs = inspiral_kwargs.copy(), sum_kwargs = sum_kwargs.copy(), use_gpu=False)
         bare_waveform = wvcls(M, m,bhspin,p0,e0,1., qS,phiS,qK,phiK,dist, T=T,npoints=inspiral_kwargs["npoints"])
         def process(procamass):
+            print("Calculating proca mass {0}.".format(procamass))
             proca_waveform = procawvcls(M,m,procamass, bhspin, p0,e0, 1.,T=T, npoints = inspiral_kwargs["npoints"],UltralightBoson=ulb)
             mismatch = get_mismatch(bare_waveform, proca_waveform)
             return mismatch
 
-        results = [print("Calculating proca mass {0}.".format(i));process(i) for i in np.arange(murange[0], murange[-1], 0.1e-17)]
-        boolresult = (sorted(results[:10])==results[:10])
+        results = [process(i) for i in np.arange(murange[0], murange[-1], 0.1e-17)]
+        boolresult = (sorted(results)==results)
 
         self.LowEnergyLimitResults = results
         self.assertTrue(boolresult)
