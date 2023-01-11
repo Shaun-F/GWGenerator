@@ -144,7 +144,11 @@ class ProcaSolution():
 		#generate 3d interpolation function over the radial data, theta data, and alpha data
 		interp = spint.RegularGridInterpolator((alphas, RadialDataSet[0], ThetaDataSet[0]), self.__RawEnergyData)
 		coords = cartesian_product(np.array([self.alpha]), RadialDataSet[0], ThetaDataSet[0])
-		InterpolatedEnergyValues = np.reshape(interp(coords), NewShape)
+		try:
+			InterpolatedEnergyValues = np.reshape(interp(coords), NewShape)
+		except ValueError:
+			raise ValueError("Error in generating interpolation function for SMBH Mass {0}, Proca mass {1}, and alpha {2}".format(self.SMBHMass, self.ProcaMass, self.alpha))
+
 		self.radial_data = RadialDataSet[0]
 		self.theta_data = ThetaDataSet[0]
 
