@@ -147,6 +147,7 @@ class ProcaSolution():
 		try:
 			InterpolatedEnergyValues = np.reshape(interp(coords), NewShape)
 		except ValueError:
+			print("DEBUG: Input alpha {0} \n self.alpha {1} \n alpha neighbors {2} \n datasets {3} ".format(alpha, self.alpha, alphas, datas))
 			raise ValueError("Error in generating interpolation function for SMBH Mass {0}, Proca mass {1}, and alpha {2}".format(self.SMBHMass, self.ProcaMass, self.alpha))
 
 		self.radial_data = RadialDataSet[0]

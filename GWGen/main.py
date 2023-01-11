@@ -12,11 +12,11 @@ import superrad
 from superrad import ultralight_boson
 
 #number of cpus to use for parallelization
-NCPUs = 32
+NCPUs = 6
 
 #data directory relative to local parent GWGen
-#DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/../Data/Output/"
-DataDirectory = "/remote/pi213f/fell/DataStore/ProcaAroundKerrGW/GWGenOutput/"
+DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/../Data/Output/"
+#DataDirectory = "/remote/pi213f/fell/DataStore/ProcaAroundKerrGW/GWGenOutput/"
 
 #generate plots
 PlotData = False
