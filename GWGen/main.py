@@ -12,10 +12,11 @@ import superrad
 from superrad import ultralight_boson
 
 #number of cpus to use for parallelization
-NCPUs = 4
+NCPUs = 32
 
 #data directory relative to local parent GWGen
-DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/../Data/Output/"
+#DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/../Data/Output/"
+DataDirectory = "/remote/pi213f/fell/DataStore/ProcaAroundKerrGW/GWGenOutput/"
 
 #generate plots
 PlotData = False
@@ -167,9 +168,9 @@ if __name__=='__main__':
     #run analysis
 
     tmparr = np.arange(1,10,.1)
-    SMBHMasses = np.kron(tmparr,[1e6,1e7]) #solar masses
+    SMBHMasses = np.kron(tmparr,[1e5, 1e6,1e7]) #solar masses
     SecondaryMass = 10 #solar masses
-    ProcaMasses = np.kron(tmparr, [1e-17,1e-18]) #eV
+    ProcaMasses = np.kron(tmparr, [1e-16,1e-17,1e-18,1e-19]) #eV
 
     Parallel(n_jobs=NCPUs, prefer="threads")(delayed(process)(bhmass, pmass,plot=PlotData, SecondaryMass=SecondaryMass) for bhmass in SMBHMasses for pmass in ProcaMasses)
 
