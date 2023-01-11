@@ -62,12 +62,24 @@ class EMRIWithProcaWaveform(ProcaSolution,AAKWaveformBase, Kerr):
 
 
         qS,phiS,qK,phiK = self.sanity_check_angles(qs,phis,qk,phik)
-        self.sanity_check_init(InitialSMBHMass, SecondaryMass,InitialBHSpin,p0,e0,x0)
+
+        #Sanity check Initial Parameters
+        try:
+            self.sanity_check_init(InitialSMBHMass, SecondaryMass,InitialBHSpin,p0,e0,x0)
+        except ValueError as err:
+            errmessage = "Error in trajectory sanity check. \n\t SMBHMass: {0} \n\t Secondary Mass: {1} \n\t SMBHSpin: {2} \n\t ProcaMass: {3} \n Error Message: {4}".format(InitialSMBHMass,SecondaryMass, InitialBHSpin, ProcaMass, err.args[0])
+            raise ValueError(errmessage)
 
         #get the Trajectory
         t,p,e,Y,pphi,ptheta,pr = self.inspiral_generator(InitialSMBHMass,SecondaryMass,InitialBHSpin,p0,e0,x0,T=T, dt=dt, Phi_phi0=Phi_phi0, Phi_theta0=Phi_theta0, Phi_r0=Phi_r0, **self.inspiralkwargs)
         self.Trajectory = {"t":t, "p":p, "e":e, "Y":Y, "Phi_phi":pphi, "Phi_theta":ptheta, "Phi_r":pr}
-        self.sanity_check_traj(p,e,Y)
+
+        #Sanity check trajectory
+        try:
+            self.sanity_check_traj(p,e,Y)
+        except ValueError as err:
+            errmessage = "Error in trajectory sanity check. \n\t SMBHMass: {0} \n\t Secondary Mass: {1} \n\t SMBHSpin: {2} \n\t ProcaMass: {3} \n Error Message: {4}".format(InitialSMBHMass,SecondaryMass, InitialBHSpin, ProcaMass, err.args[0])
+            raise ValueError(errmessage)
 
         self.end_time = t[-1]
 

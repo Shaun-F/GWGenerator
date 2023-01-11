@@ -35,7 +35,7 @@ class ProcaSolution():
 			try:
 				self.BosonWaveform = self.BosonClass.make_waveform(BHMass, BHSpin, ProcaMass, units=units)
 			except ValueError as err:
-				print("Error in Proca Solution: \n {0}".format(err))
+				raise RuntimeError("Error in Proca Solution: \n {0}".format(err))
 
 			self.Kerr = Kerr(BHSpin=BHSpin)
 			self.alpha = alphavalue(self.SMBHMass, self.ProcaMass)

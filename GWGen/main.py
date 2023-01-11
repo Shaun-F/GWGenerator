@@ -167,12 +167,12 @@ def process(BHMASS, PROCAMASS, plot=False,alphauppercutoff=0.335, alphalowercuto
 if __name__=='__main__':
     #run analysis
 
-    tmparr = np.arange(1,10,.1)
+    tmparr = [int(i*10)/10 for i in np.arange(1,10,0.1)] #strange floating point error when doing just np.arange(1,10,0.1) for np.linspace(1,10,91). Causes issues when saving numbers to filenames
     SMBHMasses = np.kron(tmparr,[1e5, 1e6,1e7]) #solar masses
     SecondaryMass = 10 #solar masses
     ProcaMasses = np.kron(tmparr, [1e-16,1e-17,1e-18,1e-19]) #eV
 
-    Parallel(n_jobs=NCPUs, prefer="threads")(delayed(process)(bhmass, pmass,plot=PlotData, SecondaryMass=SecondaryMass) for bhmass in SMBHMasses for pmass in ProcaMasses)
+    Parallel(n_jobs=NCPUs, backend="multiprocessing")(delayed(process)(bhmass, pmass,plot=PlotData, SecondaryMass=SecondaryMass) for bhmass in SMBHMasses for pmass in ProcaMasses)
 
 
 
