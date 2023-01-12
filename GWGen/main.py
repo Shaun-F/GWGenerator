@@ -20,7 +20,7 @@ from superrad import ultralight_boson
 NCPUs = 6
 
 #data directory relative to local parent GWGen
-DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/Data/"
+DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/../Data/"
 #DataDirectory = "/remote/pi213f/fell/DataStore/ProcaAroundKerrGW/GWGenOutput/"
 
 #generate plots
@@ -77,6 +77,10 @@ def process(BHMASS, PROCAMASS, plot=False,alphauppercutoff=0.335, alphalowercuto
         return None
 
     print("SMBH Mass: {0}\nProca Mass: {1}".format(BHMASS, PROCAMASS))
+
+    #Important: only pass soft copied version of kwargs as class can overwrite global variables. Should fix this....
+    unmoddedwvcl = EMRIWaveform(inspiral_kwargs=inspiral_kwargs.copy(), sum_kwargs=sum_kwargs.copy(), use_gpu=False)
+    moddedwvcl = EMRIWithProcaWaveform(inspiral_kwargs=inspiral_kwargs.copy(), sum_kwargs=sum_kwargs.copy(), use_gpu=False)
     unmoddedwv = unmoddedwvcl(BHMASS, SecondaryMass, BHSpin, p0, e0, x0, qS, phiS, qK, phiK, dist, mich=mich, dt=dt,T=T)
     unmoddedtraj = unmoddedwvcl.Trajectory
 
@@ -114,7 +118,7 @@ def process(BHMASS, PROCAMASS, plot=False,alphauppercutoff=0.335, alphalowercuto
 
     #output data to disk
     jsondata = json.dumps(data)
-    filename = DataDir + "/Output/SMBHMass{0}_SecMass{1}_ProcaMass{2}_ProcaSpin{3}.json".format(int(BHMASS),SecondaryMass,PROCAMASS,spin)
+    filename = DataDir + "Output/SMBHMass{0}_SecMass{1}_ProcaMass{2}_ProcaSpin{3}.json".format(int(BHMASS),SecondaryMass,PROCAMASS,spin)
     with open(filename, "w") as file:
         file.write(jsondata)
 
@@ -164,7 +168,7 @@ def process(BHMASS, PROCAMASS, plot=False,alphauppercutoff=0.335, alphalowercuto
         """.format(mismatch, BHMASS, PROCAMASS, spin,BHSpin, p0, e0)
         ax[1,1].text(0.5,0.5, str, bbox=prop, fontsize=14, verticalalignment='center', horizontalalignment='center')
 
-        fig.savefig(DataDir+"/Plots/"+"Plot_SMBHMass{0}_SecMass{1}_ProcMass{2}_ProcSpin{5}_p0{3}_e0{4}.png".format(BHMASS,SecondaryMass,PROCAMASS,p0,e0,spin),dpi=300)
+        fig.savefig(DataDir+"Plots/"+"Plot_SMBHMass{0}_SecMass{1}_ProcMass{2}_ProcSpin{5}_p0{3}_e0{4}.png".format(BHMASS,SecondaryMass,PROCAMASS,p0,e0,spin),dpi=300)
         plt.clf()
 
     del unmoddedwv, unmoddedtraj, moddedwv, moddedtraj,unmoddedphase, moddedphase, totalphasedifference, minlen, mismatch, time, faith, data, jsondata, filename
