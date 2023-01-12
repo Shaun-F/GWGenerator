@@ -78,9 +78,10 @@ def process(BHMASS, PROCAMASS, plot=False,alphauppercutoff=0.335, alphalowercuto
 
     print("SMBH Mass: {0}\nProca Mass: {1}".format(BHMASS, PROCAMASS))
 
-    #Important: only pass soft copied version of kwargs as class can overwrite global variables. Should fix this....
+    #Important: only pass copied version of kwargs as class can overwrite global variables. Should fix this....
     unmoddedwvcl = EMRIWaveform(inspiral_kwargs=inspiral_kwargs.copy(), sum_kwargs=sum_kwargs.copy(), use_gpu=False)
     moddedwvcl = EMRIWithProcaWaveform(inspiral_kwargs=inspiral_kwargs.copy(), sum_kwargs=sum_kwargs.copy(), use_gpu=False)
+
     unmoddedwv = unmoddedwvcl(BHMASS, SecondaryMass, BHSpin, p0, e0, x0, qS, phiS, qK, phiK, dist, mich=mich, dt=dt,T=T)
     unmoddedtraj = unmoddedwvcl.Trajectory
 

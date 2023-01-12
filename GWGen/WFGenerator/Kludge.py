@@ -383,8 +383,8 @@ class EMRIWaveform(AAKWaveformBase):
 	def __init__(
         self, inspiral_kwargs={}, sum_kwargs={}, use_gpu=False, num_threads=None
     ):
-		self.inspiralkwargs = inspiral_kwargs
-		self.sumkwargs = sum_kwargs
+		self.inspiralkwargs = inspiral_kwargs.copy()
+		self.sumkwargs = sum_kwargs.copy()
 		self.use_gpu = use_gpu
 		self.num_threads = num_threads
 
