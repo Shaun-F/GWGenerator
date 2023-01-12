@@ -91,7 +91,11 @@ class ProcaSolution():
 		return val
 
 	def GetEnergyDensity(self,mode=1,overtone=0):
-		enden = self._generate_interp(self.alpha,mode=1,overtone=0)
+		try:
+			enden = self._generate_interp(self.alpha,mode=1,overtone=0)
+		except ValueError as err:
+			errmessage = "Error generating energy density: \n\t SMBHMass {0} \n\t Proca Mass {1}  \n\t Error Message {2}".format(self.SMBHMass, self.ProcaMass, err.args[0])
+			raise ValueError(errmessage)
 
 		return enden
 

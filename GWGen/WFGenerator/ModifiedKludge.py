@@ -67,7 +67,7 @@ class EMRIWithProcaWaveform(ProcaSolution,AAKWaveformBase, Kerr):
         try:
             self.sanity_check_init(InitialSMBHMass, SecondaryMass,InitialBHSpin,p0,e0,x0)
         except ValueError as err:
-            errmessage = "Error in trajectory sanity check. \n\t SMBHMass: {0} \n\t Secondary Mass: {1} \n\t SMBHSpin: {2} \n\t ProcaMass: {3} \n Error Message: {4}".format(InitialSMBHMass,SecondaryMass, InitialBHSpin, ProcaMass, err.args[0])
+            errmessage = "Error in initial parameters sanity check. \n\t SMBHMass: {0} \n\t Secondary Mass: {1} \n\t SMBHSpin: {2} \n\t ProcaMass: {3} \n Error Message: {4}".format(InitialSMBHMass,SecondaryMass, InitialBHSpin, ProcaMass, err.args[0])
             raise ValueError(errmessage)
 
         #get the Trajectory

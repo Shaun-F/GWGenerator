@@ -655,5 +655,7 @@ GWGen/WFGenerator/ModifiedKludge.py
 GWGen/WFGenerator/__init__.py
 src/Utility.cc
 src/UtilityFuncs.cpp
+src/UtilityFuncs.pyx
 src/dIdt.cpp
+src/dIdt.pyx
 src/dIdt8H_5PNe10.cc

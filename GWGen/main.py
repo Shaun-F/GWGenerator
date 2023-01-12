@@ -1,6 +1,11 @@
 import os
 import sys
 import json
+
+
+os.chdir("../")
+path = os.getcwd()
+sys.path.insert(0, path)
 import GWGen
 from GWGen.WFGenerator import *
 import numpy as np
@@ -15,26 +20,26 @@ from superrad import ultralight_boson
 NCPUs = 6
 
 #data directory relative to local parent GWGen
-DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/../Data/Output/"
+DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/Data/"
 #DataDirectory = "/remote/pi213f/fell/DataStore/ProcaAroundKerrGW/GWGenOutput/"
 
 #generate plots
-PlotData = False
+PlotData = True
 
 #boson spin
 spin=1
 
 #parameters
-BHSpin=0.9
-p0=10.
-e0=0.2
-x0=1.
-qS=1e-20
-phiS=0.
-qK=0.
-phiK=0.
-dist=1.
-mich=False
+BHSpin=0.9 #SMBH Spin
+p0=10. #Initial Semilatus Rectum
+e0=0.2 #Initial Eccentricity
+x0=1. #Initial Inclincation
+qS=np.pi/4 #Sky Location Polar Angle
+phiS=0. #Sky Location Azimuthal Angle
+qK=1e-6 #Initial BH Spin Polar Angle. We want this to be as close to zero as allowed by FEW package. This must zero so the secondary BH orbits on equator of SMBH
+phiK=0. #Initial BH Spin Azimuthal Angle
+dist=1. #Distance to source (Mpc)
+mich=False #assume LISA long baseline response approximation
 
 T=5 #LISA data run
 dt=15 #time resolution in seconds
@@ -44,7 +49,7 @@ use_gpu=False #if CUDA or cupy is installed, this flag sets GPU parallelization
 
 # keyword arguments for inspiral generator (RunKerrGenericPn5Inspiral)
 inspiral_kwargs = {
-    "npoints": 99,  # we want a densely sampled trajectory
+    "npoints": 100,  # we want a densely sampled trajectory
     "max_init_len": int(1e3),
 }
 
@@ -59,7 +64,7 @@ moddedwvcl = EMRIWithProcaWaveform(inspiral_kwargs=inspiral_kwargs, sum_kwargs=s
 ulb = superrad.ultralight_boson.UltralightBoson(spin=1, model="relativistic")
 
 
-def process(BHMASS, PROCAMASS, plot=False,alphauppercutoff=0.335, alphalowercutoff=0.06,SecondaryMass=10):
+def process(BHMASS, PROCAMASS, plot=False,alphauppercutoff=0.335, alphalowercutoff=0.06,SecondaryMass=10, DataDir = DataDirectory):
 
     alphaval = alphavalue(BHMASS, PROCAMASS)
     print("Alpha Value: {0}".format(alphaval))
@@ -83,11 +88,14 @@ def process(BHMASS, PROCAMASS, plot=False,alphauppercutoff=0.335, alphalowercuto
     moddedphase = moddedtraj["Phi_phi"]
     totalphasedifference = moddedphase[-1]-unmoddedphase[-1]
 
-    #Mismatch
+    ####Mismatch
+    #truncate waveforms to be same length
+    minlen = min([len(unmoddedwv), len(moddedwv)])
+    unmoddedwv = unmoddedwv[:minlen]
+    moddedwv = moddedwv[:minlen]
     mismatch = get_mismatch(unmoddedwv, moddedwv)
 
-    #Faithfulness
-    minlen = min([len(moddedwv), len(unmoddedwv)])
+    ####Faithfulness
     time = np.arange(minlen)*dt
     faith = Faithfulness(time, moddedwv, unmoddedwv)
 
@@ -106,11 +114,9 @@ def process(BHMASS, PROCAMASS, plot=False,alphauppercutoff=0.335, alphalowercuto
 
     #output data to disk
     jsondata = json.dumps(data)
-    filename = DataDirectory + "SMBHMass{0}_SecMass{1}_ProcMass{2}_ProcSpin{3}.json".format(BHMASS,SecondaryMass,PROCAMASS,spin)
+    filename = DataDir + "/Output/SMBHMass{0}_SecMass{1}_ProcaMass{2}_ProcaSpin{3}.json".format(int(BHMASS),SecondaryMass,PROCAMASS,spin)
     with open(filename, "w") as file:
         file.write(jsondata)
-
-
 
     if plot:
         #plots
@@ -158,9 +164,12 @@ def process(BHMASS, PROCAMASS, plot=False,alphauppercutoff=0.335, alphalowercuto
         """.format(mismatch, BHMASS, PROCAMASS, spin,BHSpin, p0, e0)
         ax[1,1].text(0.5,0.5, str, bbox=prop, fontsize=14, verticalalignment='center', horizontalalignment='center')
 
-        fig.savefig(DataDirectory+"Plot_SMBHMass{0}_SecMass{1}_ProcMass{2}_ProcSpin{5}_p0{3}_e0{4}.png".format(BHMASS,SecondaryMass,PROCAMASS,p0,e0,spin),dpi=300)
+        fig.savefig(DataDir+"/Plots/"+"Plot_SMBHMass{0}_SecMass{1}_ProcMass{2}_ProcSpin{5}_p0{3}_e0{4}.png".format(BHMASS,SecondaryMass,PROCAMASS,p0,e0,spin),dpi=300)
         plt.clf()
 
+    del unmoddedwv, unmoddedtraj, moddedwv, moddedtraj,unmoddedphase, moddedphase, totalphasedifference, minlen, mismatch, time, faith, data, jsondata, filename
+
+    return None
 
 
 
@@ -168,9 +177,9 @@ if __name__=='__main__':
     #run analysis
 
     tmparr = [int(i*10)/10 for i in np.arange(1,10,0.1)] #strange floating point error when doing just np.arange(1,10,0.1) for np.linspace(1,10,91). Causes issues when saving numbers to filenames
-    SMBHMasses = np.kron(tmparr,[1e5, 1e6,1e7]) #solar masses
+    SMBHMasses = [int(i) for i in np.kron(tmparr,[1e5, 1e6,1e7])] #solar masses
     SecondaryMass = 10 #solar masses
-    ProcaMasses = np.kron(tmparr, [1e-16,1e-17,1e-18,1e-19]) #eV
+    ProcaMasses = [round(i,22) for i in np.kron(tmparr, [1e-16,1e-17,1e-18,1e-19])] #eV   #again avoiding floating point errors
 
     Parallel(n_jobs=NCPUs, backend="multiprocessing")(delayed(process)(bhmass, pmass,plot=PlotData, SecondaryMass=SecondaryMass) for bhmass in SMBHMasses for pmass in ProcaMasses)
 
