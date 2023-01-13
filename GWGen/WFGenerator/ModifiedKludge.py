@@ -88,7 +88,5 @@ class EMRIWithProcaWaveform(ProcaSolution,AAKWaveformBase, Kerr):
         if self.num_modes_kept < 4:
             self.num_modes_kept = self.nmodes = 4
 
-        PrettyPrint("Generating Waveform")
-
         self.waveform = self.create_waveform(t,InitialSMBHMass,InitialBHSpin,p,e,Y,pphi, ptheta, pr, SecondaryMass,qS,phiS, qK, phiK, dist, self.nmodes,mich=mich,dt=dt,T=T)
         return self.waveform
