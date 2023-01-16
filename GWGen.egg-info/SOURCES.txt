@@ -1,6 +1,7 @@
 setup.py
 GWGen/__init__.py
 GWGen/main.py
+GWGen/test.py
 GWGen.egg-info/PKG-INFO
 GWGen.egg-info/SOURCES.txt
 GWGen.egg-info/dependency_links.txt
