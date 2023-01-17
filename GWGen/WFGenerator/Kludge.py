@@ -401,7 +401,7 @@ class EMRIWaveform(AAKWaveformBase):
 	            				)
 
 
-	def __call__(self, SMBHMass, SecondaryMass, BHSpin, p0, e0, x0, qs, phis, qk, phik,dist, T=1, npoints=10, FluxName="analytic", **kwargs):
+	def __call__(self, SMBHMass, SecondaryMass, BHSpin, p0, e0, x0, qs, phis, qk, phik,dist, T=1, npoints=100, FluxName="analytic", **kwargs):
 		Phi_phi0 = kwargs.get("Phi_phi0", 0)
 		Phi_theta0 = kwargs.get("Phi_theta0",0)
 		Phi_r0 = kwargs.get("Phi_r0", 0)
