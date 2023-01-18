@@ -119,7 +119,7 @@ class ProcaSolution():
 
 		#selected closest neighbors, assuming alpha values are monotonically increasing
 		##First assert requested alpha value in range of available proca data
-		assert np.logical_and(alpha>alphavalues[0], alpha<alphavalues[-1]), "Error: Alpha value out of range of available data."
+		assert np.logical_and(alpha >= alphavalues[0], alpha <= alphavalues[-1]), "Error: Alpha value out of range of available data."
 		larger_alpha_index = bisect_right(alphavalues, alpha)
 		if larger_alpha_index == 0:
 			smaller_alpha_index = 0

@@ -5,6 +5,7 @@ mp.pretty=True
 import inspect
 
 import numpy as np
+from scipy.special import erf as ERF
 from ..Utils import *
 from ..UndressedFluxes import *
 
@@ -229,7 +230,7 @@ class PNTraj(TrajectoryBase):
 		self.FluxName = kwargs.get("FluxName","analytic")
 		self.SMBHMass = M
 
-		assert int(x0)==1, "Error: Only equatorial orbits are currently implemented."
+		assert float(x0)==1., "Error: Only equatorial orbits are currently implemented."
 		#boundary values
 		if e0<10**(-10): #guard against poles in analytic expressions
 			e0=10**(-10)
@@ -314,13 +315,14 @@ class PNTraj(TrajectoryBase):
 		Phi_theta_out = result["y"][3]
 		Phi_r_out = result["y"][4]
 
-		if self.__exit_reason!="":
-			print("Integration halted before ending time. Reasons: {0}".format(self.__exit_reason))
-		else:
-			self.__exit_reason = "Integration reached boundary. Boundary location t = {0:0.2f}".format(t_out[-1])
+		if self.__exit_reason=="":
+			self.__exit_reason = "Integration reached time boundary. Boundary location t = {0:0.2f}".format(t_out[-1])
 
 		if self.__dense_output:
-			new_time_domain = np.arange(t_out[0], t_out[-1], (t_out[-1]-t_out[0])/npoints)
+			if npoints<=len(t_out):
+				npoints = len(t_out)+50
+			new_time_domain = np.array(IncreaseArrayDensity(t_out,npoints))
+
 			interpolationfunction = result["sol"]
 			new_data = interpolationfunction(new_time_domain)
 			t_out = new_time_domain

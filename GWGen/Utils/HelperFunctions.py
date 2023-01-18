@@ -17,6 +17,24 @@ alpha_match_2 = re.compile("Alpha_\d+")
 modeovertonematch = re.compile("Mode_1_Overtone_0")
 alpha_rege = re.compile("\d+")
 
+#Increase density of points for input array by specifying total number of output points
+def IncreaseArrayDensity(arr, npoints):
+    assert len(arr)<=npoints, "Error: npoints must be larger than length of input array. Length of input array: {0}".format(len(arr))
+    newarr = [arr[0]]
+    remainder = npoints%len(arr)
+    for inx, i in enumerate(arr):
+        if inx<len(arr)-1:
+            newintermediatepoints = int(floor(npoints/len(arr)))+1
+            new_array_section = np.linspace(arr[inx], arr[inx+1], newintermediatepoints)[1:]
+            _=[newarr.append(i) for i in new_array_section]
+    remainderpoints = npoints-len(newarr)
+    array_ending_section = newarr[-remainderpoints-1:]
+    new_array_ending_section = np.linspace(array_ending_section[0], array_ending_section[-1], len(array_ending_section)+remainderpoints)
+    newarr = newarr[:-remainderpoints-1]
+    _=[newarr.append(i) for i in new_array_ending_section]
+    return newarr
+
+
 
 #extract alpha value from filename
 def AlphaValFromFilename(filename):
