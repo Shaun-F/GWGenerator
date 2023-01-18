@@ -116,7 +116,7 @@ class PN(Kerr, FluxFunction):
 		radial_phase = float(y[3])
 
 		#setup guard for bad integration steps
-		if ecc>=1.0 or ecc<0 or semimaj<get_separatrix(self.a,y[1],1.):
+		if ecc>=1.0 or ecc<0 or semimaj<self.__SEPARATRIX_CUT:
 			return np.zeros_like(y)
 
 		if ecc<1e-10:
@@ -270,7 +270,7 @@ class PNTraj(TrajectoryBase):
 
 		def __integration_event_tracker_semilatus_rectum(_, y_vec):
 			p = y_vec[0]
-			res = p-get_separatrix(a,y_vec[1],x0)
+			res = p-self.__SEPARATRIX_CUTOFF
 			if res<=0:
 				self.__exit_reason = "Separatrix reached!"
 			return res
