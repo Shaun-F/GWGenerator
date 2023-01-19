@@ -39,8 +39,6 @@ spin=1
 
 #parameters
 BHSpin=0.9 #SMBH Spin
-p0=10. #Initial Semilatus Rectum
-e0=0.2 #Initial Eccentricity
 x0=1. #Initial Inclincation
 qS=np.pi/4 #Sky Location Polar Angle in solar system barycenter coordinate system
 phiS=0. #Sky Location Azimuthal Angle in solar system barycenter coordinate system
@@ -49,7 +47,7 @@ phiK=0. #Initial BH Spin Azimuthal Angle in solar system barycenter coordinate s
 dist=1. #Distance to source (Mpc)
 mich=False #assume LISA long baseline response approximation
 
-T=5 #LISA data run
+T=8 #LISA data run is 5 years. We set the max time to be longer because the proca cloud extends the inspiral time
 dt=15 #time resolution in seconds
 
 use_gpu=False #if CUDA or cupy is installed, this flag sets GPU parallelization
@@ -59,6 +57,7 @@ use_gpu=False #if CUDA or cupy is installed, this flag sets GPU parallelization
 inspiral_kwargs = {
     "npoints": 100,  # we want a densely sampled trajectory
     "max_init_len": int(1e3),
+    "dense_output":True
 }
 
 # keyword arguments for summation generator (AAKSummation)
@@ -82,7 +81,7 @@ def process(BHMASS, PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alphalowerc
     if alphaval<alphalowercutoff and spin==1:
         return None
 
-    p0 = GetInitialP(BHMASS, e0) #ensure coalescence after 5 years
+    p0 = GetInitialP(BHMASS, e0) #approximate coalescence after 5 years for undressed system
     print("Alpha Value: {2}\nSMBH Mass: {0}\nProca Mass: {1}\n Eccentricity: {3}\nSemi-latus Rectum: {4}".format(BHMASS, PROCAMASS,alphaval, e0, p0))
 
     #Important: only pass copied version of kwargs as class can overwrite global variables. Should fix this....
