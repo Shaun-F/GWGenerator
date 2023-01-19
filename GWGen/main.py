@@ -24,6 +24,9 @@ from matplotlib import figure
 import superrad
 from superrad import ultralight_boson
 
+from astropy.units import yr, s
+SecPerYR = yr.to(s)
+
 #data directory relative to local parent GWGen
 DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/Data/"
 #DataDirectory = "/remote/pi213f/fell/DataStore/ProcaAroundKerrGW/GWGenOutput/"
@@ -70,7 +73,7 @@ ulb = superrad.ultralight_boson.UltralightBoson(spin=1, model="relativistic")
 
 
 
-def process(BHMASS, PROCAMASS, plot=False,alphauppercutoff=0.335, alphalowercutoff=0.06,SecondaryMass=10, DataDir = DataDirectory):
+def process(BHMASS, PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alphalowercutoff=0.06,SecondaryMass=10, DataDir = DataDirectory):
 
     alphaval = alphavalue(BHMASS, PROCAMASS)
     #alpha values larger than 0.02 produce energy fluxes larger than the undressed flux
@@ -79,7 +82,8 @@ def process(BHMASS, PROCAMASS, plot=False,alphauppercutoff=0.335, alphalowercuto
     if alphaval<alphalowercutoff and spin==1:
         return None
 
-    print("Alpha Value: {2}\nSMBH Mass: {0}\nProca Mass: {1}".format(BHMASS, PROCAMASS,alphaval))
+    p0 = GetInitialP(BHMASS, e0) #ensure coalescence after 5 years
+    print("Alpha Value: {2}\nSMBH Mass: {0}\nProca Mass: {1}\n Eccentricity: {3}\nSemi-latus Rectum: {4}".format(BHMASS, PROCAMASS,alphaval, e0, p0))
 
     #Important: only pass copied version of kwargs as class can overwrite global variables. Should fix this....
     unmoddedwvcl = EMRIWaveform(inspiral_kwargs=inspiral_kwargs.copy(), sum_kwargs=sum_kwargs.copy(), use_gpu=False)
@@ -95,6 +99,7 @@ def process(BHMASS, PROCAMASS, plot=False,alphauppercutoff=0.335, alphalowercuto
     unmoddedphase = unmoddedtraj["Phi_phi"]
     moddedphase = moddedtraj["Phi_phi"]
     totalphasedifference = moddedphase[-1]-unmoddedphase[-1]
+    totalorbitsdifference = totalphasedifference/(4*np.pi)
 
     ####Mismatch
     #truncate waveforms to be same length
@@ -117,20 +122,21 @@ def process(BHMASS, PROCAMASS, plot=False,alphauppercutoff=0.335, alphalowercuto
             "BHSpin":spin,
             "Trajectory Exit Reason": moddedwvcl.inspiral_generator.exit_reason,
             "mismatch":mismatch,
-            "faithfulness":faith
+            "faithfulness":faith,
+            "DeltaNOrbits":totalorbitsdifference
             }
 
 
     #output data to disk
     jsondata = json.dumps(data)
-    filename = DataDir + "Output/SMBHMass{0}_SecMass{1}_ProcaMass{2}_ProcaSpin{3}.json".format(int(BHMASS),SecondaryMass,PROCAMASS,spin)
+    filename = DataDir + "Output/SMBHMass{0}_SecMass{1}_ProcaMass{2}_ProcaSpin{3}_e0{4}_p0{5}.json".format(int(BHMASS),SecondaryMass,PROCAMASS,spin,int(e0*10)/10,int(p0*10)/10)
     with open(filename, "w") as file:
         file.write(jsondata)
 
-    if args.plot:
+    if plot:
         #plots
         fig = figure.Figure(figsize=(16,8))
-        ax = fig.subplots(2,2)
+        ax = fig.subplots(3,2)
         plt.subplots_adjust(wspace=0.5,hspace=0.5)
 
         dom1 = np.arange(len(unmoddedwv))*dt
@@ -174,6 +180,20 @@ def process(BHMASS, PROCAMASS, plot=False,alphauppercutoff=0.335, alphalowercuto
         """.format(mismatch, BHMASS, PROCAMASS, spin,BHSpin, p0, e0)
         ax[1,1].text(0.5,0.5, string, bbox=prop, fontsize=14, verticalalignment='center', horizontalalignment='center')
 
+        ax[2,0].plot(moddedtraj["t"]/SecPerYR, moddedtraj["p"], label="With Proca")
+        ax[2,0].plot(unmoddedtraj["t"]/SecPerYR, unmoddedtraj["p"], label="Without Proca")
+        ax[2,0].set_title("Semi-latus Rectum Evolution")
+        ax[2,0].set_xlabel("time (yr)")
+        ax[2,0].set_ylabel("semi-latus rectum")
+        ax[2,0].legend()
+
+        ax[2,1].plot(moddedtraj["t"]/SecPerYR, moddedtraj["e"], label="With Proca")
+        ax[2,1].plot(unmoddedtraj["t"]/SecPerYR, unmoddedtraj["e"], label="Without Proca")
+        ax[2,1].set_title("Eccentricity Evolution")
+        ax[2,1].set_xlabel("time (yr)")
+        ax[2,1].set_ylabel("eccentricity")
+        ax[2,1].legend()
+
         fig.savefig(DataDir+"Plots/"+"Plot_SMBHMass{0}_SecMass{1}_ProcMass{2}_ProcSpin{5}_p0{3}_e0{4}.png".format(BHMASS,SecondaryMass,PROCAMASS,p0,e0,spin),dpi=300)
         #strange memory leak in savefig method. Calling different clear functions and using different Figure instance resolves problem
         plt.close(fig)
@@ -199,9 +219,10 @@ if __name__=='__main__':
 
     DataDir = DataDirectory
 
-    tmparr = [int(i*10)/10 for i in np.arange(1,10,0.1)] #strange floating point error when doing just np.arange(1,10,0.1) for np.linspace(1,10,91). Causes issues when saving numbers to filenames
+    tmparr = np.linspace(1,9,9,dtype=np.int64) #strange floating point error when doing just np.arange(1,10,0.1) for np.linspace(1,10,91). Causes issues when saving numbers to filenames
     SMBHMasses = sorted([int(i) for i in np.kron(tmparr,[1e5, 1e6,1e7])]) #solar masses
     SecondaryMass = 10 #solar masses
+    e0list = [0.1,0.2,0.3,0.4,0.5,0.6,0.7]
     ProcaMasses = [round(i,22) for i in np.kron(tmparr, [1e-16,1e-17,1e-18,1e-19])] #eV   #again avoiding floating point errors
 
     #make sure output directory tree is built
@@ -217,7 +238,8 @@ if __name__=='__main__':
 
     for bhmass in SMBHMasses:
         for pmass in ProcaMasses:
-            process(bhmass, pmass,plot=PlotData, SecondaryMass=SecondaryMass, DataDir=DataDir)
+            for ecc in e0list:
+                process(bhmass, pmass,ecc, plot=PlotData, SecondaryMass=SecondaryMass, DataDir=DataDir)
 
 
 

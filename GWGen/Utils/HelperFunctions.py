@@ -1,6 +1,7 @@
 import time
 import numpy as np
 import scipy as sp
+from scipy import interpolate
 import scipy.fft
 import warnings
 from mpmath import *
@@ -16,6 +17,24 @@ alpha_match_1 = re.compile("Alpha_\d+_\d+")
 alpha_match_2 = re.compile("Alpha_\d+")
 modeovertonematch = re.compile("Mode_1_Overtone_0")
 alpha_rege = re.compile("\d+")
+
+
+def GetInitialP(SMBHMass, InitialEccentricity):
+    """
+    estimate initial semi-latus rectum for given BH mass and initial eccentricity such that the coalescence occurs after 5 years
+    """
+    y = [1e5,3e5, 4e5, 5e5, 1e6,3e6,5e6,1e7]
+    x = [0.1,0.3,0.5,0.7,0.8]
+    z = [[30,  20.1,17.4,14.5, 11.1,    7.,   5.7, 4.6],
+        [34.8, 20, 17.3, 15.5, 11, 6.97, 5.55, 4.83],
+        [34.2, 19.6, 17, 15.2, 10.9, 6.9, 5.8, 4.76],
+        [32.5, 18.7, 16.25, 14.56, 10.47, 6.64, 5.53, 4.46],
+        [30.9, 17.9, 15.5, 13.9, 10.0, 6.27, 4.9, 4.3]]
+    interp = sp.interpolate.RectBivariateSpline(x,y,z, kx=1, ky=1,s=0)
+
+    retvalue = interp(InitialEccentricity, SMBHMass)
+    return retvalue[0][0]
+
 
 #Increase density of points for input array by specifying total number of output points
 def IncreaseArrayDensity(arr, npoints):
