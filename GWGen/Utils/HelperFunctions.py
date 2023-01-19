@@ -19,20 +19,29 @@ alpha_rege = re.compile("\d+")
 
 #Increase density of points for input array by specifying total number of output points
 def IncreaseArrayDensity(arr, npoints):
-    assert len(arr)<=npoints, "Error: npoints must be larger than length of input array. Length of input array: {0}".format(len(arr))
-    newarr = [arr[0]]
-    remainder = npoints%len(arr)
-    for inx, i in enumerate(arr):
-        if inx<len(arr)-1:
-            newintermediatepoints = int(floor(npoints/len(arr)))+1
-            new_array_section = np.linspace(arr[inx], arr[inx+1], newintermediatepoints)[1:]
-            _=[newarr.append(i) for i in new_array_section]
-    remainderpoints = npoints-len(newarr)
-    array_ending_section = newarr[-remainderpoints-1:]
-    new_array_ending_section = np.linspace(array_ending_section[0], array_ending_section[-1], len(array_ending_section)+remainderpoints)
-    newarr = newarr[:-remainderpoints-1]
-    _=[newarr.append(i) for i in new_array_ending_section]
-    return newarr
+    assert len(arr)<=npoints, "Error: npoints must be equal to or larger than length of input array"
+    if npoints>len(arr):
+        newarr = [arr[0]]
+        remainder = npoints*len(arr)
+        for inx, i in enumerate(arr):
+            if inx<len(arr)-1:
+                newintpnts = int(floor(npoints/len(arr)))+1
+                newsec = np.linspace(arr[inx], arr[inx+1], newintpnts)[1:]
+                _=[newarr.append(i) for i in newsec]
+        remainderpoints=npoints-len(newarr)
+        arrend = newarr[-remainderpoints-2:]
+        arrendavgs = 1/2*(np.array(arrend)[1:] + np.array(arrend)[:-1])
+        newarrend = []
+        for i in range(len(arrend) + len(arrendavgs)):
+            if i%2 == 0:
+                newarrend.append(arrend[int(i/2)])
+            if i%2 == 1:
+                newarrend.append(arrendavgs[int((i-1)/2)])
+        newarr = newarr[:-remainderpoints-3]
+        _=[newarr.append(i) for i in newarrend]
+        return newarr
+    elif npoints==len(arr):
+        return arr
 
 
 

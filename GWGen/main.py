@@ -39,10 +39,10 @@ BHSpin=0.9 #SMBH Spin
 p0=10. #Initial Semilatus Rectum
 e0=0.2 #Initial Eccentricity
 x0=1. #Initial Inclincation
-qS=np.pi/4 #Sky Location Polar Angle
-phiS=0. #Sky Location Azimuthal Angle
-qK=1e-6 #Initial BH Spin Polar Angle. We want this to be as close to zero as allowed by FEW package. This must zero so the secondary BH orbits on equator of SMBH
-phiK=0. #Initial BH Spin Azimuthal Angle
+qS=np.pi/4 #Sky Location Polar Angle in solar system barycenter coordinate system
+phiS=0. #Sky Location Azimuthal Angle in solar system barycenter coordinate system
+qK=1e-6 #Initial BH Spin Polar Angle in solar system barycenter coordinate system
+phiK=0. #Initial BH Spin Azimuthal Angle in solar system barycenter coordinate system
 dist=1. #Distance to source (Mpc)
 mich=False #assume LISA long baseline response approximation
 
@@ -115,6 +115,7 @@ def process(BHMASS, PROCAMASS, plot=False,alphauppercutoff=0.335, alphalowercuto
             "p0":p0,
             "e0":e0,
             "BHSpin":spin,
+            "Trajectory Exit Reason": moddedwvcl.inspiral_generator.exit_reason,
             "mismatch":mismatch,
             "faithfulness":faith
             }

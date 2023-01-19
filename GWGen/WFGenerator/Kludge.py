@@ -5,7 +5,6 @@ mp.pretty=True
 import inspect
 
 import numpy as np
-from scipy.special import erf as ERF
 from ..Utils import *
 from ..UndressedFluxes import *
 
@@ -20,6 +19,7 @@ import astropy.constants as cons
 
 SEPARATRIXDELTA=0.2;
 KGtoMsun = unit.kg.to(unit.Msun)
+NegativeEccentricityThreshold=-1e-3
 
 class PN(Kerr, FluxFunction):
 
@@ -114,14 +114,15 @@ class PN(Kerr, FluxFunction):
 		ecc = float(y[1])
 		phi_phase = float(y[2])
 		radial_phase = float(y[3])
+		if ecc<1e-6:
+			#if eccentricity is zero, replace it by small number to guard against poles in integrals of motion
+			ecc=1e-6
 
 		#setup guard for bad integration steps
-		if ecc>=1.0 or ecc<0 or semimaj<self.__SEPARATRIX_CUT:
+		if ecc>=1.0  or ecc<0 or semimaj<get_separatrix(self.a,ecc,1.):
 			return np.zeros_like(y)
 
-		if ecc<1e-10:
-			#if eccentricity is zero, replace it by small number to guard against poles in integrals of motion
-			ecc=1e-10
+
 		try:
 			# Orbital Frequency
 			orb_freqs = self.OrbitFrequencies(ecc,semimaj,1);
@@ -171,21 +172,17 @@ class PN(Kerr, FluxFunction):
 		dede = self.dEde()(ecc,semimaj)*self.dEdeUnit
 		norm = (dldp*dede - dlde*dedp)
 
-		pdotCorr = (1/norm)*(dede*Lcorr - dlde*Ecorr)
-		edotCorr = (1/norm)*(dldp*Ecorr - dedp*Lcorr)
 
-		if ecc<=10**(-10):
+
+		if ecc<=1e-6:
 			edot=0
+			pdotcorr = Ecorr/dedp
+			pdot = pdotN + pdotcorr
 		else:
+			pdotCorr = (1/norm)*(dede*Lcorr - dlde*Ecorr)
+			edotCorr = (1/norm)*(dldp*Ecorr - dedp*Lcorr)
 			edot = edotN + edotCorr
-
-		pdot = pdotN + pdotCorr
-
-		"""
-		#adimensionlize
-		pdot = (pdot/cons.c).decompose().value
-		edot = (edot*cons.G*self.SMBHMass*unit.Msun/(cons.c**3)).decompose().value
-		"""
+			pdot = pdotN + pdotCorr
 
 		#rate of change of azimuthal phase
 		Phi_phi_dot = Omega_phi
@@ -270,7 +267,7 @@ class PNTraj(TrajectoryBase):
 
 		def __integration_event_tracker_semilatus_rectum(_, y_vec):
 			p = y_vec[0]
-			res = p-self.__SEPARATRIX_CUTOFF
+			res = p-get_separatrix(a,y_vec[1],1.)
 			if res<=0:
 				self.__exit_reason = "Separatrix reached!"
 			return res
@@ -293,7 +290,7 @@ class PNTraj(TrajectoryBase):
 		__integration_event_tracker_eFlux.terminal=True
 		__integration_event_tracker_pFlux.terminal=True
 
-		self.__integration_event_trackers = [__integration_event_tracker_eccentricity,
+		self.__integration_event_trackers = [#__integration_event_tracker_eccentricity,
 										__integration_event_tracker_semilatus_rectum,
 										__integration_event_tracker_pFlux]
 
@@ -308,9 +305,12 @@ class PNTraj(TrajectoryBase):
 							max_step = max_step_size #dimensionless seconds
 						)
 
+		#check eccentricity bounds
+		assert np.all(result['y'][1]>=NegativeEccentricityThreshold), "Error: Eccentricity outside tolerable negative value range."
 		t_out = result["t"]
 		p_out = result["y"][0]
-		e_out = result["y"][1]
+		e_out = result['y'][1]*(result["y"][1]>=0) #Cast negative values to 0. ALready confirmed negatives values are greater than threshold
+		e_out[e_out==0]=1e-10 #cast the zero values to small positive values to avoid poles in internal functions
 		Phi_phi_out = result["y"][2]
 		Phi_theta_out = result["y"][3]
 		Phi_r_out = result["y"][4]
@@ -327,6 +327,8 @@ class PNTraj(TrajectoryBase):
 			new_data = interpolationfunction(new_time_domain)
 			t_out = new_time_domain
 			p_out, e_out, Phi_phi_out, Phi_theta_out, Phi_r_out = new_data
+			e_out = e_out*(e_out>=0)
+			e_out[e_out==0]=1e-10 #cast zero values to small positive values to avoid
 
 		#add polar data
 		#### Only equatorial orbits implemented.
