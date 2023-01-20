@@ -19,6 +19,22 @@ modeovertonematch = re.compile("Mode_1_Overtone_0")
 alpha_rege = re.compile("\d+")
 
 
+def KerrFrequencyAbsoluteBoundary(ecc):
+    """
+    Gives the absolute semi-latus rectum lower cutoff to ensure Kerr Frequencies doesnt throw errors
+    """
+    EccentricitySemilatusrectumCutoff = [[0.9,3.34],
+                 [0.8,3.31],
+                 [0.7,3.08],
+                 [0.6,2.96],
+                 [0.5,2.84],
+                 [0.4,2.72],
+                 [0.3,2.61],
+                 [0.2,2.51],
+                 [0.1,2.41],
+                 [1e-10,2.33]]
+    return None #not currently implemented.
+
 def GetInitialP(SMBHMass, InitialEccentricity):
     """
     estimate initial semi-latus rectum for given BH mass and initial eccentricity such that the coalescence occurs after 5 years

@@ -14,6 +14,7 @@ path = os.getcwd()
 sys.path.insert(0, path)
 import GWGen
 from GWGen.WFGenerator import *
+from GWGen.Utils import GetInitialP
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
@@ -55,7 +56,7 @@ use_gpu=False #if CUDA or cupy is installed, this flag sets GPU parallelization
 
 # keyword arguments for inspiral generator (RunKerrGenericPn5Inspiral)
 inspiral_kwargs = {
-    "npoints": 100,  # we want a densely sampled trajectory
+    "npoints": 130,  # we want a densely sampled trajectory
     "max_init_len": int(1e3),
     "dense_output":True
 }

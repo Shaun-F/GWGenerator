@@ -119,7 +119,7 @@ class PN(Kerr, FluxFunction):
 			ecc=1e-6
 
 		#setup guard for bad integration steps
-		if ecc>=1.0  or ecc<0 or semimaj<get_separatrix(self.a,ecc,1.):
+		if ecc>=1.0  or ecc<0 or semimaj<self.__SEPARATRIX_CUT:
 			return np.zeros_like(y)
 
 
@@ -267,10 +267,12 @@ class PNTraj(TrajectoryBase):
 
 		def __integration_event_tracker_semilatus_rectum(_, y_vec):
 			p = y_vec[0]
-			res = p-get_separatrix(a,y_vec[1],1.)
-			if res<=0:
+			res_separatrix = p-self.__SEPARATRIX_CUTOFF
+			res_absolute_boundary = p-2.4
+			if res_separatrix<=0:
 				self.__exit_reason = "Separatrix reached!"
-			return res
+			return res_separatrix
+
 
 		def __integration_event_tracker_eFlux(_, y_vec):
 			Eflux = self.PNEvaluator.UndressedeFlux(y_vec[1], y_vec[0])
