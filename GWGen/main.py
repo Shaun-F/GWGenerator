@@ -57,7 +57,7 @@ use_gpu=False #if CUDA or cupy is installed, this flag sets GPU parallelization
 # keyword arguments for inspiral generator (RunKerrGenericPn5Inspiral)
 inspiral_kwargs = {
     "npoints": 130,  # we want a densely sampled trajectory
-    "max_init_len": int(1e3),
+    "max_init_len": int(1e4),
     "dense_output":True
 }
 
@@ -73,7 +73,7 @@ ulb = superrad.ultralight_boson.UltralightBoson(spin=1, model="relativistic")
 
 
 
-def process(BHMASS, PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alphalowercutoff=0.06,SecondaryMass=10, DataDir = DataDirectory):
+def process(BHMASS, PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alphalowercutoff=0.06,SecondaryMass=10, DataDir = DataDirectory, OverwriteSolution=False):
 
     alphaval = alphavalue(BHMASS, PROCAMASS)
     #alpha values larger than 0.02 produce energy fluxes larger than the undressed flux
@@ -81,6 +81,13 @@ def process(BHMASS, PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alphalowerc
         return None
     if alphaval<alphalowercutoff and spin==1:
         return None
+
+
+    filename = DataDir + "Output/SMBHMass{0}_SecMass{1}_ProcaMass{2}_ProcaSpin{3}_e0{4}_p0{5}.json".format(int(BHMASS),SecondaryMass,PROCAMASS,spin,int(e0*10)/10,int(p0*10)/10)
+
+    if os.path.exists(filename):
+        return None
+
 
     p0 = GetInitialP(BHMASS, e0) #approximate coalescence after 5 years for undressed system
     print("Alpha Value: {2}\nSMBH Mass: {0}\nProca Mass: {1}\n Eccentricity: {3}\nSemi-latus Rectum: {4}".format(BHMASS, PROCAMASS,alphaval, e0, p0))
@@ -129,7 +136,6 @@ def process(BHMASS, PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alphalowerc
 
     #output data to disk
     jsondata = json.dumps(data)
-    filename = DataDir + "Output/SMBHMass{0}_SecMass{1}_ProcaMass{2}_ProcaSpin{3}_e0{4}_p0{5}.json".format(int(BHMASS),SecondaryMass,PROCAMASS,spin,int(e0*10)/10,int(p0*10)/10)
     with open(filename, "w") as file:
         file.write(jsondata)
 
