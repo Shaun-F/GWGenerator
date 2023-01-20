@@ -56,7 +56,7 @@ use_gpu=False #if CUDA or cupy is installed, this flag sets GPU parallelization
 
 # keyword arguments for inspiral generator (RunKerrGenericPn5Inspiral)
 inspiral_kwargs = {
-    "npoints": 130,  # we want a densely sampled trajectory
+    "npoints": 110,  # we want a densely sampled trajectory
     "max_init_len": int(1e4),
     "dense_output":True
 }
