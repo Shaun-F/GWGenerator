@@ -82,14 +82,14 @@ def process(BHMASS, PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alphalowerc
     if alphaval<alphalowercutoff and spin==1:
         return None
 
-
+    p0 = GetInitialP(BHMASS, e0) #approximate coalescence after 5 years for undressed system
     filename = DataDir + "Output/SMBHMass{0}_SecMass{1}_ProcaMass{2}_ProcaSpin{3}_e0{4}_p0{5}.json".format(int(BHMASS),SecondaryMass,PROCAMASS,spin,int(e0*10)/10,int(p0*10)/10)
 
     if os.path.exists(filename):
+        print("Solution already exists. Skipping...")
         return None
 
 
-    p0 = GetInitialP(BHMASS, e0) #approximate coalescence after 5 years for undressed system
     print("Alpha Value: {2}\nSMBH Mass: {0}\nProca Mass: {1}\n Eccentricity: {3}\nSemi-latus Rectum: {4}".format(BHMASS, PROCAMASS,alphaval, e0, p0))
 
     #Important: only pass copied version of kwargs as class can overwrite global variables. Should fix this....
