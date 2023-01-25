@@ -99,17 +99,28 @@ class ProcaSolution():
 
 		return enden
 
-	def _get_closest_alpha_datasets(self, alpha,mode=1,overtone=0):
+	def __get_closest_datasets(self, alpha, bhspin, mode=1,overtone=0):
 
 
 		#import filenames
 		allfilenames = glob.glob(pathToSolutionSet+"BHSpin*")
-		modeovertonebool = [bool(re.search("Mode_1_Overtone_0", i)) for i in allfilenames]
+		modeovertonebool = [bool(re.search("Mode_"+str(mode)+"_Overtone_"+str(overtone), i)) for i in allfilenames]
 		newallfilenames=[]
 		for inx, boolval in enumerate(modeovertonebool):
 		    if boolval:
 		        newallfilenames.append(allfilenames[inx])
 		allfilenames = newallfilenames
+
+		#Get list of available bh spins
+		bhspins = [BHSpinValFromFilename(i) for i in allfilenames]
+		larger_bhspin_index = bisect_right(bhspins, bhspin)
+		if larger_bhspin_index==0:
+			smaller_bhspin_index=0
+		else:
+			smaller_bhspin_index = larger_bhspin_index-1
+
+		Right_BHSpin_Neighbor = bhspins[larger_bhspin_index]
+		Left_BHSpin_Neighbor = bhspins[smaller_bhspin_index]
 
 		#sort filenames
 		unsorted_alphavalues = list(map(AlphaValFromFilename, allfilenames))
@@ -125,15 +136,25 @@ class ProcaSolution():
 			smaller_alpha_index = 0
 		else:
 			smaller_alpha_index = larger_alpha_index - 1
-		alphaNeighborsIndex = (smaller_alpha_index, larger_alpha_index)
-		selectedfilenames = [allfilenames[i] for i in alphaNeighborsIndex]
-		selecteddata = [np.load(i) for i in selectedfilenames]
 
-		#import data
-		selecteddata = [np.load(i) for i in selectedfilenames]
-		selectedalphas = alphavalues[[alphaNeighborsIndex[0],alphaNeighborsIndex[1]]]
+		Right_Alpha_Neighbor = alphavalues[larger_alpha_index]
+		Left_Alpha_Neighbor = alphavalues[smaller_alpha_index]
 
-		return selectedalphas, selecteddata
+		SmallSmall_FileName = pathToSolutionSet+ProcaDataNameGenerator(Left_BHSpin_Neighbor, Left_Alpha_Neighbor,mode,overtone)
+		SmallLarge_FileName = pathToSolutionSet+ProcaDataNameGenerator(Left_BHSpin_Neighbor, Right_Alpha_Neighbor,mode,overtone)
+		LargeSmall_FileName  = pathToSolutionSet+ProcaDataNameGenerator(Right_BHSpin_Neighbor, Left_Alpha_Neighbor,mode,overtone)
+		LargeLarge_FileName = pathToSolutionSet+ProcaDataNameGenerator(Right_BHSpin_Neighbor, Right_Alpha_Neighbor,mode,overtone)
+
+
+		#Import the data
+		SelectedFilenames = [SmallSmall_FileName, SmallLarge_FileName, LargeSmall_FileName, LargeLarge_FileName]
+		SelectedDatasets = [np.load(i) for i in SelectedFilenames]
+
+
+		selectedalphas = [Left_Alpha_Neighbor, Right_Alpha_Neighbor]
+		selectedbhspin = [Left_BHSpin_Neighbor, Right_BHSpin_Neighbor]
+		return selectedalphas, selectedbhspin, SelectedDatasets
+
 
 	def _generate_interp(self, alpha,mode=1,overtone=0):
 		alphas, datas = self._get_closest_alpha_datasets(alpha,mode=mode, overtone=overtone)

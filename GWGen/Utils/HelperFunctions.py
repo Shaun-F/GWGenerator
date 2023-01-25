@@ -1,4 +1,5 @@
 import time
+import fractions
 import numpy as np
 import scipy as sp
 from scipy import interpolate
@@ -16,8 +17,15 @@ mp.pretty=True
 alpha_match_1 = re.compile("Alpha_\d+_\d+")
 alpha_match_2 = re.compile("Alpha_\d+")
 modeovertonematch = re.compile("Mode_1_Overtone_0")
-alpha_rege = re.compile("\d+")
+number_rege = re.compile("\d+")
+bhspin_rege = re.compile("BHSpin_\d+_\d+")
 
+
+def ProcaDataNameGenerator(bhspin, alpha, mode, overtone):
+    bhspin_fraction = fractions.Fraction.from_float(bhspin).limit_denominator(1000)
+    alpha_fraction = fractions.Fraction.from_float(alpha).limit_denominator(1000)
+    string = "BHSpin_"+str(bhspin_fraction.numerator)+"_"+str(bhspin_fraction.denominator)+"_Alpha_"+str(alpha_fraction.numerator)+"_"+str(alpha_fraction.denominator)+"_Mode_"+str(mode)+"_Overtone_"+str(overtone)+".npz"
+    return string
 
 def KerrFrequencyAbsoluteBoundary(ecc):
     """
@@ -89,12 +97,23 @@ def AlphaValFromFilename(filename):
         pass
     if isinstance(alphastr,list):
         alphastr=alphastr[0]
-    alphapieces = alpha_rege.findall(alphastr)
+    alphapieces = number_rege.findall(alphastr)
     if len(alphapieces)>1:
         alphavalue = float(alphapieces[0])/float(alphapieces[1])
     else:
         alphavalue = float(alphapieces[0])
     return alphavalue
+
+def BHSpinValFromFilename(filename):
+    BHSpinSection = bhspin_rege.match(filename).group()
+    numerator_denominator = number_rege.findall(BHSpinSection)
+    assert len(numerator_denominator)>0, "Error: bhspin not found in file"
+
+    value = float(numerator_denominator[0])/float(numerator_denominator[1])
+
+    return value
+
+
 
 
 #efficient cartesian product of two arrays
