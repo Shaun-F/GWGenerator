@@ -8,9 +8,27 @@ from superrad import ultralight_boson
 from GWGen.Utils import *
 import re
 from bisect import bisect_right
+from itertools import groupby
 
 pathToSolutionSet = os.path.abspath(os.path.dirname(__file__))+'/../ProcaData/';
 RadialDataTruncationFactor = 7
+
+#Import proca data once and parse to different variables
+allProcaDataFilenames = glob.glob(pathToSolutionSet+"BHSpin*")
+bh_Spins = list(map(BHSpinValFromFilename, allProcaDataFilenames))
+index_sort = np.argsort(bh_Spins)
+bh_Spins = np.array(bh_Spins)[index_sort]
+allProcaDataFilenames = np.array(allProcaDataFilenames)[index_sort]
+BHSpinGroup = groupby(allProcaDataFilenames, BHSpinValFromFilename)
+SortedProcaDataFilenames = {}
+for key, group in BHSpinGroup:
+	grouplist = list(group)
+	alphas = list(map(AlphaValFromFilename, grouplist))
+	index_sort = np.argsort(alphas)
+	sorted_group = np.array(grouplist)[index_sort]
+	SortedProcaDataFilenames[key] = sorted_group
+
+
 
 class ProcaSolution():
 	def __init__(self, BHMass, BHSpin, ProcaMass, BosonSpin=1,CloudModel = "relativistic",units="physical", UltralightBoson=None,**kwargs):
@@ -92,7 +110,7 @@ class ProcaSolution():
 
 	def GetEnergyDensity(self,mode=1,overtone=0):
 		try:
-			enden = self._generate_interp(self.alpha,mode=1,overtone=0)
+			enden = self._generate_interp(mode=1,overtone=0)
 		except ValueError as err:
 			errmessage = "Error generating energy density: \n\t SMBHMass {0} \n\t Proca Mass {1}  \n\t Error Message {2}".format(self.SMBHMass, self.ProcaMass, err.args[0])
 			raise ValueError(errmessage)
@@ -119,8 +137,12 @@ class ProcaSolution():
 		else:
 			smaller_bhspin_index = larger_bhspin_index-1
 
-		Right_BHSpin_Neighbor = bhspins[larger_bhspin_index]
-		Left_BHSpin_Neighbor = bhspins[smaller_bhspin_index]
+		if larger_bhspin_index==len(bhspins):
+			Right_BHSpin_Neighbor = bhspins[-1]
+			Left_BHSpin_Neighbor = bhspins[-2]
+		else:
+			Right_BHSpin_Neighbor = bhspins[larger_bhspin_index]
+			Left_BHSpin_Neighbor = bhspins[smaller_bhspin_index]
 
 		#sort filenames
 		unsorted_alphavalues = list(map(AlphaValFromFilename, allfilenames))
@@ -147,17 +169,34 @@ class ProcaSolution():
 
 
 		#Import the data
-		SelectedFilenames = [SmallSmall_FileName, SmallLarge_FileName, LargeSmall_FileName, LargeLarge_FileName]
+		SelectedFilenames = [SmallSmall_FileName, SmallLarge_FileName, LargeSmall_FileName, LargeLarge_FileName] #First adjective describes bh spin values, second describes alpha values
 		SelectedDatasets = [np.load(i) for i in SelectedFilenames]
 
 
 		selectedalphas = [Left_Alpha_Neighbor, Right_Alpha_Neighbor]
 		selectedbhspin = [Left_BHSpin_Neighbor, Right_BHSpin_Neighbor]
-		return selectedalphas, selectedbhspin, SelectedDatasets
+		return {"alphaneighbors": selectedalphas, "bhspinneighbors":selectedbhspin, "datasets":SelectedDatasets}
 
 
-	def _generate_interp(self, alpha,mode=1,overtone=0):
-		alphas, datas = self._get_closest_alpha_datasets(alpha,mode=mode, overtone=overtone)
+	def _generate_interp(self, mode=1,overtone=0):
+		bhspins = list(SortedProcaDataFilenames.keys())
+		assert self.SMBHSpin>=bhspins[0] and self.SMBHSpin<=bhspins[-1], "ERROR: Requested bhspin outside range of available data. Dimensionless spin must be in range [{0:0.2f}:{1:0.2f}]".format(bhspins[0], bhspins[-1])
+
+		bhspin_rindex = bisect_right(bhspins, self.SMBHSpin)
+		Larger_BHSpin_Datasets = SortedProcaDataFilenames[bhspins[bhspin_rindex]]
+		Smaller_BHSpin_Datasets = SortedProcaDataFilenames[bhspins[bhspin_rindex-1]]
+
+		Smaller_BHSpin_AlphaValues = list(map(AlphaValFromFilename, Smaller_BHSpin_Datasets))
+		Larger_BHSpin_AlphaValues = list(map(AlphaValFromFilename, Larger_BHSpin_Datasets))
+		assert self.alpha>=Smaller_BHSpin_AlphaValues[0] and self.alpha<=Smaller_BHSpin_AlphaValues[-1] and self.alpha>=Larger_BHSpin_AlphaValues[0] and self.alpha<=Smaller_BHSpin_AlphaValues[-1], "ERROR: requested alpha outside range of available data. Alpha parameters must be in range [{0:0.3f}, {1:0.3f}]".format(max([Smaller_BHSpin_AlphaValues[0], Larger_BHSpin_AlphaValues[0]]),min([Smaller_BHSpin_AlphaValues[-1], Larger_BHSpin_AlphaValues[-1]]))
+
+		alpha_rindex_smaller = bisect_right(Smaller_BHSpin_AlphaValues, self.alpha)
+		alpha_rindex_larger = bisect_right(Larger_BHSpin_AlphaValues, self.alpha)
+
+
+		alphaNeighbors = [Smaller_BHSpin_AlphaValues[alpha_rindex_smaller-1], Smaller_BHSpin_AlphaValues[alpha_rindex_smaller]]
+		bhspinNeighbors = [bhspins[bhspin_rindex-1], bhspins[bhspin_rindex]]
+		datas = list(map(np.load,[Smaller_BHSpin_Datasets[alpha_rindex_smaller-1], Smaller_BHSpin_Datasets[alpha_rindex_smaller], Larger_BHSpin_Datasets[alpha_rindex_larger-1], Larger_BHSpin_Datasets[alpha_rindex_larger]]))
 
 		RadialDataSet = [i["RadialData"] for i in datas]
 		ThetaDataSet = [i["ThetaData"][0:100] for i in datas]
@@ -165,10 +204,28 @@ class ProcaSolution():
 		RadialDataSet = [i[:NewShape[0]] for i in RadialDataSet]
 		ThetaDataSet = [i[:NewShape[1]] for i in ThetaDataSet]
 
-		self.__RawEnergyData = [i["EnergyData"][:NewShape[0],:NewShape[1] ] for i in datas]
+		RawEnergyData = [i["EnergyData"][:NewShape[0],:NewShape[1] ] for i in datas]
+		RawEnergyDataShape = np.shape(RawEnergyData)
+		rawenReshaped = np.reshape(RawEnergyData, (2,2,RawEnergyDataShape[1], RawEnergyDataShape[2]))
+
 		#generate 3d interpolation function over the radial data, theta data, and alpha data
-		interp = spint.RegularGridInterpolator((alphas, RadialDataSet[0], ThetaDataSet[0]), self.__RawEnergyData)
-		coords = cartesian_product(np.array([self.alpha]), RadialDataSet[0], ThetaDataSet[0])
+		UniqueBHSpinNeighbors = len(np.unique(bhspinNeighbors))==len(bhspinNeighbors) #Check if neighbors are unique values
+		UniqueAlphaNeighbors = len(np.unique(alphaNeighbors))==len(alphaNeighbors) #Check if neighbors are unique values
+
+
+		if UniqueBHSpinNeighbors  and UniqueAlphaNeighbors:
+			interp = spint.RegularGridInterpolator((bhspinNeighbors,alphaNeighbors, RadialDataSet[0], ThetaDataSet[0]), rawenReshaped)
+			coords = cartesian_product(np.array([self.SMBHSpin]),np.array([self.alpha]), RadialDataSet[0], ThetaDataSet[0])
+		if not UniqueBHSpinNeighbors and UniqueAlphaNeighbors:
+			interp = spint.RegularGridInterpolator((alphaNeighbors, RadialDataSet[0], ThetaDataSet[0]), rawenReshaped[0])
+			coords = cartesian_product(np.array([self.Alpha]), RadialDataSet[0], ThetaDataSet[0])
+		if UniqueBHSpinNeighbors and not UniqueAlphaNeighbors:
+			interp = spint.RegularGridInterpolator((bhspinNeighbors, RadialDataSet[0], ThetaDataSet[0]), rawenReshaped[:,0])
+			coords = cartesian_product(np.array([self.SMBHSpin]), RadialDataSet[0], ThetaDataSet[0])
+		if not UniqueBHSpinNeighbors and not UniqueBHSpinNeighbors:
+			interp = spint.RegularGridInterpolator((RadialDataSet[0], ThetaDataSet[0]), rawenReshaped[0][0])
+			coords = cartesian_product(RadialDataSet[0], ThetaDataSet[0])
+
 		try:
 			InterpolatedEnergyValues = np.reshape(interp(coords), NewShape)
 		except ValueError:

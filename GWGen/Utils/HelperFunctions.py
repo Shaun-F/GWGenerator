@@ -105,7 +105,7 @@ def AlphaValFromFilename(filename):
     return alphavalue
 
 def BHSpinValFromFilename(filename):
-    BHSpinSection = bhspin_rege.match(filename).group()
+    BHSpinSection = bhspin_rege.findall(filename)[0]
     numerator_denominator = number_rege.findall(BHSpinSection)
     assert len(numerator_denominator)>0, "Error: bhspin not found in file"
 
