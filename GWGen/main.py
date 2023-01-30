@@ -14,7 +14,7 @@ path = os.getcwd()
 sys.path.insert(0, path)
 import GWGen
 from GWGen.WFGenerator import *
-from GWGen.Utils import GetInitialP
+from GWGen.Utils import GetInitialP, BHSpinAlphaCutoff,cartesian_product
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
@@ -28,9 +28,13 @@ from superrad import ultralight_boson
 from astropy.units import yr, s
 SecPerYR = yr.to(s)
 
+import multiprocess as mp
+
 #data directory relative to local parent GWGen
 DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/Data/"
+NCPUs = 6
 #DataDirectory = "/remote/pi213f/fell/DataStore/ProcaAroundKerrGW/GWGenOutput/"
+#NCPUs = 32
 
 #generate plots
 PlotData = True
@@ -39,7 +43,6 @@ PlotData = True
 spin=1
 
 #parameters
-BHSpin=0.9 #SMBH Spin
 x0=1. #Initial Inclincation
 qS=np.pi/4 #Sky Location Polar Angle in solar system barycenter coordinate system
 phiS=0. #Sky Location Azimuthal Angle in solar system barycenter coordinate system
@@ -73,7 +76,7 @@ ulb = superrad.ultralight_boson.UltralightBoson(spin=1, model="relativistic")
 
 
 
-def process(BHMASS, PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alphalowercutoff=0.06,SecondaryMass=10, DataDir = DataDirectory, OverwriteSolution=False):
+def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alphalowercutoff=0.02,SecondaryMass=10, DataDir = DataDirectory, OverwriteSolution=False):
 
     alphaval = alphavalue(BHMASS, PROCAMASS)
     #alpha values larger than 0.02 produce energy fluxes larger than the undressed flux
@@ -83,14 +86,15 @@ def process(BHMASS, PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alphalowerc
         return None
 
     p0 = GetInitialP(BHMASS, e0) #approximate coalescence after 5 years for undressed system
-    filename = DataDir + "Output/SMBHMass{0}_SecMass{1}_ProcaMass{2}_ProcaSpin{3}_e0{4}_p0{5}.json".format(int(BHMASS),SecondaryMass,PROCAMASS,spin,int(e0*10)/10,int(p0*10)/10)
+    basefilename = "SMBHMass{0}_SMBHSpin{6}_SecMass{1}_ProcaMass{2}_ProcaSpin{3}_e0{4}_p0{5}.json".format(int(BHMASS),SecondaryMass,PROCAMASS,spin,int(e0*10)/10,int(p0*10)/10, BHSpin)
+    filename = DataDir + "Output/"+basefilename
 
     if os.path.exists(filename):
         print("Solution already exists. Skipping...")
         return None
 
 
-    print("Alpha Value: {2}\nSMBH Mass: {0}\nProca Mass: {1}\n Eccentricity: {3}\nSemi-latus Rectum: {4}".format(BHMASS, PROCAMASS,alphaval, e0, p0))
+    print("Alpha Value: {2}\nSMBH Mass: {0}\nProca Mass: {1}\nSMBH Spin: {5}\nEccentricity: {3}\nSemi-latus Rectum: {4}".format(BHMASS, PROCAMASS,alphaval, e0, p0, BHSpin))
 
     #Important: only pass copied version of kwargs as class can overwrite global variables. Should fix this....
     unmoddedwvcl = EMRIWaveform(inspiral_kwargs=inspiral_kwargs.copy(), sum_kwargs=sum_kwargs.copy(), use_gpu=False)
@@ -200,7 +204,7 @@ def process(BHMASS, PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alphalowerc
         ax[2,1].set_ylabel("eccentricity")
         ax[2,1].legend()
 
-        fig.savefig(DataDir+"Plots/"+"Plot_SMBHMass{0}_SecMass{1}_ProcMass{2}_ProcSpin{5}_p0{3}_e0{4}.png".format(BHMASS,SecondaryMass,PROCAMASS,p0,e0,spin),dpi=300)
+        fig.savefig(DataDir+"Plots/"+basefilename,dpi=300)
         #strange memory leak in savefig method. Calling different clear functions and using different Figure instance resolves problem
         plt.close(fig)
         plt.cla()
@@ -227,6 +231,7 @@ if __name__=='__main__':
 
     tmparr = np.linspace(1,9,9,dtype=np.int64) #strange floating point error when doing just np.arange(1,10,0.1) for np.linspace(1,10,91). Causes issues when saving numbers to filenames
     SMBHMasses = sorted([int(i) for i in np.kron(tmparr,[1e5, 1e6,1e7])]) #solar masses
+    SMBHSpins = np.linspace(0.6,0.9,10)
     SecondaryMass = 10 #solar masses
     e0list = [0.1,0.2,0.3,0.4,0.5,0.6,0.7]
     ProcaMasses = [round(i,22) for i in np.kron(tmparr, [1e-16,1e-17,1e-18,1e-19])] #eV   #again avoiding floating point errors
@@ -242,34 +247,21 @@ if __name__=='__main__':
         shutil.rmtree(DataDir+"debug/")
     os.mkdir(DataDir+"debug/")
 
+    """
     for bhmass in SMBHMasses:
         for pmass in ProcaMasses:
             for ecc in e0list:
                 process(bhmass, pmass,ecc, plot=PlotData, SecondaryMass=SecondaryMass, DataDir=DataDir)
+    """
 
+    parallel_func = lambda bhm, bhs, pmass, ecc: process(bhm, bhs, pmass, ecc, SecondaryMass=SecondaryMass, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(bhs))
+    parallel_args = cartesian_product(np.array(SMBHMasses),np.array(SMBHSpins), np.array(ProcaMasses), np.array(e0list))
 
+    chunk_size = 20
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-"""
-alpha values for mode = 1 overtone = 0
-[0.06, 0.07, 0.08, 0.09, 0.1, 0.11, 0.12, 0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 0.19, 0.2, 0.21, 0.22, 0.23, 0.24, 0.25, 0.26, 0.27, 0.28, 0.29, 0.3, 0.31, 0.315, 0.32, 0.325, 0.33, 0.335]
-
-"""
+    PrettyPrint("Executing parallelized computation: ")
+    starttime=time.time()
+    with mp.Pool(processes=NCPUs) as poo:
+        poo.starmap(parallel_func, parallel_args,chunksize=chunk_size)
+    processtime = time.time()-starttime
+    PrettyPrint("Time to complete computation: {0}\nOutput Directory: {1}\nPlot Directory: {2}".format(processtime, DataDir+"Output/",DataDir+"Plots/"))

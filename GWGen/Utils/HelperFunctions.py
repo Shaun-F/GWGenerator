@@ -7,6 +7,7 @@ import scipy.fft
 import warnings
 from mpmath import *
 import re #must be imported after mpmath to override definitions in mpmath package
+from bisect import bisect_right
 import astropy.constants as cons
 import astropy.units as unit
 import glob
@@ -26,6 +27,15 @@ def ProcaDataNameGenerator(bhspin, alpha, mode, overtone):
     alpha_fraction = fractions.Fraction.from_float(alpha).limit_denominator(1000)
     string = "BHSpin_"+str(bhspin_fraction.numerator)+"_"+str(bhspin_fraction.denominator)+"_Alpha_"+str(alpha_fraction.numerator)+"_"+str(alpha_fraction.denominator)+"_Mode_"+str(mode)+"_Overtone_"+str(overtone)+".npz"
     return string
+
+def BHSpinAlphaCutoff(bhspin):
+    bhspins_lastalpha = [(0.6, 0.165), (0.62, 0.175), (0.64, 0.18), (0.66, 0.19), (0.68, 0.2), (0.7, 0.205), (0.72, 0.215), (0.74, 0.225), (0.76, 0.235), (0.78, 0.245), (0.8, 0.26), (0.82, 0.27), (0.84, 0.285), (0.86, 0.3), (0.88, 0.315), (0.9, 0.335)]
+    bhspins = np.array(bhspins_lastalpha)[:,0]
+    inx = bisect_right(bhspins, bhspin)
+    if inx==len(bhspins):
+        inx-=1
+    alpha_cutoff = bhspins_lastalpha[inx-1][1]
+    return alpha_cutoff
 
 def KerrFrequencyAbsoluteBoundary(ecc):
     """

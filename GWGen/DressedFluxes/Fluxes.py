@@ -183,6 +183,8 @@ class ProcaSolution():
 		assert self.SMBHSpin>=bhspins[0] and self.SMBHSpin<=bhspins[-1], "ERROR: Requested bhspin outside range of available data. Dimensionless spin must be in range [{0:0.2f}:{1:0.2f}]".format(bhspins[0], bhspins[-1])
 
 		bhspin_rindex = bisect_right(bhspins, self.SMBHSpin)
+		if bhspin_rindex == len(bhspins):
+			bhspin_rindex -=1;
 		Larger_BHSpin_Datasets = SortedProcaDataFilenames[bhspins[bhspin_rindex]]
 		Smaller_BHSpin_Datasets = SortedProcaDataFilenames[bhspins[bhspin_rindex-1]]
 
