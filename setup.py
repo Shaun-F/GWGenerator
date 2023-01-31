@@ -40,7 +40,7 @@ ProcaDataPath = os.path.abspath(os.path.dirname(__file__))+"/GWGen/ProcaData"
 if not os.path.exists(ProcaDataPath):
     import progressbar
     os.mkdir(ProcaDataPath)
-    ZenodoURL = "https://zenodo.org/record/7439398"
+    ZenodoURL = "https://zenodo.org/record/7590391"
     page = urllib.request.urlopen(ZenodoURL)
     soup = BeautifulSoup(page, "html.parser")
     hreflinks = [link.get("href") for link in soup.findAll("link")]

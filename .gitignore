@@ -6,3 +6,5 @@ Analytic_Flux/ProcaEnDenData
 Analytic_Flux/CSVData
 GWGen/ProcaData
 Analytic_Flux/ProcaEnDenCSVData
+GWGen/output.*
+GWGen/error.*
