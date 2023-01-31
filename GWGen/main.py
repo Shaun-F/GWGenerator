@@ -30,14 +30,20 @@ SecPerYR = yr.to(s)
 
 import multiprocess as mp
 
+try:
+    import cupy as cp
+    usingcupy=True
+except (ImportError, ModuleNotFoundError) as e:
+    usingcupy=False
+
 #data directory relative to local parent GWGen
 DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/Data/"
-NCPUs = 6
+NCPUs = 2
 #DataDirectory = "/remote/pi213f/fell/DataStore/ProcaAroundKerrGW/GWGenOutput/"
 #NCPUs = 32
 
 #generate plots
-PlotData = True
+PlotData = False
 
 #boson spin
 spin=1
@@ -54,7 +60,7 @@ mich=False #assume LISA long baseline response approximation
 T=8 #LISA data run is 5 years. We set the max time to be longer because the proca cloud extends the inspiral time
 dt=15 #time resolution in seconds
 
-use_gpu=False #if CUDA or cupy is installed, this flag sets GPU parallelization
+use_gpu=True #if CUDA or cupy is installed, this flag sets GPU parallelization
 
 
 # keyword arguments for inspiral generator (RunKerrGenericPn5Inspiral)
@@ -94,18 +100,19 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
         return None
 
 
-    print("Alpha Value: {2}\nSMBH Mass: {0}\nProca Mass: {1}\nSMBH Spin: {5}\nEccentricity: {3}\nSemi-latus Rectum: {4}".format(BHMASS, PROCAMASS,alphaval, e0, p0, BHSpin))
+    print("\n\nAlpha Value: {2}\nSMBH Mass: {0}\nProca Mass: {1}\nSMBH Spin: {5}\nEccentricity: {3}\nSemi-latus Rectum: {4}".format(BHMASS, PROCAMASS,alphaval, e0, p0, BHSpin))
 
     #Important: only pass copied version of kwargs as class can overwrite global variables. Should fix this....
     unmoddedwvcl = EMRIWaveform(inspiral_kwargs=inspiral_kwargs.copy(), sum_kwargs=sum_kwargs.copy(), use_gpu=False)
     moddedwvcl = EMRIWithProcaWaveform(inspiral_kwargs=inspiral_kwargs.copy(), sum_kwargs=sum_kwargs.copy(), use_gpu=False)
 
+    print("Generating waveforms...")
     unmoddedwv = unmoddedwvcl(BHMASS, SecondaryMass, BHSpin, p0, e0, x0, qS, phiS, qK, phiK, dist, mich=mich, dt=dt,T=T)
     unmoddedtraj = unmoddedwvcl.Trajectory
 
     moddedwv = moddedwvcl(BHMASS, SecondaryMass, PROCAMASS, BHSpin,p0,e0,x0,T=T, qS=qS, phiS=phiS, qK=qK, phiK=phiK, dist=dist,mich=mich,dt=dt, BosonSpin=spin, UltralightBoson = ulb)
     moddedtraj = moddedwvcl.Trajectory
-
+    print("Waveforms generated. Calculating figures of merit.")
     #azimuthal phase difference
     unmoddedphase = unmoddedtraj["Phi_phi"]
     moddedphase = moddedtraj["Phi_phi"]
@@ -113,15 +120,16 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
     totalorbitsdifference = totalphasedifference/(4*np.pi)
 
     ####Mismatch
+    print("Calculating mismatch")
     #truncate waveforms to be same length
     minlen = min([len(unmoddedwv), len(moddedwv)])
     unmoddedwv = unmoddedwv[:minlen]
     moddedwv = moddedwv[:minlen]
-    mismatch = get_mismatch(unmoddedwv, moddedwv)
-
+    mismatch = get_mismatch(unmoddedwv.get(), moddedwv.get(),use_gpu=False)
+    print("Mismatch = {0}".format(mismatch))
     ####Faithfulness
     time = np.arange(minlen)*dt
-    faith = Faithfulness(time, moddedwv, unmoddedwv)
+    faith = Faithfulness(time, moddedwv.get(), unmoddedwv.get(),use_gpu=False)
 
     #data structure
     data = {
@@ -138,8 +146,11 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
             }
 
 
+
+
     #output data to disk
     jsondata = json.dumps(data)
+    print("Outputting data to: {0}".format(filename))
     with open(filename, "w") as file:
         file.write(jsondata)
 
@@ -203,7 +214,7 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
         ax[2,1].set_xlabel("time (yr)")
         ax[2,1].set_ylabel("eccentricity")
         ax[2,1].legend()
-
+        print("Saving plot to: {0}".format(DataDir+"Plots/"+basefilename))
         fig.savefig(DataDir+"Plots/"+basefilename,dpi=300)
         #strange memory leak in savefig method. Calling different clear functions and using different Figure instance resolves problem
         plt.close(fig)
@@ -220,6 +231,10 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
             file.write("\n")
             file.write(str(meminuse))
 
+    del unmoddedwvcl,moddedwvcl,moddedwv,moddedtraj,unmoddedphase,moddedphase,totalphasedifference,totalorbitsdifference,minlen,mismatch,time,faith,data,jsondata
+    if usingcupy:
+        cp.get_default_memory_pool().free_all_blocks()
+        cp.get_default_pinned_memory_pool().free_all_blocks()
     return None
 
 
@@ -259,9 +274,9 @@ if __name__=='__main__':
 
     chunk_size = 20
 
-    PrettyPrint("Executing parallelized computation: ")
+    PrettyPrint("Executing parallelized computation... \n\t Output Directory: {0}\n\t Plot Directory: {1}".format(DataDir+"Output/", DataDir+"Plot/"))
     starttime=time.time()
     with mp.Pool(processes=NCPUs) as poo:
         poo.starmap(parallel_func, parallel_args,chunksize=chunk_size)
     processtime = time.time()-starttime
-    PrettyPrint("Time to complete computation: {0}\nOutput Directory: {1}\nPlot Directory: {2}".format(processtime, DataDir+"Output/",DataDir+"Plots/"))
+    PrettyPrint("Time to complete computation: {0}".format(processtime))
