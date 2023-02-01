@@ -38,7 +38,7 @@ extensions = [flux_ext, frequency_ext]
 ##Verify proca data directory exists. If not, download from Zenodo
 ProcaDataPath = os.path.abspath(os.path.dirname(__file__))+"/GWGen/ProcaData"
 if not os.path.exists(ProcaDataPath):
-    import progressbar
+    print("Download data from Zenodo repository. This will take some time...")
     os.mkdir(ProcaDataPath)
     ZenodoURL = "https://zenodo.org/record/7590391"
     page = urllib.request.urlopen(ZenodoURL)
@@ -48,7 +48,7 @@ if not os.path.exists(ProcaDataPath):
     basefilenames = [os.path.basename(i) for i in datasetUrls]
     datasetTargetFilenames = [ProcaDataPath+"/"+i for i in basefilenames]
 
-    for i in progressbar.progressbar(range(len(datasetUrls)), prefix="Downloading Proca Datasets: "):
+    for i in range(len(datasetUrls)):
         subprocess.run(["wget", "--quiet", "--no-check-certificate", "--output-document="+datasetTargetFilenames[i], datasetUrls[i]])
 
 

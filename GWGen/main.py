@@ -3,6 +3,13 @@ import json
 import argparse
 
 
+try:
+    import mpi4py as m4p
+    from mpi4py import MPI
+    usingmpi=True
+except (ImportError, ModuleNotFoundError) as e:
+    usingmpi=False
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--debug", action='store_true',default=False)
 parser.add_argument("-p", "--plot", action='store_true',default=False)
@@ -60,8 +67,9 @@ mich=False #assume LISA long baseline response approximation
 T=8 #LISA data run is 5 years. We set the max time to be longer because the proca cloud extends the inspiral time
 dt=15 #time resolution in seconds
 
-use_gpu=True #if CUDA or cupy is installed, this flag sets GPU parallelization
-
+use_gpu=False #if CUDA or cupy is installed, this flag sets GPU parallelization
+usingcupy=False #master variable to set use of cupy
+usingmpi=True #master variable to set use of MPI
 
 # keyword arguments for inspiral generator (RunKerrGenericPn5Inspiral)
 inspiral_kwargs = {
@@ -125,11 +133,15 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
     minlen = min([len(unmoddedwv), len(moddedwv)])
     unmoddedwv = unmoddedwv[:minlen]
     moddedwv = moddedwv[:minlen]
-    mismatch = get_mismatch(unmoddedwv.get(), moddedwv.get(),use_gpu=False)
+    if usingcupy:
+        unmoddedwv = unmoddedwv.get()
+        moddedwv = moddedwv.get()
+
+    mismatch = get_mismatch(unmoddedwv, moddedwv,use_gpu=False)
     print("Mismatch = {0}".format(mismatch))
     ####Faithfulness
     time = np.arange(minlen)*dt
-    faith = Faithfulness(time, moddedwv.get(), unmoddedwv.get(),use_gpu=False)
+    faith = Faithfulness(time, moddedwv, unmoddedwv,use_gpu=False)
 
     #data structure
     data = {
@@ -246,7 +258,7 @@ if __name__=='__main__':
 
     tmparr = np.linspace(1,9,9,dtype=np.int64) #strange floating point error when doing just np.arange(1,10,0.1) for np.linspace(1,10,91). Causes issues when saving numbers to filenames
     SMBHMasses = sorted([int(i) for i in np.kron(tmparr,[1e5, 1e6,1e7])]) #solar masses
-    SMBHSpins = np.linspace(0.6,0.9,10)
+    SMBHSpins = [int(100*i)/100 for i in np.linspace(0.6,0.9,10)]
     SecondaryMass = 10 #solar masses
     e0list = [0.1,0.2,0.3,0.4,0.5,0.6,0.7]
     ProcaMasses = [round(i,22) for i in np.kron(tmparr, [1e-16,1e-17,1e-18,1e-19])] #eV   #again avoiding floating point errors
@@ -269,6 +281,7 @@ if __name__=='__main__':
                 process(bhmass, pmass,ecc, plot=PlotData, SecondaryMass=SecondaryMass, DataDir=DataDir)
     """
 
+    """
     parallel_func = lambda bhm, bhs, pmass, ecc: process(bhm, bhs, pmass, ecc, SecondaryMass=SecondaryMass, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(bhs))
     parallel_args = cartesian_product(np.array(SMBHMasses),np.array(SMBHSpins), np.array(ProcaMasses), np.array(e0list))
 
@@ -280,3 +293,25 @@ if __name__=='__main__':
         poo.starmap(parallel_func, parallel_args,chunksize=chunk_size)
     processtime = time.time()-starttime
     PrettyPrint("Time to complete computation: {0}".format(processtime))
+    """
+
+    if usingmpi:
+        comm = m4p.MPI.COMM_WORLD
+        rank = comm.Get_rank()
+
+        parallel_func = lambda args: process(args[0], args[1], args[2], args[3], SecondaryMass=SecondaryMass, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(args[1]))
+        parallel_args = cartesian_product(np.array(SMBHMasses),np.array(SMBHSpins), np.array(ProcaMasses), np.array(e0list))
+
+        def split(a, n):
+            k, m = divmod(len(a), n)
+            return list(a[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n))
+
+        split_parallel_args = split(parallel_args, comm.Get_size())
+        parallel_args_for_subprocesses = comm.scatter(split_parallel_args,root=0)
+
+        if rank==0:
+            print("Size of parameter space: {0}\nNumber MPI subprocesses: {1}\n".format(len(parallel_args), comm.Get_size()))
+            print("shape of partitioned parameter space: {0}".format(np.shape(split_parallel_args)))
+        #main calculation
+        for arg in parallel_args_for_subprocesses:
+            parallel_func(arg)
