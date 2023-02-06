@@ -1,7 +1,17 @@
-import os, psutil, shutil, gc, sys
+import os, psutil, shutil, gc, sys, time
 import json
 import argparse
 
+
+"""
+Redirect stdout
+"""
+
+orig_stdout = sys.stdout
+stdout_file = orig_stdout #open(os.environ["HOME"]+"/WS_gwgen_output/debug/stdout.o", "w+")
+
+print("Executing GWGen/main.py...",file=stdout_file)
+print("{0}".format(time.ctime(time.time())), file=stdout_file)
 
 try:
     import mpi4py as m4p
@@ -44,10 +54,11 @@ except (ImportError, ModuleNotFoundError) as e:
     usingcupy=False
 
 #data directory relative to local parent GWGen
-DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/Data/"
-NCPUs = 2
+#DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/Data/"
+#NCPUs = 2
 #DataDirectory = "/remote/pi213f/fell/DataStore/ProcaAroundKerrGW/GWGenOutput/"
 #NCPUs = 32
+DataDirectory=os.environ["HOME"]+"/WS_gwgen_output/"
 
 #generate plots
 PlotData = False
@@ -108,19 +119,19 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
         return None
 
 
-    print("\n\nAlpha Value: {2}\nSMBH Mass: {0}\nProca Mass: {1}\nSMBH Spin: {5}\nEccentricity: {3}\nSemi-latus Rectum: {4}".format(BHMASS, PROCAMASS,alphaval, e0, p0, BHSpin))
+    print("\n\nAlpha Value: {2}\nSMBH Mass: {0}\nProca Mass: {1}\nSMBH Spin: {5}\nEccentricity: {3}\nSemi-latus Rectum: {4}".format(BHMASS, PROCAMASS,alphaval, e0, p0, BHSpin), file=stdout_file)
 
     #Important: only pass copied version of kwargs as class can overwrite global variables. Should fix this....
     unmoddedwvcl = EMRIWaveform(inspiral_kwargs=inspiral_kwargs.copy(), sum_kwargs=sum_kwargs.copy(), use_gpu=False)
     moddedwvcl = EMRIWithProcaWaveform(inspiral_kwargs=inspiral_kwargs.copy(), sum_kwargs=sum_kwargs.copy(), use_gpu=False)
 
-    print("Generating waveforms...")
+    print("Generating waveforms...", file=stdout_file)
     unmoddedwv = unmoddedwvcl(BHMASS, SecondaryMass, BHSpin, p0, e0, x0, qS, phiS, qK, phiK, dist, mich=mich, dt=dt,T=T)
     unmoddedtraj = unmoddedwvcl.Trajectory
 
     moddedwv = moddedwvcl(BHMASS, SecondaryMass, PROCAMASS, BHSpin,p0,e0,x0,T=T, qS=qS, phiS=phiS, qK=qK, phiK=phiK, dist=dist,mich=mich,dt=dt, BosonSpin=spin, UltralightBoson = ulb)
     moddedtraj = moddedwvcl.Trajectory
-    print("Waveforms generated. Calculating figures of merit.")
+    print("Waveforms generated. Calculating figures of merit.", file=stdout_file)
     #azimuthal phase difference
     unmoddedphase = unmoddedtraj["Phi_phi"]
     moddedphase = moddedtraj["Phi_phi"]
@@ -128,7 +139,7 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
     totalorbitsdifference = totalphasedifference/(4*np.pi)
 
     ####Mismatch
-    print("Calculating mismatch")
+    print("Calculating mismatch", file=stdout_file)
     #truncate waveforms to be same length
     minlen = min([len(unmoddedwv), len(moddedwv)])
     unmoddedwv = unmoddedwv[:minlen]
@@ -138,7 +149,7 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
         moddedwv = moddedwv.get()
 
     mismatch = get_mismatch(unmoddedwv, moddedwv,use_gpu=False)
-    print("Mismatch = {0}".format(mismatch))
+    print("Mismatch = {0}".format(mismatch), file=stdout_file)
     ####Faithfulness
     time = np.arange(minlen)*dt
     faith = Faithfulness(time, moddedwv, unmoddedwv,use_gpu=False)
@@ -150,7 +161,7 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
             "PROCAMASS":PROCAMASS,
             "p0":p0,
             "e0":e0,
-            "BHSpin":spin,
+            "BHSpin":BHSpin,
             "Trajectory Exit Reason": moddedwvcl.inspiral_generator.exit_reason,
             "mismatch":mismatch,
             "faithfulness":faith,
@@ -162,7 +173,7 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
 
     #output data to disk
     jsondata = json.dumps(data)
-    print("Outputting data to: {0}".format(filename))
+    print("Outputting data to: {0}".format(filename), file=stdout_file)
     with open(filename, "w") as file:
         file.write(jsondata)
 
@@ -226,7 +237,7 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
         ax[2,1].set_xlabel("time (yr)")
         ax[2,1].set_ylabel("eccentricity")
         ax[2,1].legend()
-        print("Saving plot to: {0}".format(DataDir+"Plots/"+basefilename))
+        print("Saving plot to: {0}".format(DataDir+"Plots/"+basefilename), file=stdout_file)
         fig.savefig(DataDir+"Plots/"+basefilename,dpi=300)
         #strange memory leak in savefig method. Calling different clear functions and using different Figure instance resolves problem
         plt.close(fig)
@@ -270,9 +281,8 @@ if __name__=='__main__':
     if not os.path.exists(DataDir+"Output/"):
         os.mkdir(DataDir+"Output/")
 
-    if os.path.exists(DataDir+"debug/"):
-        shutil.rmtree(DataDir+"debug/")
-    os.mkdir(DataDir+"debug/")
+    if not os.path.exists(DataDir+"debug/"):
+        os.mkdir(DataDir+"debug/")
 
     """
     for bhmass in SMBHMasses:
@@ -310,8 +320,14 @@ if __name__=='__main__':
         parallel_args_for_subprocesses = comm.scatter(split_parallel_args,root=0)
 
         if rank==0:
-            print("Size of parameter space: {0}\nNumber MPI subprocesses: {1}\n".format(len(parallel_args), comm.Get_size()))
-            print("shape of partitioned parameter space: {0}".format(np.shape(split_parallel_args)))
+            print("Size of parameter space: {0}\nNumber MPI subprocesses: {1}".format(len(parallel_args), comm.Get_size()), file=stdout_file)
+            print("shape of partitioned parameter space: {0}".format(np.shape(split_parallel_args)), file=stdout_file)
         #main calculation
-        for arg in parallel_args_for_subprocesses:
+        counter = 1
+        for inx, arg in enumerate(parallel_args_for_subprocesses):
+            print("process {2} on solution {0} out of {1}".format(counter, len(parallel_args_for_subprocesses), rank))
             parallel_func(arg)
+            counter+=1
+
+    sys.stdout=orig_stdout
+    stdout_file.close()
