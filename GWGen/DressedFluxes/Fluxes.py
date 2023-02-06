@@ -237,8 +237,15 @@ class ProcaSolution():
 		self.radial_data = RadialDataSet[0]
 		self.theta_data = ThetaDataSet[0]
 
+		jacobian = lambda r, theta, spin: np.sin(theta)*(r**2 + spin**2 * np.cos(theta)**2)
+		jacdata = jacobian(self.radial_data[:,None], self.theta_data[None,:],self.SMBHSpin)
+		WeightedInterpolatedEnergyValues = np.multiply(jacdata, InterpolatedEnergyValues)
+		#WeightedInterpolatedEnergyValues=InterpolatedEnergyValues
+		#self.interpdat = InterpolatedEnergyValues
+		#self.weightinterpdat = WeightedInterpolatedEnergyValues
 		#linear interpolation over radial data and theta data for given alpha value
-		InterpolationFunction = spint.RectBivariateSpline(self.radial_data, self.theta_data, InterpolatedEnergyValues)
+		InterpolationFunction = spint.RectBivariateSpline(self.radial_data, self.theta_data, WeightedInterpolatedEnergyValues)
+
 
 		return InterpolationFunction
 
