@@ -10,7 +10,7 @@ rank = comm.Get_rank()
 
 DataDir = os.path.abspath(os.path.dirname(__file__)) + "/Data/"
 
-parallel_func = lambda args: process(args[0], args[1], args[2], args[3], SecondaryMass=10, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(args[1]))
+parallel_func = lambda args,solcount,nsols: process(args[0], args[1], args[2], args[3], SecondaryMass=10, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(args[1]),mpirank=rank, solcounter=solcount,nsols=nsols)
 
 coords = [(smbhmass, smbhspin, 6e-17,0.8),(smbhmass, smbhspin, 6e-17,0.9),(smbhmass, smbhspin, 7e-17,0.1),(smbhmass, smbhspin, 7e-17,0.2)]
 
@@ -24,7 +24,9 @@ counter=1;
 if rank==0:
         print("Size of parameter space: {0}\nNumber MPI subprocesses: {1}".format(len(coords), comm.Get_size()), file=stdout_file)
         print("shape of partitioned parameter space: {0}".format(np.shape(split_parallel_args)), file=stdout_file)
+with open("Rank{0}ProcessArguments.dat".format(rank), "w+") as file:
+        for inx, val in enumerate(parallel_args_for_subprocesses):
+                file.write("inx: {0}     val: {1}\n".format(inx+1,val))
 for inx, arg in enumerate(parallel_args_for_subprocesses):
-        print("\n\nprocess {2} on solution {0} out of {1}".format(counter, len(parallel_args_for_subprocesses), rank))
-        parallel_func(arg)
+        parallel_func(arg,counter,len(parallel_args_for_subprocesses))
         counter+=1
