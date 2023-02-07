@@ -106,8 +106,10 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
     alphaval = alphavalue(BHMASS, PROCAMASS)
     #alpha values larger than 0.02 produce energy fluxes larger than the undressed flux
     if alphaval>alphauppercutoff and spin==1:
+        print("Alpha value {0:.0.4f} beyond range of available data. Allowed range [{1},{2}]".format(alphaval,alphalowercutoff, alphauppercutoff)) 
         return None
     if alphaval<alphalowercutoff and spin==1:
+        print("Alpha value {0:.0.4f} below range of available data. Allowed range [{1},{2}]".format(alphaval,alphalowercutoff, alphauppercutoff))
         return None
 
     p0 = GetInitialP(BHMASS, e0) #approximate coalescence after 5 years for undressed system
@@ -119,7 +121,7 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
         return None
 
 
-    print("\n\nAlpha Value: {2}\nSMBH Mass: {0}\nProca Mass: {1}\nSMBH Spin: {5}\nEccentricity: {3}\nSemi-latus Rectum: {4}".format(BHMASS, PROCAMASS,alphaval, e0, p0, BHSpin), file=stdout_file)
+    print("\nAlpha Value: {2}\nSMBH Mass: {0}\nProca Mass: {1}\nSMBH Spin: {5}\nEccentricity: {3}\nSemi-latus Rectum: {4}".format(BHMASS, PROCAMASS,alphaval, e0, p0, BHSpin), file=stdout_file)
 
     #Important: only pass copied version of kwargs as class can overwrite global variables. Should fix this....
     unmoddedwvcl = EMRIWaveform(inspiral_kwargs=inspiral_kwargs.copy(), sum_kwargs=sum_kwargs.copy(), use_gpu=False)
@@ -325,7 +327,7 @@ if __name__=='__main__':
         #main calculation
         counter = 1
         for inx, arg in enumerate(parallel_args_for_subprocesses):
-            print("process {2} on solution {0} out of {1}".format(counter, len(parallel_args_for_subprocesses), rank))
+            print("\n\nprocess {2} on solution {0} out of {1}".format(counter, len(parallel_args_for_subprocesses), rank))
             parallel_func(arg)
             counter+=1
 
