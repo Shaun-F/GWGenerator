@@ -161,6 +161,7 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
     ####Faithfulness
     time = np.arange(minlen)*dt
     faith = Faithfulness(time, moddedwv, unmoddedwv,use_gpu=False)
+    snr2 = WaveformInnerProduct(time, moddedwv, unmoddedwv, use_gpu=False)
 
     #data structure
     data = {
@@ -173,6 +174,7 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
             "Trajectory Exit Reason": moddedwvcl.inspiral_generator.exit_reason,
             "mismatch":mismatch,
             "faithfulness":faith,
+            "snr2":snr2,
             "DeltaNOrbits":totalorbitsdifference
             }
 
