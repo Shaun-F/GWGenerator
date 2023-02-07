@@ -1,1 +1,0 @@
-{"SMBHMASS": 30000000.0, "SecondaryMass": 10, "PROCAMASS": 3e-19, "p0": 4.76, "e0": 0.5, "BHSpin": 1, "Trajectory Exit Reason": "Integration reached time boundary. Boundary location t = 1708561.96", "mismatch": 1.6791590242704046e-06, "faithfulness": 0.9999849842789106, "DeltaNOrbits": -9.698921889630628e-05}
