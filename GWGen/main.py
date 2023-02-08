@@ -54,11 +54,11 @@ except (ImportError, ModuleNotFoundError) as e:
     usingcupy=False
 
 #data directory relative to local parent GWGen
-#DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/Data/"
-#NCPUs = 2
+DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/Data/"
+NCPUs = 2
 #DataDirectory = "/remote/pi213f/fell/DataStore/ProcaAroundKerrGW/GWGenOutput/"
 #NCPUs = 32
-DataDirectory=os.environ["HOME"]+"/WS_gwgen_output/"
+#DataDirectory=os.environ["HOME"]+"/WS_gwgen_output/"
 
 #generate plots
 PlotData = False
@@ -112,10 +112,10 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
     alphaval = alphavalue(BHMASS, PROCAMASS)
     #alpha values larger than 0.02 produce energy fluxes larger than the undressed flux
     if alphaval>alphauppercutoff and spin==1:
-        print(prepend_print_string+"Alpha value {0:.0.4f} beyond range of available data. Allowed range [{1},{2}]".format(alphaval,alphalowercutoff, alphauppercutoff))
+        print(prepend_print_string+"Alpha value {0:0.4f} beyond range of available data. Allowed range [[{1},{2}]]".format(alphaval,alphalowercutoff, alphauppercutoff))
         return None
     if alphaval<alphalowercutoff and spin==1:
-        print(prepend_print_string+"Alpha value {0:.0.4f} below range of available data. Allowed range [{1},{2}]".format(alphaval,alphalowercutoff, alphauppercutoff))
+        print(prepend_print_string+"Alpha value {0:0.4f} below range of available data. Allowed range [[{1},{2}]]".format(alphaval,alphalowercutoff, alphauppercutoff))
         return None
 
     p0 = GetInitialP(BHMASS, e0) #approximate coalescence after 5 years for undressed system
