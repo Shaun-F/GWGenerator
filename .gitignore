@@ -10,3 +10,4 @@ Analytic_Flux/ProcaEnDenCSVData
 GWGen/output.*
 GWGen/error.*
 Rank*.dat
+dist/
