@@ -80,7 +80,7 @@ class PN(Kerr, FluxFunction):
 		self.dEdpUnit = (self.SecondaryMass) #*cons.c**4/cons.G/self.SMBHMass).decompose()
 		self.dEdeUnit = (self.SecondaryMass)#*unit.Msun*cons.c**2).decompose()
 
-		self.__SEPARATRIX=6+SEPARATRIXDELTA
+		self.__SEPARATRIX = 6
 		self.__SEPARATRIX_CUT =	self.__SEPARATRIX+SEPARATRIXDELTA
 
 	@property
@@ -119,7 +119,11 @@ class PN(Kerr, FluxFunction):
 			ecc=1e-6
 
 		#setup guard for bad integration steps
-		if ecc>=1.0  or ecc<0 or semimaj<self.__SEPARATRIX_CUT:
+		if ecc>=1.0  or ecc<0:
+			self.IntegratorExitReason="Eccentricity exceeded boundary"
+			return np.zeros_like(y)
+		if semimaj<get_separatrix(float(self.a), y[1], 1.) + SEPARATRIXDELTA:#self.__SEPARATRIX_CUT:
+			self.IntegratorExitReason="Semi-latus rectum beyond separatrix cutoff"
 			return np.zeros_like(y)
 
 
@@ -234,7 +238,7 @@ class PNTraj(TrajectoryBase):
 		y0 = [p0, e0, 0.0, 0.0, 0.0] #zero mean anomaly initially
 
 		#compute separatrix of initial parameters
-		self.__initial_separatrix = get_separatrix(float(a), 0., 1.)
+		self.__initial_separatrix = get_separatrix(float(a), e0, 1.)
 		self.__SEPARATRIX_CUTOFF = self.__initial_separatrix + self.__SEPARATRIX_DELTA
 
 
@@ -267,7 +271,8 @@ class PNTraj(TrajectoryBase):
 
 		def __integration_event_tracker_semilatus_rectum(_, y_vec):
 			p = y_vec[0]
-			res_separatrix = p-self.__SEPARATRIX_CUTOFF
+			#res_separatrix = p-self.__SEPARATRIX_CUTOFF
+			res_separatrix = p-get_separatrix(float(a), y_vec[1], 1.)
 			res_absolute_boundary = p-2.4
 			if res_separatrix<=0:
 				self.__exit_reason = "Separatrix reached!"
@@ -306,7 +311,7 @@ class PNTraj(TrajectoryBase):
 							events = self.__integration_event_trackers, #track boundaries of integration
 							max_step = max_step_size #dimensionless seconds
 						)
-
+		self.__SEPARATRIX_CUTOFF = get_separatrix(float(a), result["y"][1][-1], 1.) + self.__SEPARATRIX_DELTA
 		#check eccentricity bounds
 		assert np.all(result['y'][1]>=NegativeEccentricityThreshold), "Error: Eccentricity outside tolerable negative value range."
 		t_out = result["t"]

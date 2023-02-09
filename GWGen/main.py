@@ -55,7 +55,7 @@ except (ImportError, ModuleNotFoundError) as e:
 
 #data directory relative to local parent GWGen
 DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/Data/"
-NCPUs = 2
+NCPUs = 3
 #DataDirectory = "/remote/pi213f/fell/DataStore/ProcaAroundKerrGW/GWGenOutput/"
 #NCPUs = 32
 #DataDirectory=os.environ["HOME"]+"/WS_gwgen_output/"
@@ -80,6 +80,7 @@ dt=15 #time resolution in seconds
 
 use_gpu=False #if CUDA or cupy is installed, this flag sets GPU parallelization
 usingcupy=False #master variable to set use of cupy
+usingmultipool=False
 usingmpi=True #master variable to set use of MPI
 
 # keyword arguments for inspiral generator (RunKerrGenericPn5Inspiral)
@@ -247,8 +248,8 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
         ax[2,1].set_xlabel("time (yr)")
         ax[2,1].set_ylabel("eccentricity")
         ax[2,1].legend()
-        print(prepend_print_string+"Saving plot to: {0}".format(DataDir+"Plots/"+basefilename), file=stdout_file)
-        fig.savefig(DataDir+"Plots/"+basefilename,dpi=300)
+        print(prepend_print_string+"Saving plot to: {0}".format(DataDir+"Plots/"+basefilename[:-4]+"png"), file=stdout_file)
+        fig.savefig(DataDir+"Plots/"+basefilename[:-4]+"png",dpi=300)
         #strange memory leak in savefig method. Calling different clear functions and using different Figure instance resolves problem
         plt.close(fig)
         plt.cla()
@@ -294,26 +295,27 @@ if __name__=='__main__':
     if not os.path.exists(DataDir+"debug/"):
         os.mkdir(DataDir+"debug/")
 
-    """
-    for bhmass in SMBHMasses:
-        for pmass in ProcaMasses:
-            for ecc in e0list:
-                process(bhmass, pmass,ecc, plot=PlotData, SecondaryMass=SecondaryMass, DataDir=DataDir)
-    """
+    if not usingmultipool and not usingmpi:
+        for bhmass in SMBHMasses:
+            for pmass in ProcaMasses:
+                for ecc in e0list:
+                    for bhspin in SMBHSpins:
+                        process(bhmass, bhspin,pmass,ecc, plot=PlotData, SecondaryMass=SecondaryMass, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(bhspin))
 
-    """
-    parallel_func = lambda bhm, bhs, pmass, ecc: process(bhm, bhs, pmass, ecc, SecondaryMass=SecondaryMass, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(bhs))
-    parallel_args = cartesian_product(np.array(SMBHMasses),np.array(SMBHSpins), np.array(ProcaMasses), np.array(e0list))
 
-    chunk_size = 20
+    if usingmultipool:
+        parallel_func = lambda bhm, bhs, pmass, ecc: process(bhm, bhs, pmass, ecc, SecondaryMass=SecondaryMass, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(bhs))
+        parallel_args = cartesian_product(np.array(SMBHMasses),np.array(SMBHSpins), np.array(ProcaMasses), np.array(e0list))
 
-    PrettyPrint("Executing parallelized computation... \n\t Output Directory: {0}\n\t Plot Directory: {1}".format(DataDir+"Output/", DataDir+"Plot/"))
-    starttime=time.time()
-    with mp.Pool(processes=NCPUs) as poo:
-        poo.starmap(parallel_func, parallel_args,chunksize=chunk_size)
-    processtime = time.time()-starttime
-    PrettyPrint("Time to complete computation: {0}".format(processtime))
-    """
+        chunk_size = 20
+
+        PrettyPrint("Executing parallelized computation... \n\t Output Directory: {0}\n\t Plot Directory: {1}".format(DataDir+"Output/", DataDir+"Plot/"))
+        starttime=time.time()
+        with mp.Pool(processes=NCPUs) as poo:
+            poo.starmap(parallel_func, parallel_args,chunksize=chunk_size)
+        processtime = time.time()-starttime
+        PrettyPrint("Time to complete computation: {0}".format(processtime))
+
 
     if usingmpi:
         comm = m4p.MPI.COMM_WORLD
