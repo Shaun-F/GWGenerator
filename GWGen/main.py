@@ -54,11 +54,11 @@ except (ImportError, ModuleNotFoundError) as e:
     usingcupy=False
 
 #data directory relative to local parent GWGen
-DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/Data/"
-NCPUs = 3
+#DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/Data/"
+#NCPUs = 3
 #DataDirectory = "/remote/pi213f/fell/DataStore/ProcaAroundKerrGW/GWGenOutput/"
 #NCPUs = 32
-#DataDirectory=os.environ["HOME"]+"/WS_gwgen_output/"
+DataDirectory=os.environ["HOME"]+"/WS_gwgen_output/"
 
 #generate plots
 PlotData = False
@@ -82,6 +82,13 @@ use_gpu=False #if CUDA or cupy is installed, this flag sets GPU parallelization
 usingcupy=False #master variable to set use of cupy
 usingmultipool=False
 usingmpi=True #master variable to set use of MPI
+
+
+
+print("Executing GWGen/main.py...",file=stdout_file)
+print("{0}".format(time.ctime(time.time())), file=stdout_file)
+print("\tUsing GPU: {0}\n\tUsing Cupy: {1}\n\tUsing Multiprocessing: {2}\n\tUsing MPI: {3}".format(use_gpu, usingcupy, usingmultipool, usingmpi))
+
 
 # keyword arguments for inspiral generator (RunKerrGenericPn5Inspiral)
 inspiral_kwargs = {
