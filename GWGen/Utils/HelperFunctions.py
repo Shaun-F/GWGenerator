@@ -4,6 +4,7 @@ import numpy as np
 import scipy as sp
 from scipy import interpolate
 import scipy.fft
+from scipy.integrate._ivp.ivp import *
 import warnings
 from mpmath import *
 import re #must be imported after mpmath to override definitions in mpmath package
@@ -360,3 +361,191 @@ def PrettyPrint(str):
     decoration = "****************"
     prn_str = decoration+'\n'+str+'\n'+decoration
     print(prn_str)
+
+
+
+
+
+##### custom ivp solver
+METHODS = {'RK23': RK23,
+           'RK45': RK45,
+           'DOP853': DOP853,
+           'Radau': Radau,
+           'BDF': BDF,
+           'LSODA': LSODA}
+MESSAGES = {0: "The solver successfully reached the end of the integration interval.",
+            1: "A termination event occurred.",
+            2: "Trajectory failed to appreciably change between timesteps."}
+
+def solve_ivp(fun, t_span, y0, method='RK45', t_eval=None, dense_output=False,
+              events=None, vectorized=False, args=None, **options):
+    """
+        See scipy.integrate.solve_ivp docstring
+    """
+    if method not in METHODS and not (
+            inspect.isclass(method) and issubclass(method, OdeSolver)):
+        raise ValueError("`method` must be one of {} or OdeSolver class."
+                         .format(METHODS))
+
+    t0, tf = float(t_span[0]), float(t_span[1])
+    y_tol = options.get("ytol", 1e-10)
+    if args is not None:
+        # Wrap the user's fun (and jac, if given) in lambdas to hide the
+        # additional parameters.  Pass in the original fun as a keyword
+        # argument to keep it in the scope of the lambda.
+        fun = lambda t, x, fun=fun: fun(t, x, *args)
+        jac = options.get('jac')
+        if callable(jac):
+            options['jac'] = lambda t, x: jac(t, x, *args)
+
+    if t_eval is not None:
+        t_eval = np.asarray(t_eval)
+        if t_eval.ndim != 1:
+            raise ValueError("`t_eval` must be 1-dimensional.")
+
+        if np.any(t_eval < min(t0, tf)) or np.any(t_eval > max(t0, tf)):
+            raise ValueError("Values in `t_eval` are not within `t_span`.")
+
+        d = np.diff(t_eval)
+        if tf > t0 and np.any(d <= 0) or tf < t0 and np.any(d >= 0):
+            raise ValueError("Values in `t_eval` are not properly sorted.")
+
+        if tf > t0:
+            t_eval_i = 0
+        else:
+            # Make order of t_eval decreasing to use np.searchsorted.
+            t_eval = t_eval[::-1]
+            # This will be an upper bound for slices.
+            t_eval_i = t_eval.shape[0]
+
+    if method in METHODS:
+        method = METHODS[method]
+
+    solver = method(fun, t0, y0, tf, vectorized=vectorized, **options)
+
+    if t_eval is None:
+        ts = [t0]
+        ys = [y0]
+    elif t_eval is not None and dense_output:
+        ts = []
+        ti = [t0]
+        ys = []
+    else:
+        ts = []
+        ys = []
+
+    interpolants = []
+
+    events, is_terminal, event_dir = prepare_events(events)
+
+    if events is not None:
+        if args is not None:
+            # Wrap user functions in lambdas to hide the additional parameters.
+            # The original event function is passed as a keyword argument to the
+            # lambda to keep the original function in scope (i.e., avoid the
+            # late binding closure "gotcha").
+            events = [lambda t, x, event=event: event(t, x, *args)
+                      for event in events]
+        g = [event(t0, y0) for event in events]
+        t_events = [[] for _ in range(len(events))]
+        y_events = [[] for _ in range(len(events))]
+    else:
+        t_events = None
+        y_events = None
+
+    status = None
+    while status is None:
+        message = solver.step()
+
+        if solver.status == 'finished':
+            status = 0
+        elif solver.status == 'failed':
+            status = -1
+            break
+
+        t_old = solver.t_old
+        t = solver.t
+        y = solver.y
+
+        if np.any(np.abs(ys[-1][0]-y)<y_tol):
+            status = 2
+            break
+
+        if dense_output:
+            sol = solver.dense_output()
+            interpolants.append(sol)
+        else:
+            sol = None
+
+        if events is not None:
+            g_new = [event(t, y) for event in events]
+            active_events = find_active_events(g, g_new, event_dir)
+            if active_events.size > 0:
+                if sol is None:
+                    sol = solver.dense_output()
+
+                root_indices, roots, terminate = handle_events(
+                    sol, events, active_events, is_terminal, t_old, t)
+
+                for e, te in zip(root_indices, roots):
+                    t_events[e].append(te)
+                    y_events[e].append(sol(te))
+
+                if terminate:
+                    status = 1
+                    t = roots[-1]
+                    y = sol(t)
+
+            g = g_new
+
+        if t_eval is None:
+            ts.append(t)
+            ys.append(y)
+        else:
+            # The value in t_eval equal to t will be included.
+            if solver.direction > 0:
+                t_eval_i_new = np.searchsorted(t_eval, t, side='right')
+                t_eval_step = t_eval[t_eval_i:t_eval_i_new]
+            else:
+                t_eval_i_new = np.searchsorted(t_eval, t, side='left')
+                # It has to be done with two slice operations, because
+                # you can't slice to 0th element inclusive using backward
+                # slicing.
+                t_eval_step = t_eval[t_eval_i_new:t_eval_i][::-1]
+
+            if t_eval_step.size > 0:
+                if sol is None:
+                    sol = solver.dense_output()
+                ts.append(t_eval_step)
+                ys.append(sol(t_eval_step))
+                t_eval_i = t_eval_i_new
+
+        if t_eval is not None and dense_output:
+            ti.append(t)
+
+
+
+    message = MESSAGES.get(status, message)
+
+    if t_events is not None:
+        t_events = [np.asarray(te) for te in t_events]
+        y_events = [np.asarray(ye) for ye in y_events]
+
+    if t_eval is None:
+        ts = np.array(ts)
+        ys = np.vstack(ys).T
+    else:
+        ts = np.hstack(ts)
+        ys = np.hstack(ys)
+
+    if dense_output:
+        if t_eval is None:
+            sol = OdeSolution(ts, interpolants)
+        else:
+            sol = OdeSolution(ti, interpolants)
+    else:
+        sol = None
+
+    return OdeResult(t=ts, y=ys, sol=sol, t_events=t_events, y_events=y_events,
+                     nfev=solver.nfev, njev=solver.njev, nlu=solver.nlu,
+                     status=status, message=message, success=status >= 0)

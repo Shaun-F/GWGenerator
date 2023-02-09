@@ -1,4 +1,4 @@
-from scipy.integrate import solve_ivp
+#from scipy.integrate import solve_ivp
 from mpmath import *
 mp.dps=25
 mp.pretty=True
@@ -149,7 +149,7 @@ class PN(Kerr, FluxFunction):
 		except TypeError:
 			print("ERROR: type error in frequency and flux generation as (e,p)=({0},{1})".format(ecc,semimaj))
 		except SystemError as errmsg:
-			print("Error at parameter point (p,e)=({0},{1}). \n {2}".format(semimaj,ecc,errmsg))
+			print("Error at parameter point (p,e)=({0},{1}). \n\t SystemError: {2}".format(semimaj,ecc,errmsg))
 			self.IntegratorRun=False
 			self.IntegratorExitReason=errmsg
 			return np.zeros_like(y)

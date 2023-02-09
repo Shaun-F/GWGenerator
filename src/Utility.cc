@@ -18,6 +18,7 @@ void throw_python_error(char* str_in, int status)
 
 // Define elliptic integrals that use Mathematica's conventions
 double EllipticK(double k){
+    gsl_set_error_handler_off();
     gsl_sf_result result;
     int status = gsl_sf_ellint_Kcomp_e(sqrt(k), GSL_PREC_DOUBLE, &result);
     if (status != GSL_SUCCESS)
@@ -30,6 +31,7 @@ double EllipticK(double k){
 }
 
 double EllipticF(double phi, double k){
+    gsl_set_error_handler_off();
     gsl_sf_result result;
     int status = gsl_sf_ellint_F_e(phi, sqrt(k), GSL_PREC_DOUBLE, &result);
     if (status != GSL_SUCCESS)
@@ -42,6 +44,7 @@ double EllipticF(double phi, double k){
 }
 
 double EllipticE(double k){
+    gsl_set_error_handler_off();
     gsl_sf_result result;
     int status = gsl_sf_ellint_Ecomp_e(sqrt(k), GSL_PREC_DOUBLE, &result);
     if (status != GSL_SUCCESS)
@@ -54,6 +57,7 @@ double EllipticE(double k){
 }
 
 double EllipticEIncomp(double phi, double k){
+    gsl_set_error_handler_off();
     gsl_sf_result result;
     int status = gsl_sf_ellint_E_e(phi, sqrt(k), GSL_PREC_DOUBLE, &result);
     if (status != GSL_SUCCESS)
@@ -66,6 +70,7 @@ double EllipticEIncomp(double phi, double k){
 }
 
 double EllipticPi(double n, double k){
+    gsl_set_error_handler_off();
     gsl_sf_result result;
     int status = gsl_sf_ellint_Pcomp_e(sqrt(k), -n, GSL_PREC_DOUBLE, &result);
     if (status != GSL_SUCCESS)
@@ -78,6 +83,7 @@ double EllipticPi(double n, double k){
 }
 
 double EllipticPiIncomp(double n, double phi, double k){
+    gsl_set_error_handler_off();
     gsl_sf_result result;
     int status = gsl_sf_ellint_P_e(phi, sqrt(k), -n, GSL_PREC_DOUBLE, &result);
     if (status != GSL_SUCCESS)
