@@ -54,11 +54,11 @@ except (ImportError, ModuleNotFoundError) as e:
     usingcupy=False
 
 #data directory relative to local parent GWGen
-#DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/Data/"
-#NCPUs = 3
+DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/Data/"
+NCPUs = 3
 #DataDirectory = "/remote/pi213f/fell/DataStore/ProcaAroundKerrGW/GWGenOutput/"
 #NCPUs = 32
-DataDirectory=os.environ["HOME"]+"/WS_gwgen_output/"
+#DataDirectory=os.environ["HOME"]+"/WS_gwgen_output/"
 
 #generate plots
 PlotData = False
@@ -129,6 +129,11 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
     p0 = GetInitialP(BHMASS, e0) #approximate coalescence after 5 years for undressed system
     basefilename = "SMBHMass{0}_SMBHSpin{6}_SecMass{1}_ProcaMass{2}_ProcaSpin{3}_e0{4}_p0{5}.json".format(int(BHMASS),SecondaryMass,PROCAMASS,spin,int(e0*10)/10,int(p0*10)/10, BHSpin)
     filename = DataDir + "Output/"+basefilename
+
+    #sanity check on initial parameters
+    if p0<(get_separatrix(BHSpin, e0, 1.)+0.2):
+        print("Bad initial data: initial semi-latus rectum within 0.2 gravitational radii of separatrix! Skipping loop")
+        return None
 
     if os.path.exists(filename):
         print(prepend_print_string+"Solution already exists. Skipping...")
