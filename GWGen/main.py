@@ -78,10 +78,10 @@ mich=False #assume LISA long baseline response approximation
 T=8 #LISA data run is 5 years. We set the max time to be longer because the proca cloud extends the inspiral time
 dt=15 #time resolution in seconds
 
-use_gpu=False #if CUDA or cupy is installed, this flag sets GPU parallelization
-usingcupy=False #master variable to set use of cupy
-usingmultipool=False
-usingmpi=True #master variable to set use of MPI
+use_gpu=True #if CUDA or cupy is installed, this flag sets GPU parallelization
+usingcupy=use_gpu #master variable to set use of cupy
+usingmultipool=True
+usingmpi=False #master variable to set use of MPI
 
 
 
@@ -114,8 +114,12 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
     if usingmpi:
         print("\n\nprocess {2} on solution {0} out of {1}".format(solcounter,nsols, mpirank))
         prepend_print_string = "Process rank {0} says: ".format(mpirank)
+    elif usingmultipool:
+        prepend_print_string = "Process rank {0} says: ".format(mp.current_process().name)
     else:
         prepend_print_string = ""
+
+
 
     alphaval = alphavalue(BHMASS, PROCAMASS)
     #alpha values larger than 0.02 produce energy fluxes larger than the undressed flux
