@@ -327,7 +327,7 @@ if __name__=='__main__':
 
         chunk_size = 20
 
-        PrettyPrint("Executing parallelized computation... \n\t Output Directory: {0}\n\t Plot Directory: {1}".format(DataDir+"Output/", DataDir+"Plot/"))
+        PrettyPrint("Executing parallelized computation on {2} CPUs... \n\t Output Directory: {0}\n\t Plot Directory: {1}".format(DataDir+"Output/", DataDir+"Plot/", NCPUs))
         starttime=time.time()
         with mp.Pool(processes=NCPUs) as poo:
             poo.starmap(parallel_func, parallel_args,chunksize=chunk_size)
