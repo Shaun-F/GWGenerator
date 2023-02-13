@@ -24,6 +24,8 @@ NegativeEccentricityThreshold=-1e-3
 class PN(Kerr, FluxFunction):
 
 	def __init__(self, M,m, bhspin=0.9, DeltaEFlux=0.0*unit.kg*unit.m**2/(unit.s**3), DeltaLFlux=0.0*unit.kg*unit.m**2/(unit.s**2), FluxName="analytic"):
+		global SEPARATRIXDELTA
+
 		Kerr.__init__(self,BHSpin=bhspin) ###better to use super()? How with multiple inheritance and multilpe arguments to inits?
 		FluxFunction.__init__(self, name=FluxName)
 
@@ -205,7 +207,6 @@ class PNTraj(TrajectoryBase):
 	def __init__(self,**kwargs):
 		self.__exit_reason = ""
 
-
 	def get_inspiral(self, M, mu, a, p0, e0, x0, T=1.0, **kwargs):
 		"""
 		M: mass of central SMBH
@@ -216,6 +217,7 @@ class PNTraj(TrajectoryBase):
 		x0: initial inclination of orbital plane (NOTE: currently only considering equatorial orbits)
 		T: integration time (years)
 		"""
+		global SEPARATRIXDELTA
 
 
 
@@ -303,6 +305,7 @@ class PNTraj(TrajectoryBase):
 
 		max_step_size = t_span[-1]/npoints
 
+		"""
 		result = solve_ivp(self.PNEvaluator,
 							t_span, #time range
 							y0, #initial values
@@ -311,7 +314,22 @@ class PNTraj(TrajectoryBase):
 							events = self.__integration_event_trackers, #track boundaries of integration
 							max_step = max_step_size #dimensionless seconds
 						)
-		self.__SEPARATRIX_CUTOFF = get_separatrix(float(a), result["y"][1][-1], 1.) + self.__SEPARATRIX_DELTA
+		"""
+		sanity_check_status = False
+		while not sanity_check_status:
+			result = solve_ivp(self.PNEvaluator,
+								t_span, #time range
+								y0, #initial values
+								method=self.__integration_method, #integration method
+								dense_output=self.__dense_output, #compute interpolation over points
+								events = self.__integration_event_trackers, #track boundaries of integration
+								max_step = max_step_size #dimensionless seconds
+							)
+			sanity_check_status = self.trajectory_frequency_sanity_check(result["y"][0], result["y"][1], np.ones_like(result["y"][0], dtype=result["y"[0]].dtype))
+			if not sanity_check_status:
+				SEPARATRIXDELTA += 0.1
+
+		self.__SEPARATRIX_CUTOFF = get_separatrix(float(a), result['y'][1][-1], 1.) + SEPARATRIXDELTA
 		#check eccentricity bounds
 		assert np.all(result['y'][1]>=NegativeEccentricityThreshold), "Error: Eccentricity outside tolerable negative value range."
 		t_out = result["t"]
@@ -321,6 +339,8 @@ class PNTraj(TrajectoryBase):
 		Phi_phi_out = result["y"][2]
 		Phi_theta_out = result["y"][3]
 		Phi_r_out = result["y"][4]
+
+		#sanity check trajectory by calculating
 
 		if self.__exit_reason=="":
 			self.__exit_reason = "Integration reached time boundary. Boundary location t = {0:0.2f}".format(t_out[-1])
@@ -388,6 +408,12 @@ class PNTraj(TrajectoryBase):
 		else:
 			print("Run trajectory method to generate this property")
 			return None
+
+	def trajectory_frequency_sanity_check(self,p_arr,e_arr,x_arr):
+		assert len(p_arr)==len(e_arr)==len(x_arr), "Error: array lengths must be equal"
+		boolearr = [np.any(np.isnan(list(self.PNEvaluator.OrbitFrequencies(e_arr[i],p_arr[i],x_arr[i]).values()))) for i in range(len(p_arr))]
+		#if trajectory produces nan values in orbital frequencies return False (sanity check fails)
+		return not np.any(boolearr)
 
 
 class EMRIWaveform(AAKWaveformBase):
