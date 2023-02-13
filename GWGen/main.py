@@ -13,6 +13,8 @@ stdout_file = orig_stdout #open(os.environ["HOME"]+"/WS_gwgen_output/debug/stdou
 print("Executing GWGen/main.py...",file=stdout_file)
 print("{0}".format(time.ctime(time.time())), file=stdout_file)
 
+dense_printing = False
+
 try:
     import mpi4py as m4p
     from mpi4py import MPI
@@ -80,7 +82,7 @@ mich=False #assume LISA long baseline response approximation
 T=8 #LISA data run is 5 years. We set the max time to be longer because the proca cloud extends the inspiral time
 dt=15 #time resolution in seconds
 
-use_gpu=True #if CUDA or cupy is installed, this flag sets GPU parallelization
+use_gpu=False #if CUDA or cupy is installed, this flag sets GPU parallelization
 usingcupy=use_gpu #master variable to set use of cupy
 usingmultipool=True
 usingmpi=False #master variable to set use of MPI
@@ -126,10 +128,12 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
     alphaval = alphavalue(BHMASS, PROCAMASS)
     #alpha values larger than 0.02 produce energy fluxes larger than the undressed flux
     if alphaval>alphauppercutoff and spin==1:
-        print(prepend_print_string+"Alpha value {0:0.4f} beyond range of available data. Allowed range [[{1},{2}]]".format(alphaval,alphalowercutoff, alphauppercutoff))
+        if dense_printing:
+            print(prepend_print_string+"Alpha value {0:0.4f} beyond range of available data. Allowed range [[{1},{2}]]".format(alphaval,alphalowercutoff, alphauppercutoff))
         return None
     if alphaval<alphalowercutoff and spin==1:
-        print(prepend_print_string+"Alpha value {0:0.4f} below range of available data. Allowed range [[{1},{2}]]".format(alphaval,alphalowercutoff, alphauppercutoff))
+        if dense_printing:
+            print(prepend_print_string+"Alpha value {0:0.4f} below range of available data. Allowed range [[{1},{2}]]".format(alphaval,alphalowercutoff, alphauppercutoff))
         return None
 
     p0 = GetInitialP(BHMASS, e0) #approximate coalescence after 5 years for undressed system
@@ -142,7 +146,8 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
         return None
 
     if os.path.exists(filename):
-        print(prepend_print_string+"Solution already exists. Skipping...")
+        if dense_printing:
+            print(prepend_print_string+"Solution already exists. Skipping...")
         return None
 
 
