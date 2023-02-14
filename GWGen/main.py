@@ -25,6 +25,9 @@ except (ImportError, ModuleNotFoundError) as e:
 parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--debug", action='store_true',default=False)
 parser.add_argument("-p", "--plot", action='store_true',default=False)
+parser.add_argument("--mpi", action="store_true", default=False)
+parser.add_argument("--mp", action="store_true", default=False)
+parser.add_argument("--gpu", action="store_true", default=False)
 args=parser.parse_args()
 
 
@@ -65,7 +68,7 @@ NCPUs = 3
 
 
 #generate plots
-PlotData = False
+PlotData = args.plot
 
 #boson spin
 spin=1
@@ -82,10 +85,10 @@ mich=False #assume LISA long baseline response approximation
 T=8 #LISA data run is 5 years. We set the max time to be longer because the proca cloud extends the inspiral time
 dt=15 #time resolution in seconds
 
-use_gpu=False #if CUDA or cupy is installed, this flag sets GPU parallelization
+use_gpu=args.gpu #if CUDA or cupy is installed, this flag sets GPU parallelization
 usingcupy=use_gpu #master variable to set use of cupy
-usingmultipool=True
-usingmpi=False #master variable to set use of MPI
+usingmultipool=args.mp
+usingmpi=args.mpi #master variable to set use of MPI
 
 
 
