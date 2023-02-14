@@ -13,6 +13,11 @@ import astropy.constants as cons
 import astropy.units as unit
 import glob
 
+#FFT specific packages
+import pyfftw
+import multiprocessing
+
+
 try:
     import cupy as cp
     usingcupy=True
@@ -156,7 +161,7 @@ def ConvertToCCompatibleArray(arr,newdtype=None):
         ret = np.require(arr, dtype=newdtype, requirements=["C", "O", "A", "E"])
     return ret
 
-def WaveformInnerProduct(timedomain, h1,h2, fmin=0.0001, fmax=1,use_gpu=False):
+def WaveformInnerProduct(timedomain, h1,h2, fmin=0.0001, fmax=1,use_gpu=False, maximize=False):
     """
     complex waveforms h1 and h2 are in time-domain with time domain in units of seconds. Compute inner product defined in
     """
@@ -189,11 +194,22 @@ def WaveformInnerProduct(timedomain, h1,h2, fmin=0.0001, fmax=1,use_gpu=False):
     if len(timedomain)!=len(h1) or len(timedomain)!=len(h2):
         raise RuntimeError("time domain has different length than the waveforms")
 
-    h1_InFreq = xp.fft.fft(h1)
-    h2_InFreq = xp.fft.fft(h2)
-    timelength = len(timedomain)
-    DeltaT = timedomain[1]-timedomain[0]
-    frequency_range = xp.fft.fftfreq(int(timelength), d=float(DeltaT))
+    if not use_gpu:
+        pyfftw.config.NUM_THREADS = multiprocessing.cpu_count()
+        pyfftw.interfaces.cache.enable()
+
+        with sp.fft.set_backend(pyfftw.interfaces.scipy_fft):
+            h1_InFreq = sp.fft.fft(h1)
+            h2_InFreq = sp.fft.fft(h2)
+            timelength = len(timedomain)
+            DeltaT = timedomain[1]-timedomain[0]
+            frequency_range = sp.fft.fftfreq(int(timelength), d=float(DeltaT))
+    else:
+        h1_InFreq = xp.fft.fft(h1)
+        h2_InFreq = xp.fft.fft(h2)
+        timelength = len(timedomain)
+        DeltaT = timedomain[1]-timedomain[0]
+        frequency_range = xp.fft.fftfreq(int(timelength), d=float(DeltaT))
 
     #Consider real frequencies and ignore zero frequency
     frequency_length = int(len(frequency_range)/2 -1)
@@ -217,16 +233,25 @@ def WaveformInnerProduct(timedomain, h1,h2, fmin=0.0001, fmax=1,use_gpu=False):
         masked_integrand = np.asarray(masked_integrand)
         masked_frequency_range = np.asarray(masked_frequency_range)
 
-    integral = sp.integrate.simpson(masked_integrand.real, x=masked_frequency_range)
+    if maximize:
+        integral = []
+        for i in np.arange(-5,5):
+            phase_offset = np.exp(-2*np.pi*1j*masked_frequency_range*i*DeltaT)
+            integral.append(sp.integrate.simpson(masked_integrand*phase_offset, x=masked_frequency_range))
+        ret = 4*np.real(np.max(integral))
 
-    ret = 4*integral
-    del h1,h2,h2_InFreq,h1_InFreq,timelength,DeltaT,frequency_range,frequency_length,frequency_domain,h1f,h2f,h2fstar,PowerSpectralDensity,integrand,mininx,maxinx,masked_frequency_range,masked_integrand,integral
+    else:
+        ret = 4*sp.integrate.simpson(masked_integrand.real, x=masked_frequency_range)
+
+    del h1,h2,h2_InFreq,h1_InFreq,timelength,DeltaT,frequency_range,frequency_length,frequency_domain,h1f,h2f,h2fstar,PowerSpectralDensity,integrand,mininx,maxinx,masked_frequency_range,masked_integrand
     if use_gpu:
         cp.get_default_memory_pool().free_all_blocks()
         cp.get_default_pinned_memory_pool().free_all_blocks()
     return ret
 
-def Faithfulness(timedomain, h1, h2,use_gpu=False):
+
+#Naive implementaion of faithfulness (without maximization over time and phase offsets)
+def Faithfulness(timedomain, h1, h2,use_gpu=False, maximize=True):
     """
     time domain must be in units of seconds
     """
@@ -241,7 +266,7 @@ def Faithfulness(timedomain, h1, h2,use_gpu=False):
     assert len(timedomain)==len(h1), "time domain has different length than the waveforms. time domain length: {0} waveform 1 length: {1} waveform 2 length: {2}".format(len(timedomain), len(h1), len(h2))
 
 
-    h1h2 = WaveformInnerProduct(timedomain, h1, h2,use_gpu=use_gpu)
+    h1h2 = WaveformInnerProduct(timedomain, h1, h2,use_gpu=use_gpu, maximize=maximize)
     h1h1 = WaveformInnerProduct(timedomain, h1, h1,use_gpu=use_gpu)
     h2h2 = WaveformInnerProduct(timedomain, h2, h2,use_gpu=use_gpu)
     ret = h1h2/np.sqrt(h1h1*h2h2)
