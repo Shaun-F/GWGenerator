@@ -37,7 +37,7 @@ from GWGen.Utils import GetInitialP, BHSpinAlphaCutoff,cartesian_product
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-plt.rcParams['text.usetex'] = True
+plt.rcParams['text.usetex'] = False
 matplotlib.use("Agg")
 from matplotlib import figure
 
@@ -302,11 +302,12 @@ if __name__=='__main__':
     DataDir = DataDirectory
 
     tmparr = np.linspace(1,9,9,dtype=np.int64) #strange floating point error when doing just np.arange(1,10,0.1) for np.linspace(1,10,91). Causes issues when saving numbers to filenames
+    tmparr1 = np.linspace(1,9,81, dtype=np.int64)
     SMBHMasses = sorted([int(i) for i in np.kron(tmparr,[1e5, 1e6,1e7])]) #solar masses
     SMBHSpins = [int(100*i)/100 for i in np.linspace(0.6,0.9,10)]
     SecondaryMass = 10 #solar masses
     e0list = [0.1,0.2,0.3,0.4,0.5,0.6,0.7]
-    ProcaMasses = [round(i,22) for i in np.kron(tmparr, [1e-16,1e-17,1e-18,1e-19])] #eV   #again avoiding floating point errors
+    ProcaMasses = [round(i,22) for i in np.kron(tmparr1, [1e-16,1e-17,1e-18,1e-19])] #eV   #again avoiding floating point errors
 
     #make sure output directory tree is built
     if not os.path.exists(DataDir+"Plots/"):
