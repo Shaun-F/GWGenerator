@@ -402,7 +402,7 @@ MESSAGES = {0: "The solver successfully reached the end of the integration inter
             1: "A termination event occurred.",
             2: "Trajectory failed to appreciably change between timesteps."}
 
-def solve_ivp(fun, t_span, y0, method='RK45', t_eval=None, dense_output=False,
+def solve_ivp(fun, t_span, y0, method='DOP853', t_eval=None, dense_output=False,
               events=None, vectorized=False, args=None, **options):
     """
         See scipy.integrate.solve_ivp docstring
