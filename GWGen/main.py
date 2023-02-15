@@ -13,7 +13,7 @@ stdout_file = orig_stdout #open(os.environ["HOME"]+"/WS_gwgen_output/debug/stdou
 print("Executing GWGen/main.py...",file=stdout_file)
 print("{0}".format(time.ctime(time.time())), file=stdout_file)
 
-dense_printing = False
+dense_printing = True
 
 try:
     import mpi4py as m4p
@@ -59,11 +59,11 @@ except (ImportError, ModuleNotFoundError) as e:
     usingcupy=False
 
 #data directory relative to local parent GWGen
-#DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/Data/"
+DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/Data/"
 #NCPUs = 3
 #DataDirectory = "/remote/pi213f/fell/DataStore/ProcaAroundKerrGW/GWGenOutput/"
 #NCPUs = 32
-DataDirectory=os.environ["HOME"]+"/WS_gwgen_output/"
+#DataDirectory=os.environ["HOME"]+"/WS_gwgen_output/"
 NCPUs=mp.cpu_count()
 
 
@@ -145,7 +145,8 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
 
     #sanity check on initial parameters
     if p0<(get_separatrix(BHSpin, e0, 1.)+0.2):
-        print("Bad initial data: initial semi-latus rectum within 0.2 gravitational radii of separatrix! Skipping loop")
+        if dense_printing:
+            print("Bad initial data: initial semi-latus rectum within 0.2 gravitational radii of separatrix! Skipping loop")
         return None
 
     if os.path.exists(filename):
@@ -305,7 +306,7 @@ if __name__=='__main__':
     DataDir = DataDirectory
 
     tmparr = np.linspace(1,9,9,dtype=np.int64) #strange floating point error when doing just np.arange(1,10,0.1) for np.linspace(1,10,91). Causes issues when saving numbers to filenames
-    tmparr1 = np.linspace(1,9,81, dtype=np.int64)
+    tmparr1 = np.linspace(1,9,81, dtype=np.float64)
     SMBHMasses = sorted([int(i) for i in np.kron(tmparr,[1e5, 1e6,1e7])]) #solar masses
     SMBHSpins = [int(100*i)/100 for i in np.linspace(0.6,0.9,10)]
     SecondaryMass = 10 #solar masses
@@ -323,12 +324,15 @@ if __name__=='__main__':
         os.mkdir(DataDir+"debug/")
 
     if not usingmultipool and not usingmpi:
-	PrettyPrint("Executing parallelized computation on {2} CPUs... \n\t Output Directory: {0}\n\t Plot Directory: {1}".format(DataDir+"Output/", DataDir+"Plot/", NCPUs))
+        PrettyPrint("Executing parallelized computation on {2} CPUs... \n\t Output Directory: {0}\n\t Plot Directory: {1}".format(DataDir+"Output/", DataDir+"Plot/", NCPUs))
+        counter=1
         for bhmass in SMBHMasses:
             for pmass in ProcaMasses:
                 for ecc in e0list:
                     for bhspin in SMBHSpins:
+                        print("On iteration {0} out of {1}".format(counter, len(SMBHMasses)*len(ProcaMasses)*len(e0list)*len(SMBHSpins)))
                         process(bhmass, bhspin,pmass,ecc, plot=PlotData, SecondaryMass=SecondaryMass, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(bhspin))
+                        counter+=1
 
 
     if usingmultipool:
