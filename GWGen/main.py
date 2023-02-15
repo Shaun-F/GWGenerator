@@ -59,12 +59,12 @@ except (ImportError, ModuleNotFoundError) as e:
     usingcupy=False
 
 #data directory relative to local parent GWGen
-DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/Data/"
-NCPUs = 3
+#DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/Data/"
+#NCPUs = 3
 #DataDirectory = "/remote/pi213f/fell/DataStore/ProcaAroundKerrGW/GWGenOutput/"
 #NCPUs = 32
-#DataDirectory=os.environ["HOME"]+"/WS_gwgen_output/"
-#NCPUS=mp.cpu_count()
+DataDirectory=os.environ["HOME"]+"/WS_gwgen_output/"
+NCPUs=mp.cpu_count()
 
 
 #generate plots
@@ -323,6 +323,7 @@ if __name__=='__main__':
         os.mkdir(DataDir+"debug/")
 
     if not usingmultipool and not usingmpi:
+	PrettyPrint("Executing parallelized computation on {2} CPUs... \n\t Output Directory: {0}\n\t Plot Directory: {1}".format(DataDir+"Output/", DataDir+"Plot/", NCPUs))
         for bhmass in SMBHMasses:
             for pmass in ProcaMasses:
                 for ecc in e0list:
