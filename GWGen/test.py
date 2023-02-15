@@ -2,8 +2,11 @@ from main import *
 from mpi4py import MPI
 
 
-smbhmass = 200000
-smbhspin = 0.63
+smbhmass = 100000
+smbhspin = 0.9
+p0 = 34.8
+e0 = 0.3
+pmass = 1e-16
 
 """
 comm = MPI.COMM_WORLD
@@ -15,8 +18,7 @@ DataDir = os.path.abspath(os.path.dirname(__file__)) + "/Data/"
 #parallel_func = lambda args,solcount,nsols: process(args[0], args[1], args[2], args[3], SecondaryMass=10, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(args[1]),mpirank=rank, solcounter=solcount,nsols=nsols)
 parallel_func = lambda args,solcount,nsols: process(args[0], args[1], args[2], args[3], SecondaryMass=10, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(args[1]), solcounter=solcount,nsols=nsols)
 
-coords = [(smbhmass, smbhspin, 6e-17,0.8),(smbhmass, smbhspin, 6e-17,0.9),(smbhmass, smbhspin, 7e-17,0.1),(smbhmass, smbhspin, 7e-17,0.2)]
-
+coords = [(smbhmass, smbhspin, pmass,e0)]
 """
 def split(a, n):
         k, m = divmod(len(a), n)
