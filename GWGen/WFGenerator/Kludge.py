@@ -116,7 +116,7 @@ class PN(Kerr, FluxFunction):
 		ecc = float(y[1])
 		phi_phase = float(y[2])
 		radial_phase = float(y[3])
-		if ecc<1e-6:
+		if 0<=ecc<1e-6:
 			#if eccentricity is zero, replace it by small number to guard against poles in integrals of motion
 			ecc=1e-6
 
@@ -235,6 +235,7 @@ class PNTraj(TrajectoryBase):
 
 		assert float(x0)==1., "Error: Only equatorial orbits are currently implemented."
 		assert float(T)<=6, "Error: inspiral time must be shorter than 6 years"
+
 		#boundary values
 		if e0<10**(-10): #guard against poles in analytic expressions
 			e0=10**(-10)
@@ -260,7 +261,7 @@ class PNTraj(TrajectoryBase):
 
 		# run integrator down to T or separatrix
 		t_span = (t_start, t_stop)
-
+		"""
 		def __integration_event_tracker_eccentricity(_, y_vec):
 			e = y_vec[1]
 			#define a function which is has a zero at e=1, a zero at the smallest negative float, and positive on the range [0,1)
@@ -271,39 +272,43 @@ class PNTraj(TrajectoryBase):
 			if res<=0:
 				self.__exit_reason = "Eccentricity exceeded bounds"
 			return res
+		__integration_event_tracker_eccentricity.terminal=True
+		"""
 
 		def __integration_event_tracker_semilatus_rectum(_, y_vec):
 			p = y_vec[0]
 			e = float(y_vec[1])
 			#res_separatrix = p-self.__SEPARATRIX_CUTOFF
-			res_separatrix = p-get_separatrix(float(a), e, 1.)
-			res_absolute_boundary = p-2.4
+			res_separatrix = p-get_separatrix(float(a), e, 1.)-self.__SEPARATRIX_DELTA
+			#res_absolute_boundary = p-2.4
 			if res_separatrix<=0:
 				self.__exit_reason = "Separatrix reached!"
 			return res_separatrix
+		__integration_event_tracker_semilatus_rectum.terminal=True
 
-
+		"""
 		def __integration_event_tracker_eFlux(_, y_vec):
 			Eflux = self.PNEvaluator.UndressedeFlux(y_vec[1], y_vec[0])
 			res = -Eflux
 			if res<=0:
 				self.__exit_reason="PN Eccentricity flux larger than zero! Breaking."
 			return res
+		__integration_event_tracker_eFlux.terminal=True
+		"""
+
 		def __integration_event_tracker_pFlux(_, y_vec):
 			Lflux = self.PNEvaluator.UndressedpFlux(y_vec[1], y_vec[0])
 			res = -Lflux
 			if res<=0:
 				self.__exit_reason="PN Semilatus Rectum flux larger than zero! Breaking."
 			return res
-
-		__integration_event_tracker_eccentricity.terminal=True
-		__integration_event_tracker_semilatus_rectum.terminal=True
-		__integration_event_tracker_eFlux.terminal=True
 		__integration_event_tracker_pFlux.terminal=True
 
-		self.__integration_event_trackers = [#__integration_event_tracker_eccentricity,
+
+		self.__integration_event_trackers = [
 										__integration_event_tracker_semilatus_rectum,
-										__integration_event_tracker_pFlux]
+										__integration_event_tracker_pFlux
+										]
 
 		max_step_size = t_span[-1]/npoints
 

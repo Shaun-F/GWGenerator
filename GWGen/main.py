@@ -82,7 +82,7 @@ phiK=0. #Initial BH Spin Azimuthal Angle in solar system barycenter coordinate s
 dist=1. #Distance to source (Mpc)
 mich=False #assume LISA long baseline response approximation
 
-T=6 #LISA data run is 5 years. We set the max time to be longer because the proca cloud extends the inspiral time
+T=5.8 #LISA data run is 5 years. We set the max time to be longer because the proca cloud extends the inspiral time
 dt=15 #time resolution in seconds
 
 use_gpu=args.gpu #if CUDA or cupy is installed, this flag sets GPU parallelization
@@ -162,9 +162,10 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
     moddedwvcl = EMRIWithProcaWaveform(inspiral_kwargs=inspiral_kwargs.copy(), sum_kwargs=sum_kwargs.copy(), use_gpu=False)
 
     print(prepend_print_string+"Generating waveforms...", file=stdout_file)
+
     unmoddedwv = unmoddedwvcl(BHMASS, SecondaryMass, BHSpin, p0, e0, x0, qS, phiS, qK, phiK, dist, mich=mich, dt=dt,T=T)
     unmoddedtraj = unmoddedwvcl.Trajectory
-
+    print("\t Unmodded waveform generated. Generating modded waveform.")
     moddedwv = moddedwvcl(BHMASS, SecondaryMass, PROCAMASS, BHSpin,p0,e0,x0,T=T, qS=qS, phiS=phiS, qK=qK, phiK=phiK, dist=dist,mich=mich,dt=dt, BosonSpin=spin, UltralightBoson = ulb)
     moddedtraj = moddedwvcl.Trajectory
     print(prepend_print_string+"Waveforms generated. Calculating figures of merit.", file=stdout_file)

@@ -38,4 +38,56 @@ for inx, arg in enumerate(parallel_args_for_subprocesses):
         counter+=1
 """
 
-parallel_func((200000.0,0.63,8e-17,0.5),1,1)
+
+ulb = superrad.ultralight_boson.UltralightBoson(spin=1, model="relativistic")
+
+
+
+DataDir = DataDirectory
+
+tmparr = np.linspace(1,9,9,dtype=np.int64) #strange floating point error when doing just np.arange(1,10,0.1) for np.linspace(1,10,91). Causes issues when saving numbers to filenames
+tmparr1 = np.linspace(1,9,81, dtype=np.float64)
+SMBHMasses = sorted([int(i) for i in np.kron(tmparr,[1e5, 1e6,1e7])]) #solar masses
+SMBHSpins = [int(100*i)/100 for i in np.linspace(0.6,0.9,10)]
+SecondaryMass = 10 #solar masses
+e0list = [0.1,0.2,0.3,0.4,0.5,0.6,0.7]
+ProcaMasses = [round(i,22) for i in np.kron(tmparr1, [1e-16,1e-17,1e-18,1e-19])] #eV   #again avoiding floating point errors
+
+maxlen = len(SMBHMasses)*len(SMBHSpins)*len(ProcaMasses)*len(e0list)
+counter=1
+for bh in SMBHMasses:
+    for a in SMBHSpins:
+        for pm in ProcaMasses:
+            for e0 in e0list:
+                alphaval = alphavalue(bh, pm)
+
+                if alphaval>BHSpinAlphaCutoff(a) or alphaval<0.02:
+                    continue
+
+                p0 = GetInitialP(bh,e0)
+
+                print("On iteration {0} out of {1}\n\t BHMass: {2}\n\tBHSpin: {3}\n\tPMass: {4}\n\te0: {5}\n\tp0: {6}\n\tT: {7}".format(counter, maxlen, bh, a, pm,e0,p0,T))
+                unmoddedwvcl = EMRIWaveform(inspiral_kwargs=inspiral_kwargs.copy(), sum_kwargs=sum_kwargs.copy(), use_gpu=False)
+                moddedwvcl = EMRIWithProcaWaveform(inspiral_kwargs=inspiral_kwargs.copy(), sum_kwargs=sum_kwargs.copy(), use_gpu=False)
+
+                ProcaSolution.__init__(moddedwvcl,bh, a, pm, BosonSpin=1, CloudModel="relativistic", units="physical",UltralightBoson=ulb)
+                Kerr.__init__(moddedwvcl,BHSpin=a)
+
+
+                if e0<1e-6:
+                    warnings.warn("Eccentricity below safe threshold for FEW. Functions behave poorly for e<1e-6")
+                    e0=1e-6 #Certain functions in FEW are not well-behaved below this value
+
+                OrbitalConstantsChange = moddedwvcl.ChangeInOrbitalConstants(SecondaryMass=10, SMBHMass=bh)
+                asymptoticBosonCloudEFlux = OrbitalConstantsChange["E"] #Dimensionfull Flux. Mass Ratio prefactor comes from derivative of orbital energy wrt spacetime mass and factor of mass of the geodesic. Takes into account effective mass seen by secondary BH during its orbit
+                asymptoticBosonCloudLFlux = OrbitalConstantsChange["L"]
+
+
+                moddedwvcl.inspiralkwargs["DeltaEFlux"] = asymptoticBosonCloudEFlux
+                moddedwvcl.inspiralkwargs["DeltaLFlux"] = asymptoticBosonCloudLFlux
+                moddedwvcl.inspiralkwargs["FluxName"] = "analytic"
+
+                unmoddedtraj = unmoddedwvcl.inspiral_generator(bh,10,a,p0,e0,1.,T=T, dt=dt, Phi_phi0=0, Phi_theta0=0, Phi_r0=0, **unmoddedwvcl.inspiralkwargs)
+
+                moddedtraj = moddedwvcl.inspiral_generator(bh,10,a,p0,e0,1.,T=T, dt=dt, Phi_phi0=0, Phi_theta0=0, Phi_r0=0, **moddedwvcl.inspiralkwargs)
+                counter+=1
