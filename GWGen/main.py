@@ -82,7 +82,7 @@ phiK=0. #Initial BH Spin Azimuthal Angle in solar system barycenter coordinate s
 dist=1. #Distance to source (Mpc)
 mich=False #assume LISA long baseline response approximation
 
-T=8 #LISA data run is 5 years. We set the max time to be longer because the proca cloud extends the inspiral time
+T=6 #LISA data run is 5 years. We set the max time to be longer because the proca cloud extends the inspiral time
 dt=15 #time resolution in seconds
 
 use_gpu=args.gpu #if CUDA or cupy is installed, this flag sets GPU parallelization
@@ -149,7 +149,7 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
             print("Bad initial data: initial semi-latus rectum within 0.2 gravitational radii of separatrix! Skipping loop")
         return None
 
-    if os.path.exists(filename):
+    if os.path.exists(filename) and not OverwriteSolution:
         if dense_printing:
             print(prepend_print_string+"Solution already exists. Skipping...")
         return None
@@ -259,7 +259,8 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
         BHSpin = {4}
         p0 = {5}
         e0 = {6}
-        """.format(mismatch, BHMASS, PROCAMASS, spin,BHSpin, p0, e0)
+        alpha = {7}
+        """.format(mismatch, BHMASS, PROCAMASS, spin,BHSpin, p0, e0, alphaval)
         ax[1,1].text(0.5,0.5, string, bbox=prop, fontsize=14, verticalalignment='center', horizontalalignment='center')
 
         ax[2,0].plot(moddedtraj["t"]/SecPerYR, moddedtraj["p"], label="With Proca")

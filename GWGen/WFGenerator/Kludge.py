@@ -234,13 +234,14 @@ class PNTraj(TrajectoryBase):
 		self.SMBHMass = M
 
 		assert float(x0)==1., "Error: Only equatorial orbits are currently implemented."
+		assert float(T)<=6, "Error: inspiral time must be shorter than 6 years"
 		#boundary values
 		if e0<10**(-10): #guard against poles in analytic expressions
 			e0=10**(-10)
 		y0 = [p0, e0, 0.0, 0.0, 0.0] #zero mean anomaly initially
 
 		#compute separatrix of initial parameters
-		self.__initial_separatrix = get_separatrix(float(a), e0, 1.)
+		self.__initial_separatrix = get_separatrix(float(a), float(e0), 1.)
 		self.__SEPARATRIX_CUTOFF = self.__initial_separatrix + self.__SEPARATRIX_DELTA
 
 
@@ -273,8 +274,9 @@ class PNTraj(TrajectoryBase):
 
 		def __integration_event_tracker_semilatus_rectum(_, y_vec):
 			p = y_vec[0]
+			e = float(y_vec[1])
 			#res_separatrix = p-self.__SEPARATRIX_CUTOFF
-			res_separatrix = p-get_separatrix(float(a), y_vec[1], 1.)
+			res_separatrix = p-get_separatrix(float(a), e, 1.)
 			res_absolute_boundary = p-2.4
 			if res_separatrix<=0:
 				self.__exit_reason = "Separatrix reached!"
@@ -315,6 +317,7 @@ class PNTraj(TrajectoryBase):
 							max_step = max_step_size #dimensionless seconds
 						)
 		"""
+
 		sanity_check_status = False
 		while not sanity_check_status:
 			result = solve_ivp(self.PNEvaluator,
