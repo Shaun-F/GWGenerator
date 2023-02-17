@@ -28,6 +28,7 @@ parser.add_argument("-p", "--plot", action='store_true',default=False)
 parser.add_argument("--mpi", action="store_true", default=False)
 parser.add_argument("--mp", action="store_true", default=False)
 parser.add_argument("--gpu", action="store_true", default=False)
+parser.add_argument("--overwrite", action="store_true", default=False)
 args=parser.parse_args()
 
 
@@ -90,11 +91,12 @@ usingcupy=use_gpu #master variable to set use of cupy
 usingmultipool=args.mp
 usingmpi=args.mpi #master variable to set use of MPI
 
+overwriteexisting = args.overwrite #overwrite existing solutions
 
 
 print("Executing GWGen/main.py...",file=stdout_file)
 print("{0}".format(time.ctime(time.time())), file=stdout_file)
-print("\tUsing GPU: {0}\n\tUsing Cupy: {1}\n\tUsing Multiprocessing: {2}\n\tUsing MPI: {3}".format(use_gpu, usingcupy, usingmultipool, usingmpi))
+print("\tUsing GPU: {0}\n\tUsing Cupy: {1}\n\tUsing Multiprocessing: {2}\n\tUsing MPI: {3}\n\tOverwrite existin solutions: {4}".format(use_gpu, usingcupy, usingmultipool, usingmpi,overwriteexisting))
 
 
 # keyword arguments for inspiral generator (RunKerrGenericPn5Inspiral)
@@ -150,9 +152,12 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
         return None
 
     if os.path.exists(filename) and not OverwriteSolution:
-        if dense_printing:
-            print(prepend_print_string+"Solution already exists. Skipping...")
-        return None
+        if OverwriteSolution:
+            print(prepend_print_string+"Solution exists. Overwriting...")
+        elif not OverwriteSolution:
+            if dense_printing:
+                print(prepend_print_string+"Solution already exists. Skipping...")
+            return None
 
 
     print(prepend_print_string+"\nAlpha Value: {2}\nSMBH Mass: {0}\nProca Mass: {1}\nSMBH Spin: {5}\nEccentricity: {3}\nSemi-latus Rectum: {4}".format(BHMASS, PROCAMASS,alphaval, e0, p0, BHSpin), file=stdout_file)
@@ -333,12 +338,12 @@ if __name__=='__main__':
                 for ecc in e0list:
                     for bhspin in SMBHSpins:
                         print("On iteration {0} out of {1}".format(counter, len(SMBHMasses)*len(ProcaMasses)*len(e0list)*len(SMBHSpins)))
-                        process(bhmass, bhspin,pmass,ecc, plot=PlotData, SecondaryMass=SecondaryMass, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(bhspin))
+                        process(bhmass, bhspin,pmass,ecc, plot=PlotData, SecondaryMass=SecondaryMass, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(bhspin),OverwriteSolution=overwriteexisting)
                         counter+=1
 
 
     if usingmultipool:
-        parallel_func = lambda bhm, bhs, pmass, ecc: process(bhm, bhs, pmass, ecc, SecondaryMass=SecondaryMass, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(bhs))
+        parallel_func = lambda bhm, bhs, pmass, ecc: process(bhm, bhs, pmass, ecc, SecondaryMass=SecondaryMass, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(bhs),OverwriteSolution=overwriteexisting)
         parallel_args = cartesian_product(np.array(SMBHMasses),np.array(SMBHSpins), np.array(ProcaMasses), np.array(e0list))
 
         chunk_size = 20
@@ -356,7 +361,7 @@ if __name__=='__main__':
         rank = comm.Get_rank()
 
         parallel_args = cartesian_product(np.array(SMBHMasses),np.array(SMBHSpins), np.array(ProcaMasses), np.array(e0list))
-        parallel_func = lambda args,solcount,nsols: process(args[0], args[1], args[2], args[3], SecondaryMass=SecondaryMass, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(args[1]),mpirank=rank, solcounter=solcount,nsols=nsols)
+        parallel_func = lambda args,solcount,nsols: process(args[0], args[1], args[2], args[3], SecondaryMass=SecondaryMass, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(args[1]),mpirank=rank, solcounter=solcount,nsols=nsols,OverwriteSolution=overwriteexisting)
 
         def split(a, n):
             k, m = divmod(len(a), n)
