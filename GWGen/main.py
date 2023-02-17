@@ -60,11 +60,11 @@ except (ImportError, ModuleNotFoundError) as e:
     usingcupy=False
 
 #data directory relative to local parent GWGen
-DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/Data/"
+#DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/Data/"
 #NCPUs = 3
 #DataDirectory = "/remote/pi213f/fell/DataStore/ProcaAroundKerrGW/GWGenOutput/"
 #NCPUs = 32
-#DataDirectory=os.environ["HOME"]+"/WS_gwgen_output/"
+DataDirectory=os.environ["HOME"]+"/WS_gwgen_output/"
 NCPUs=mp.cpu_count()
 
 
@@ -96,7 +96,7 @@ overwriteexisting = args.overwrite #overwrite existing solutions
 
 print("Executing GWGen/main.py...",file=stdout_file)
 print("{0}".format(time.ctime(time.time())), file=stdout_file)
-print("\tUsing GPU: {0}\n\tUsing Cupy: {1}\n\tUsing Multiprocessing: {2}\n\tUsing MPI: {3}\n\tOverwrite existing solutions: {4}".format(use_gpu, usingcupy, usingmultipool, usingmpi,overwriteexisting))
+print("\tPlotting Data: {5}\n\tUsing GPU: {0}\n\tUsing Cupy: {1}\n\tUsing Multiprocessing: {2}\n\tUsing MPI: {3}\n\tOverwrite existing solutions: {4}".format(use_gpu, usingcupy, usingmultipool, usingmpi,overwriteexisting, PlotData))
 
 
 # keyword arguments for inspiral generator (RunKerrGenericPn5Inspiral)
@@ -338,12 +338,12 @@ if __name__=='__main__':
                 for ecc in e0list:
                     for bhspin in SMBHSpins:
                         print("On iteration {0} out of {1}".format(counter, len(SMBHMasses)*len(ProcaMasses)*len(e0list)*len(SMBHSpins)))
-                        process(bhmass, bhspin,pmass,ecc, plot=PlotData, SecondaryMass=SecondaryMass, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(bhspin),OverwriteSolution=overwriteexisting)
+                        process(bhmass, bhspin,pmass,ecc, plot=PlotData, SecondaryMass=SecondaryMass, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(bhspin),OverwriteSolution=overwriteexisting, plot=PlotData)
                         counter+=1
 
 
     if usingmultipool:
-        parallel_func = lambda bhm, bhs, pmass, ecc: process(bhm, bhs, pmass, ecc, SecondaryMass=SecondaryMass, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(bhs),OverwriteSolution=overwriteexisting)
+        parallel_func = lambda bhm, bhs, pmass, ecc: process(bhm, bhs, pmass, ecc, SecondaryMass=SecondaryMass, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(bhs),OverwriteSolution=overwriteexisting, plot=PlotData)
         parallel_args = cartesian_product(np.array(SMBHMasses),np.array(SMBHSpins), np.array(ProcaMasses), np.array(e0list))
 
         chunk_size = 20
@@ -361,7 +361,7 @@ if __name__=='__main__':
         rank = comm.Get_rank()
 
         parallel_args = cartesian_product(np.array(SMBHMasses),np.array(SMBHSpins), np.array(ProcaMasses), np.array(e0list))
-        parallel_func = lambda args,solcount,nsols: process(args[0], args[1], args[2], args[3], SecondaryMass=SecondaryMass, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(args[1]),mpirank=rank, solcounter=solcount,nsols=nsols,OverwriteSolution=overwriteexisting)
+        parallel_func = lambda args,solcount,nsols: process(args[0], args[1], args[2], args[3], SecondaryMass=SecondaryMass, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(args[1]),mpirank=rank, solcounter=solcount,nsols=nsols,OverwriteSolution=overwriteexisting, plot=PlotData)
 
         def split(a, n):
             k, m = divmod(len(a), n)
