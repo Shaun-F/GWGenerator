@@ -96,7 +96,7 @@ overwriteexisting = args.overwrite #overwrite existing solutions
 
 print("Executing GWGen/main.py...",file=stdout_file)
 print("{0}".format(time.ctime(time.time())), file=stdout_file)
-print("\tUsing GPU: {0}\n\tUsing Cupy: {1}\n\tUsing Multiprocessing: {2}\n\tUsing MPI: {3}\n\tOverwrite existin solutions: {4}".format(use_gpu, usingcupy, usingmultipool, usingmpi,overwriteexisting))
+print("\tUsing GPU: {0}\n\tUsing Cupy: {1}\n\tUsing Multiprocessing: {2}\n\tUsing MPI: {3}\n\tOverwrite existing solutions: {4}".format(use_gpu, usingcupy, usingmultipool, usingmpi,overwriteexisting))
 
 
 # keyword arguments for inspiral generator (RunKerrGenericPn5Inspiral)
@@ -151,7 +151,7 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
             print("Bad initial data: initial semi-latus rectum within 0.2 gravitational radii of separatrix! Skipping loop")
         return None
 
-    if os.path.exists(filename) and not OverwriteSolution:
+    if os.path.exists(filename):
         if OverwriteSolution:
             print(prepend_print_string+"Solution exists. Overwriting...")
         elif not OverwriteSolution:
