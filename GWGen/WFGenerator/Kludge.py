@@ -115,7 +115,8 @@ class PN(Kerr, FluxFunction):
 		semimaj = float(y[0])
 		ecc = float(y[1])
 		phi_phase = float(y[2])
-		radial_phase = float(y[3])
+		theta_phase = float(y[3])
+		radial_phase = float(y[4])
 		if 0<=ecc<1e-6:
 			#if eccentricity is zero, replace it by small number to guard against poles in integrals of motion
 			ecc=1e-6
@@ -220,6 +221,10 @@ class PNTraj(TrajectoryBase):
 		global SEPARATRIXDELTA
 
 
+		Phi_phi0 = kwargs.get("Phi_phi0", 0)
+		Phi_theta0 = kwargs.get("Phi_theta0",0)
+		Phi_r0 = kwargs.get("Phi_r0", 0)
+
 
 
 
@@ -239,7 +244,7 @@ class PNTraj(TrajectoryBase):
 		#boundary values
 		if e0<10**(-10): #guard against poles in analytic expressions
 			e0=10**(-10)
-		y0 = [p0, e0, 0.0, 0.0, 0.0] #zero mean anomaly initially
+		y0 = [p0, e0, Phi_phi0, 0.0, 0.0] #zero mean anomaly initially
 
 		#compute separatrix of initial parameters
 		self.__initial_separatrix = get_separatrix(float(a), float(e0), 1.)
@@ -377,7 +382,7 @@ class PNTraj(TrajectoryBase):
 		Phi_theta = ConvertToCCompatibleArray(Phi_theta_out,newdtype=np.float64)
 		Phi_r = ConvertToCCompatibleArray(Phi_r_out,newdtype=np.float64)
 
-		return (t, p, e, x, Phi_phi, Phi_theta, Phi_r)
+		return (t, p, e, x, Phi_phi0 + Phi_phi, Phi_theta0 + Phi_theta, Phi_r0 + Phi_r)
 
 	#mutable properties
 	@property

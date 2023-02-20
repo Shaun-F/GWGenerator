@@ -338,7 +338,7 @@ if __name__=='__main__':
                 for ecc in e0list:
                     for bhspin in SMBHSpins:
                         print("On iteration {0} out of {1}".format(counter, len(SMBHMasses)*len(ProcaMasses)*len(e0list)*len(SMBHSpins)))
-                        process(bhmass, bhspin,pmass,ecc, plot=PlotData, SecondaryMass=SecondaryMass, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(bhspin),OverwriteSolution=overwriteexisting, plot=PlotData)
+                        process(bhmass, bhspin,pmass,ecc, plot=PlotData, SecondaryMass=SecondaryMass, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(bhspin),OverwriteSolution=overwriteexisting)
                         counter+=1
 
 
