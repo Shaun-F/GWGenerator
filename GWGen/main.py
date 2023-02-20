@@ -60,11 +60,11 @@ except (ImportError, ModuleNotFoundError) as e:
     usingcupy=False
 
 #data directory relative to local parent GWGen
-#DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/Data/"
+DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/Data/"
 #NCPUs = 3
 #DataDirectory = "/remote/pi213f/fell/DataStore/ProcaAroundKerrGW/GWGenOutput/"
 #NCPUs = 32
-DataDirectory=os.environ["HOME"]+"/WS_gwgen_output/"
+#DataDirectory=os.environ["HOME"]+"/WS_gwgen_output/"
 NCPUs=mp.cpu_count()
 
 
@@ -206,6 +206,10 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
             "e0":e0,
             "BHSpin":BHSpin,
             "Trajectory Exit Reason": moddedwvcl.inspiral_generator.exit_reason,
+            "unmodded final position": unmoddedtraj["p"][-1],
+            "modded final position": moddedtraj["p"][-1],
+            "unmodded final separatrix": get_separatrix(BHSpin, unmoddedtraj["e"][-1],1.),
+            "modded final separatrix": get_separatrix(BHSpin, moddedtraj["e"][-1],1.),
             "mismatch":mismatch,
             "faithfulness":faith,
             "snr2":snr2,
