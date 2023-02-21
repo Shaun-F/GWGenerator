@@ -361,17 +361,24 @@ if __name__=='__main__':
 
 
     if usingmpi:
+        import itertools
+
         comm = m4p.MPI.COMM_WORLD
         rank = comm.Get_rank()
 
         parallel_args = cartesian_product(np.array(SMBHMasses),np.array(SMBHSpins), np.array(ProcaMasses), np.array(e0list))
-        parallel_func = lambda args,solcount,nsols: process(args[0], args[1], args[2], args[3], SecondaryMass=SecondaryMass, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(args[1]),mpirank=rank, solcounter=solcount,nsols=nsols,OverwriteSolution=overwriteexisting, plot=PlotData)
+        def parallel_func(args,solcount,sols):
+            if args!=None
+                process(args[0], args[1], args[2], args[3], SecondaryMass=SecondaryMass, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(args[1]),mpirank=rank, solcounter=solcount,nsols=nsols,OverwriteSolution=overwriteexisting, plot=PlotData)
+            return None
+        #parallel_func = lambda args,solcount,nsols: process(args[0], args[1], args[2], args[3], SecondaryMass=SecondaryMass, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(args[1]),mpirank=rank, solcounter=solcount,nsols=nsols,OverwriteSolution=overwriteexisting, plot=PlotData)
 
         def split(a, n):
             k, m = divmod(len(a), n)
             return list(a[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n))
 
         split_parallel_args = split(parallel_args, comm.Get_size())
+        split_parallel_args = np.array(list(itertools.zip_longest(*split_parallel_args)))
         parallel_args_for_subprocesses = comm.scatter(split_parallel_args,root=0)
 
         if rank==0:
