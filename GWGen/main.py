@@ -322,7 +322,7 @@ if __name__=='__main__':
     SMBHSpins = [int(100*i)/100 for i in np.linspace(0.6,0.9,10)]
     SecondaryMass = 10 #solar masses
     e0list = [0.1,0.2,0.3,0.4,0.5,0.6,0.7]
-    ProcaMasses = [round(i,22) for i in np.kron(tmparr1, [1e-16,1e-17,1e-18,1e-19])] #eV   #again avoiding floating point errors
+    ProcaMasses = sorted([round(i,22) for i in np.kron(tmparr1, [1e-16,1e-17,1e-18,1e-19])]) #eV   #again avoiding floating point errors
 
     #make sure output directory tree is built
     if not os.path.exists(DataDir+"Plots/"):
@@ -365,10 +365,11 @@ if __name__=='__main__':
 
         comm = m4p.MPI.COMM_WORLD
         rank = comm.Get_rank()
+        commsize = comm.Get_size()
 
         parallel_args = cartesian_product(np.array(SMBHMasses),np.array(SMBHSpins), np.array(ProcaMasses), np.array(e0list))
-        def parallel_func(args,solcount,sols):
-            if args!=None
+        def parallel_func(args,solcount,nsols):
+            if np.all(args!=None):
                 process(args[0], args[1], args[2], args[3], SecondaryMass=SecondaryMass, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(args[1]),mpirank=rank, solcounter=solcount,nsols=nsols,OverwriteSolution=overwriteexisting, plot=PlotData)
             return None
         #parallel_func = lambda args,solcount,nsols: process(args[0], args[1], args[2], args[3], SecondaryMass=SecondaryMass, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(args[1]),mpirank=rank, solcounter=solcount,nsols=nsols,OverwriteSolution=overwriteexisting, plot=PlotData)
@@ -376,9 +377,12 @@ if __name__=='__main__':
         def split(a, n):
             k, m = divmod(len(a), n)
             return list(a[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n))
-
-        split_parallel_args = split(parallel_args, comm.Get_size())
-        split_parallel_args = np.array(list(itertools.zip_longest(*split_parallel_args)))
+        if divmod(len(parallel_args),commsize)[1]!=0:
+            nsplit = len(parallel_args)//commsize+1
+        else:
+            nsplit=len(parallel_args)//commsize
+        split_parallel_args = split(parallel_args, nsplit)
+        split_parallel_args = list(itertools.zip_longest(*split_parallel_args))
         parallel_args_for_subprocesses = comm.scatter(split_parallel_args,root=0)
 
         if rank==0:
