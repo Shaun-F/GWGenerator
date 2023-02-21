@@ -383,15 +383,13 @@ if __name__=='__main__':
             nsplit=len(parallel_args)//commsize
         split_parallel_args = split(parallel_args, nsplit)
         split_parallel_args = list(itertools.zip_longest(*split_parallel_args))
+        [split_parallel_args.append([None]) for i in commsize-len(split_parallel_args)];
+        
         parallel_args_for_subprocesses = comm.scatter(split_parallel_args,root=0)
-
         if rank==0:
             print("Size of parameter space: {0}\nNumber MPI subprocesses: {1}".format(len(parallel_args), comm.Get_size()), file=stdout_file)
             print("shape of partitioned parameter space: {0}".format(np.shape(split_parallel_args)), file=stdout_file)
 
-        with open("Rank{0}ProcessArguments.dat".format(rank), "w+") as file:
-            for inx, val in enumerate(parallel_args_for_subprocesses):
-                file.write("inx: {0}     val: {1}\n".format(inx+1,val))
         #main calculation
         counter = 1
         for inx, arg in enumerate(parallel_args_for_subprocesses):
