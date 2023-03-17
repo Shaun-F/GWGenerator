@@ -199,7 +199,6 @@ class PN(Kerr, FluxFunction):
 
 		#rate of change of polar phase
 		Phi_theta_dot = Omega_theta
-
 		dydt = [pdot, edot, Phi_phi_dot, Phi_theta_dot, Phi_r_dot]
 
 		return dydt
@@ -316,6 +315,7 @@ class PNTraj(TrajectoryBase):
 										]
 
 		max_step_size = t_span[-1]/npoints
+
 
 		"""
 		result = solve_ivp(self.PNEvaluator,

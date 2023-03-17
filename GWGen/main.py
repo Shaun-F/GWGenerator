@@ -177,8 +177,8 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
     #azimuthal phase difference
     unmoddedphase = unmoddedtraj["Phi_phi"]
     moddedphase = moddedtraj["Phi_phi"]
-    totalphasedifference = moddedphase[-1]-unmoddedphase[-1]
-    totalorbitsdifference = totalphasedifference/(4*np.pi)
+    totalphasedifference = np.max(moddedphase)-np.max(unmoddedphase)
+    totalorbitsdifference = totalphasedifference/((2*np.pi)**2)
 
     ####Mismatch
     print(prepend_print_string+"Calculating mismatch", file=stdout_file)
@@ -383,8 +383,8 @@ if __name__=='__main__':
             nsplit=len(parallel_args)//commsize
         split_parallel_args = split(parallel_args, nsplit)
         split_parallel_args = list(itertools.zip_longest(*split_parallel_args))
-        [split_parallel_args.append([None]) for i in commsize-len(split_parallel_args)];
-        
+        [split_parallel_args.append([None]) for i in range(commsize-len(split_parallel_args))];
+
         parallel_args_for_subprocesses = comm.scatter(split_parallel_args,root=0)
         if rank==0:
             print("Size of parameter space: {0}\nNumber MPI subprocesses: {1}".format(len(parallel_args), comm.Get_size()), file=stdout_file)

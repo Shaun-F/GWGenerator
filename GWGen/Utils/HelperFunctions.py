@@ -3,6 +3,7 @@ import fractions
 import numpy as np
 import scipy as sp
 from scipy import interpolate
+from scipy import signal
 import scipy.fft
 from scipy.integrate._ivp.ivp import *
 import warnings
@@ -161,7 +162,7 @@ def ConvertToCCompatibleArray(arr,newdtype=None):
         ret = np.require(arr, dtype=newdtype, requirements=["C", "O", "A", "E"])
     return ret
 
-def WaveformInnerProduct(timedomain, h1,h2, fmin=0.0001, fmax=1,use_gpu=False, maximize=False):
+def WaveformInnerProduct(timedomain, h1,h2, use_gpu=False, maximize=False):
     """
     complex waveforms h1 and h2 are in time-domain with time domain in units of seconds. Compute inner product defined in
     """
@@ -186,10 +187,12 @@ def WaveformInnerProduct(timedomain, h1,h2, fmin=0.0001, fmax=1,use_gpu=False, m
             pass
 
     if len(h1)!=len(h2):
-        warnings.warn("Waveforms have different lengths. Truncating longer waveform")
-        minlength = min([len(h1), len(h2)])-1
-        h1 = h1[0:minlength]
-        h2 = h2[0:minlength]
+        warnings.warn("Waveforms have different lengths. Zero padding shorter waveform")
+        if len(h1)<len(h2):
+            h1 = np.pad(h1, (0,len(h2)-len(h1)))
+        elif len(h2)<len(h1):
+            h2 = np.pad(h2, (0, len(h1)-len(h2)))
+
 
     if len(timedomain)!=len(h1) or len(timedomain)!=len(h2):
         raise RuntimeError("time domain has different length than the waveforms")
@@ -211,39 +214,27 @@ def WaveformInnerProduct(timedomain, h1,h2, fmin=0.0001, fmax=1,use_gpu=False, m
         DeltaT = timedomain[1]-timedomain[0]
         frequency_range = xp.fft.fftfreq(int(timelength), d=float(DeltaT))
 
-    #Consider real frequencies and ignore zero frequency
-    frequency_length = int(len(frequency_range)/2 -1)
-    frequency_domain = frequency_range[1:frequency_length]
-    h1f = h1_InFreq[1:frequency_length]
-    h2f = h2_InFreq[1:frequency_length]
+    #Ignore zero frequency
+    frequency_domain = frequency_range[1:]
+    h1f = h1_InFreq[1:]
+    h2f = h2_InFreq[1:]
     h2fstar = xp.conjugate(h2f)
-    PowerSpectralDensity = LisaSensitivity(frequency_domain)
+    PowerSpectralDensity = LisaSensitivity(np.abs(frequency_domain))
 
+    Factor1 = xp.fft.ifft(h1f/PowerSpectralDensity)
+    Factor2 = xp.fft.ifft(h2fstar)
+    convolution = sp.signal.convolve(Factor1, Factor2, method="fft", mode="full")
+    convolutionlength = int(len(convolution))+1
 
-
-    integrand = h1f*h2fstar/PowerSpectralDensity
-
-    #Assuming frequency domain is monotonically increasing
-    mininx = xp.abs(frequency_domain-fmin).argmin()
-    maxinx = xp.abs(frequency_domain-fmax).argmin()
-    masked_frequency_range = frequency_domain[mininx:maxinx]
-    masked_integrand = integrand[mininx:maxinx]
-
-    if use_gpu:
-        masked_integrand = np.asarray(masked_integrand)
-        masked_frequency_range = np.asarray(masked_frequency_range)
+    resultarray = 2*np.real(convolution)
 
     if maximize:
-        integral = []
-        for i in np.arange(-5,5):
-            phase_offset = np.exp(-2*np.pi*1j*masked_frequency_range*i*DeltaT)
-            integral.append(sp.integrate.simpson(masked_integrand*phase_offset, x=masked_frequency_range))
-        ret = 4*np.real(np.max(integral))
+        ret = max(resultarray)
 
     else:
-        ret = 4*sp.integrate.simpson(masked_integrand.real, x=masked_frequency_range)
+        ret = resultarray[int(convolutionlength/2)]
 
-    del h1,h2,h2_InFreq,h1_InFreq,timelength,DeltaT,frequency_range,frequency_length,frequency_domain,h1f,h2f,h2fstar,PowerSpectralDensity,integrand,mininx,maxinx,masked_frequency_range,masked_integrand
+    del convolution, convolutionlength,h1,h2,h2_InFreq,h1_InFreq,timelength,DeltaT,frequency_range,frequency_domain,h1f,h2f,h2fstar,PowerSpectralDensity
     if use_gpu:
         cp.get_default_memory_pool().free_all_blocks()
         cp.get_default_pinned_memory_pool().free_all_blocks()
@@ -251,22 +242,23 @@ def WaveformInnerProduct(timedomain, h1,h2, fmin=0.0001, fmax=1,use_gpu=False, m
 
 
 #Naive implementaion of faithfulness (without maximization over time and phase offsets)
-def Faithfulness(timedomain, h1, h2,use_gpu=False, maximize=True):
+def Faithfulness(timedomain, h1, h2,use_gpu=False):
     """
     time domain must be in units of seconds
     """
 
     if len(h1)!=len(h2):
-        warnings.warn("Waveforms have different lengths. Truncating longer waveform")
-        minlength = min([len(h1), len(h2)])
-        h1 = h1[0:minlength]
-        h2 = h2[0:minlength]
+        warnings.warn("Waveforms have different lengths. Zero padding shorter waveform")
+        if len(h1)<len(h2):
+            h1 = np.pad(h1, (0,len(h2)-len(h1)))
+        elif len(h2)<len(h1):
+            h2 = np.pad(h2, (0, len(h1)-len(h2)))
         assert len(h1)==len(h2)
 
     assert len(timedomain)==len(h1), "time domain has different length than the waveforms. time domain length: {0} waveform 1 length: {1} waveform 2 length: {2}".format(len(timedomain), len(h1), len(h2))
 
 
-    h1h2 = WaveformInnerProduct(timedomain, h1, h2,use_gpu=use_gpu, maximize=maximize)
+    h1h2 = WaveformInnerProduct(timedomain, h1, h2,use_gpu=use_gpu, maximize=True)
     h1h1 = WaveformInnerProduct(timedomain, h1, h1,use_gpu=use_gpu)
     h2h2 = WaveformInnerProduct(timedomain, h2, h2,use_gpu=use_gpu)
     ret = h1h2/np.sqrt(h1h1*h2h2)
@@ -574,3 +566,115 @@ def solve_ivp(fun, t_span, y0, method='DOP853', t_eval=None, dense_output=False,
     return OdeResult(t=ts, y=ys, sol=sol, t_events=t_events, y_events=y_events,
                      nfev=solver.nfev, njev=solver.njev, nlu=solver.nlu,
                      status=status, message=message, success=status >= 0)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""
+
+
+def WaveformInnerProduct(timedomain, h1,h2, fmin=0.0001, fmax=1,use_gpu=False, maximize=False):
+
+    if use_gpu:
+        xp = cp
+        if isinstance(h1,np.ndarray):
+            h1 = xp.asarray(h1)
+        if isinstance(h2, np.ndarray):
+            h2 = xp.asarray(h2)
+    else:
+        xp = np
+
+        try:
+            if isinstance(h1,cp.ndarray):
+                h1 = xp.asarray(h1.get())
+        except NameError:
+            pass
+        try:
+            if isinstance(h2,cp.ndarray):
+                h2 = xp.asarray(h2.get())
+        except NameError:
+            pass
+
+    if len(h1)!=len(h2):
+        warnings.warn("Waveforms have different lengths. Truncating longer waveform")
+        minlength = min([len(h1), len(h2)])-1
+        h1 = h1[0:minlength]
+        h2 = h2[0:minlength]
+
+    if len(timedomain)!=len(h1) or len(timedomain)!=len(h2):
+        raise RuntimeError("time domain has different length than the waveforms")
+
+    if not use_gpu:
+        pyfftw.config.NUM_THREADS = multiprocessing.cpu_count()
+        pyfftw.interfaces.cache.enable()
+
+        with sp.fft.set_backend(pyfftw.interfaces.scipy_fft):
+            h1_InFreq = sp.fft.fft(h1)
+            h2_InFreq = sp.fft.fft(h2)
+            timelength = len(timedomain)
+            DeltaT = timedomain[1]-timedomain[0]
+            frequency_range = sp.fft.fftfreq(int(timelength), d=float(DeltaT))
+    else:
+        h1_InFreq = xp.fft.fft(h1)
+        h2_InFreq = xp.fft.fft(h2)
+        timelength = len(timedomain)
+        DeltaT = timedomain[1]-timedomain[0]
+        frequency_range = xp.fft.fftfreq(int(timelength), d=float(DeltaT))
+
+    #Consider real frequencies and ignore zero frequency
+    frequency_length = np.argmax(frequency_range)
+    frequency_domain = frequency_range[1:frequency_length]
+    h1f = h1_InFreq[1:frequency_length]
+    h2f = h2_InFreq[1:frequency_length]
+    h2fstar = xp.conjugate(h2f)
+    PowerSpectralDensity = LisaSensitivity(frequency_domain)
+
+
+    integrand = h1f*h2fstar/PowerSpectralDensity
+
+
+    #Assuming frequency domain is monotonically increasing
+    mininx = xp.abs(frequency_domain-fmin).argmin()
+    maxinx = xp.abs(frequency_domain-fmax).argmin()
+    if maxinx==len(frequency_domain)-1:
+        maxinx+=1
+    masked_frequency_range = frequency_domain[mininx:maxinx]
+    masked_integrand = integrand[mininx:maxinx]
+
+
+    if use_gpu:
+        masked_integrand = np.asarray(masked_integrand)
+        masked_frequency_range = np.asarray(masked_frequency_range)
+
+    if maximize:
+        integral = []
+        for i in np.arange(-5,5):
+            phase_offset = np.exp(-2*np.pi*1j*masked_frequency_range*i*DeltaT)
+            integral.append(sp.integrate.simpson(masked_integrand*phase_offset, x=masked_frequency_range))
+        ret = 4*np.real(np.max(integral))
+
+    else:
+        ret = 4*sp.integrate.simpson(masked_integrand.real, x=masked_frequency_range)
+
+    del h1,h2,h2_InFreq,h1_InFreq,timelength,DeltaT,frequency_range,frequency_length,frequency_domain,h1f,h2f,h2fstar,PowerSpectralDensity,integrand,mininx,maxinx,masked_frequency_range,masked_integrand
+    if use_gpu:
+        cp.get_default_memory_pool().free_all_blocks()
+        cp.get_default_pinned_memory_pool().free_all_blocks()
+    return ret
+
+
+"""
