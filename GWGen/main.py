@@ -324,9 +324,10 @@ if __name__=='__main__':
     e0list = [0.1,0.2,0.3,0.4,0.5,0.6,0.7]
     ProcaMasses = sorted([round(i,22) for i in np.kron(tmparr1, [1e-16,1e-17,1e-18,1e-19])]) #eV   #again avoiding floating point errors
 
-    subSMBHMasses = [1e5,1e7]
+    subProcaMasses = sorted([round(i,22) for i in np.linspace(0.25e-18,5e-18,int((5-0.25)/0.125))])
+    subSMBHMasses = [1e7]
     subSMBHSpins = [0.9]
-    sube0list = [0.1]
+    sube0list = [0.2]
     #make sure output directory tree is built
     if not os.path.exists(DataDir+"Plots/"):
         os.mkdir(DataDir+"Plots/")
@@ -371,7 +372,7 @@ if __name__=='__main__':
         commsize = comm.Get_size()
 
         #parallel_args = cartesian_product(np.array(SMBHMasses),np.array(SMBHSpins), np.array(ProcaMasses), np.array(e0list))
-        parallel_args = cartesian(np.array(subSMBHMasses), np.array(subSMBHSpins), np.array(ProcaMasses), np.array(sube0list))
+        parallel_args = cartesian_product(np.array(subSMBHMasses), np.array(subSMBHSpins), np.array(subProcaMasses), np.array(sube0list))
         def parallel_func(args,solcount,nsols):
             if np.all(args!=None):
                 process(args[0], args[1], args[2], args[3], SecondaryMass=SecondaryMass, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(args[1]),mpirank=rank, solcounter=solcount,nsols=nsols,OverwriteSolution=overwriteexisting, plot=PlotData)
