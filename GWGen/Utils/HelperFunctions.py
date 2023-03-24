@@ -162,7 +162,7 @@ def ConvertToCCompatibleArray(arr,newdtype=None):
         ret = np.require(arr, dtype=newdtype, requirements=["C", "O", "A", "E"])
     return ret
 
-def WaveformInnerProduct(timedomain, h1,h2, use_gpu=False, maximize=False):
+def WaveformInnerProduct(timedomain, h1,h2, use_gpu=False, maximize=False,Tmaximize=False):
     """
     complex waveforms h1 and h2 are in time-domain with time domain in units of seconds. Compute inner product defined in
     """
@@ -221,38 +221,46 @@ def WaveformInnerProduct(timedomain, h1,h2, use_gpu=False, maximize=False):
     h2fstar = xp.conjugate(h2f)
     PowerSpectralDensity = LisaSensitivity(np.abs(frequency_domain))
 
-    Factor1 = xp.fft.ifft(h1f/PowerSpectralDensity)
-    Factor2 = xp.fft.ifft(h2fstar)
-    convolution = sp.signal.convolve(Factor1, Factor2, method="fft", mode="full")
-    convolutionlength = int(len(convolution))+1
-
-    resultarray = 2*np.real(convolution)
-
     if maximize:
         #maximize over coalescence phase and coalescence time
         subresult = []
         for theta in np.linspace(0,2*np.pi,15):
             Factor1 = xp.fft.ifft(h1f/PowerSpectralDensity)
-            Factor2 = xp.fft.ifft(h2fstar*np.exp(1j*theta))
-            convolution = sp.signal.convolve(Factor1, Factor2, method="fft", mode="full")
-            convolutionlength = int(len(convolution))+1
+            Factor2 = xp.fft.ifft(h2fstar)*np.exp(1j*theta)
+            if use_gpu:
+                convolution = sp.signal.convolve(Factor1.get(), Factor2.get(), method="fft", mode="full")
+            else:
+                convolution = sp.signal.convolve(Factor1, Factor2, method="fft", mode="full")
 
             resultarray = 2*np.real(convolution)
             subresult.append(max(resultarray))
-        ret = max(subresult)
 
+        ret = max(subresult)
+    elif Tmaximize:
+        Factor1 = xp.fft.ifft(h1f/PowerSpectralDensity)
+        Factor2 = xp.fft.ifft(h2fstar)
+        if use_gpu:
+            convolution = sp.signal.convolve(Factor1.get(), Factor2.get(), method="fft", mode="full")
+        else:
+            convolution = sp.signal.convolve(Factor1, Factor2, method="fft", mode="full")
+
+        resultarray = 2*np.real(convolution)
+        ret = max(resultarray)
     else:
         #dont perform maximization and instead take simple inner product
         Factor1 = xp.fft.ifft(h1f/PowerSpectralDensity)
         Factor2 = xp.fft.ifft(h2fstar)
-        convolution = sp.signal.convolve(Factor1, Factor2, method="fft", mode="full")
+        if use_gpu:
+            convolution = sp.signal.convolve(Factor1.get(), Factor2.get(), method="fft", mode="full")
+        else:
+            convolution = sp.signal.convolve(Factor1, Factor2, method="fft", mode="full")
         convolutionlength = int(len(convolution))+1
 
         resultarray = 2*np.real(convolution)
 
         ret = resultarray[int(convolutionlength/2)]
 
-    del convolution, convolutionlength,h1,h2,h2_InFreq,h1_InFreq,timelength,DeltaT,frequency_range,frequency_domain,h1f,h2f,h2fstar,PowerSpectralDensity
+    del convolution, h1,h2,h2_InFreq,h1_InFreq,timelength,DeltaT,frequency_range,frequency_domain,h1f,h2f,h2fstar,PowerSpectralDensity
     if use_gpu:
         cp.get_default_memory_pool().free_all_blocks()
         cp.get_default_pinned_memory_pool().free_all_blocks()
