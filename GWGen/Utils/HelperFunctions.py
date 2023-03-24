@@ -229,9 +229,27 @@ def WaveformInnerProduct(timedomain, h1,h2, use_gpu=False, maximize=False):
     resultarray = 2*np.real(convolution)
 
     if maximize:
-        ret = max(resultarray)
+        #maximize over coalescence phase and coalescence time
+        subresult = []
+        for theta in np.linspace(0,2*np.pi,15):
+            Factor1 = xp.fft.ifft(h1f/PowerSpectralDensity)
+            Factor2 = xp.fft.ifft(h2fstar*np.exp(1j*theta))
+            convolution = sp.signal.convolve(Factor1, Factor2, method="fft", mode="full")
+            convolutionlength = int(len(convolution))+1
+
+            resultarray = 2*np.real(convolution)
+            subresult.append(max(resultarray))
+        ret = max(subresult)
 
     else:
+        #dont perform maximization and instead take simple inner product
+        Factor1 = xp.fft.ifft(h1f/PowerSpectralDensity)
+        Factor2 = xp.fft.ifft(h2fstar)
+        convolution = sp.signal.convolve(Factor1, Factor2, method="fft", mode="full")
+        convolutionlength = int(len(convolution))+1
+
+        resultarray = 2*np.real(convolution)
+
         ret = resultarray[int(convolutionlength/2)]
 
     del convolution, convolutionlength,h1,h2,h2_InFreq,h1_InFreq,timelength,DeltaT,frequency_range,frequency_domain,h1f,h2f,h2fstar,PowerSpectralDensity

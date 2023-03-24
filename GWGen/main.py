@@ -324,8 +324,8 @@ if __name__=='__main__':
     e0list = [0.1,0.2,0.3,0.4,0.5,0.6,0.7]
     ProcaMasses = sorted([round(i,22) for i in np.kron(tmparr1, [1e-16,1e-17,1e-18,1e-19])]) #eV   #again avoiding floating point errors
 
-    subProcaMasses = sorted([round(i,22) for i in np.linspace(0.25e-18,5e-18,int((5-0.25)/0.125))])
-    subSMBHMasses = [1e7]
+    subProcaMasses = sorted([round(i,22) for i in np.linspace(0.25e-17,5e-17,int((5-0.25)/0.125))])
+    subSMBHMasses = [1e4]
     subSMBHSpins = [0.9]
     sube0list = [0.2]
     #make sure output directory tree is built
