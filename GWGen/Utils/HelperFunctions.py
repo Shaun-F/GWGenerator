@@ -224,18 +224,19 @@ def WaveformInnerProduct(timedomain, h1,h2, use_gpu=False, maximize=False,Tmaxim
     if maximize:
         #maximize over coalescence phase and coalescence time
         subresult = []
+        Factor1 = xp.fft.ifft(h1f/PowerSpectralDensity)
+        Factor2 = xp.fft.ifft(h2fstar)
+        if use_gpu:
+            convolution = sp.signal.convolve(Factor1.get(), Factor2.get(), method="fft", mode="full")
+        else:
+            convolution = sp.signal.convolve(Factor1, Factor2, method="fft", mode="full")
         for theta in np.linspace(0,2*np.pi,15):
-            Factor1 = xp.fft.ifft(h1f/PowerSpectralDensity)
-            Factor2 = xp.fft.ifft(h2fstar)*np.exp(1j*theta)
-            if use_gpu:
-                convolution = sp.signal.convolve(Factor1.get(), Factor2.get(), method="fft", mode="full")
-            else:
-                convolution = sp.signal.convolve(Factor1, Factor2, method="fft", mode="full")
-
-            resultarray = 2*np.real(convolution)
-            subresult.append(max(resultarray))
-
+            resultarray = 2*np.real(convolution*np.exp(1j*theta))
+            maxinx = np.argmax(resultarray)
+            maxval = resultarray[maxinx]
+            subresult.append(maxval)
         ret = max(subresult)
+
     elif Tmaximize:
         Factor1 = xp.fft.ifft(h1f/PowerSpectralDensity)
         Factor2 = xp.fft.ifft(h2fstar)
@@ -268,7 +269,7 @@ def WaveformInnerProduct(timedomain, h1,h2, use_gpu=False, maximize=False,Tmaxim
 
 
 #Naive implementaion of faithfulness (without maximization over time and phase offsets)
-def Faithfulness(timedomain, h1, h2,use_gpu=False):
+def Faithfulness(timedomain, h1, h2,use_gpu=False, data=False):
     """
     time domain must be in units of seconds
     """
@@ -289,12 +290,14 @@ def Faithfulness(timedomain, h1, h2,use_gpu=False):
     h2h2 = WaveformInnerProduct(timedomain, h2, h2,use_gpu=use_gpu)
     ret = h1h2/np.sqrt(h1h1*h2h2)
 
-    del h1,h2,h1h2,h1h1,h2h2
     if use_gpu:
         cp.get_default_memory_pool().free_all_blocks()
         cp.get_default_pinned_memory_pool().free_all_blocks()
 
-    return ret
+    if data:
+        return {"h1h1":h1h1, "h2h2":h2h2, "h1h2":h1h2,"faithfulness":ret}
+    else:
+        return ret
 
 
 def LisaSensitivity(f):

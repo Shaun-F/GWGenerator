@@ -194,8 +194,11 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
     print(prepend_print_string+"Mismatch = {0}".format(mismatch), file=stdout_file)
     ####Faithfulness
     time = np.arange(minlen)*dt
-    faith = Faithfulness(time, moddedwv, unmoddedwv,use_gpu=False)
-    snr2 = WaveformInnerProduct(time, moddedwv, unmoddedwv, use_gpu=False)
+    faith_dir = Faithfulness(time, moddedwv, unmoddedwv,use_gpu=False,data=True)
+    faith = faith_dir["faithfulness"]
+    snr2 = faith_dir["h1h2"]
+    print(prepend_print_string+"Faithfulness = {0}".format(faith), file=stdout_file)
+
 
     #data structure
     data = {
@@ -213,7 +216,9 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
             "mismatch":mismatch,
             "faithfulness":faith,
             "snr2":snr2,
-            "DeltaNOrbits":totalorbitsdifference
+            "DeltaNOrbits":totalorbitsdifference,
+            "vaccumNOrbits":np.max(unmoddedphase)/((2*np.pi)**2),
+            "procaNOrbits":np.max(moddedphase)/((2*np.pi)**2)
             }
 
 
@@ -324,8 +329,8 @@ if __name__=='__main__':
     e0list = [0.1,0.2,0.3,0.4,0.5,0.6,0.7]
     ProcaMasses = sorted([round(i,22) for i in np.kron(tmparr1, [1e-16,1e-17,1e-18,1e-19])]) #eV   #again avoiding floating point errors
 
-    subProcaMasses = sorted([round(i,22) for i in np.linspace(0.25e-17,5e-17,int((5-0.25)/0.125))])
-    subSMBHMasses = [1e4]
+    subProcaMasses = sorted([round(i,22) for i in np.append(np.append(np.linspace(0.25e-17,5e-17,int((5-0.25)/0.125)),np.linspace(0.25e-18,5e-18,int((5-0.25)/0.125))),np.linspace(0.25e-16,5e-16,int((5-0.25)/0.125)))])
+    subSMBHMasses = [1e5,1e6,1e7]
     subSMBHSpins = [0.9]
     sube0list = [0.2]
     #make sure output directory tree is built
@@ -341,11 +346,11 @@ if __name__=='__main__':
     if not usingmultipool and not usingmpi:
         PrettyPrint("Executing parallelized computation on {2} CPUs... \n\t Output Directory: {0}\n\t Plot Directory: {1}".format(DataDir+"Output/", DataDir+"Plot/", NCPUs))
         counter=1
-        for bhmass in SMBHMasses:
-            for pmass in ProcaMasses:
-                for ecc in e0list:
-                    for bhspin in SMBHSpins:
-                        print("On iteration {0} out of {1}".format(counter, len(SMBHMasses)*len(ProcaMasses)*len(e0list)*len(SMBHSpins)))
+        for bhmass in subSMBHMasses:
+            for pmass in subProcaMasses:
+                for ecc in sube0list:
+                    for bhspin in subSMBHSpins:
+                        print("On iteration {0} out of {1}".format(counter, len(subSMBHMasses)*len(subProcaMasses)*len(sube0list)*len(subSMBHSpins)))
                         process(bhmass, bhspin,pmass,ecc, plot=PlotData, SecondaryMass=SecondaryMass, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(bhspin),OverwriteSolution=overwriteexisting)
                         counter+=1
 

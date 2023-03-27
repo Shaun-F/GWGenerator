@@ -1,93 +1,111 @@
-from main import *
-from mpi4py import MPI
+import os, sys
+os.chdir("../")
+path = os.getcwd()
+sys.path.insert(0, path)
+import GWGen
+from GWGen.Utils import *
+from GWGen.WFGenerator import *
+import matplotlib.pyplot as plt
+import scipy as sp
+import scipy.signal
+import superrad
 
 
-smbhmass = 100000
-smbhspin = 0.9
-p0 = 34.8
-e0 = 0.3
-pmass = 1e-16
-
-"""
-comm = MPI.COMM_WORLD
-rank = comm.Get_rank()
-"""
-
-DataDir = os.path.abspath(os.path.dirname(__file__)) + "/Data/"
-
-#parallel_func = lambda args,solcount,nsols: process(args[0], args[1], args[2], args[3], SecondaryMass=10, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(args[1]),mpirank=rank, solcounter=solcount,nsols=nsols)
-parallel_func = lambda args,solcount,nsols: process(args[0], args[1], args[2], args[3], SecondaryMass=10, DataDir=DataDir, alphauppercutoff=BHSpinAlphaCutoff(args[1]), solcounter=solcount,nsols=nsols)
-
-coords = [(smbhmass, smbhspin, pmass,e0)]
-"""
-def split(a, n):
-        k, m = divmod(len(a), n)
-        return list(a[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(n))
-
-split_parallel_args = split(coords, comm.Get_size())
-parallel_args_for_subprocesses = comm.scatter(split_parallel_args,root=0)
-counter=1;
-if rank==0:
-        print("Size of parameter space: {0}\nNumber MPI subprocesses: {1}".format(len(coords), comm.Get_size()), file=stdout_file)
-        print("shape of partitioned parameter space: {0}".format(np.shape(split_parallel_args)), file=stdout_file)
-with open("Rank{0}ProcessArguments.dat".format(rank), "w+") as file:
-        for inx, val in enumerate(parallel_args_for_subprocesses):
-                file.write("inx: {0}     val: {1}\n".format(inx+1,val))
-for inx, arg in enumerate(parallel_args_for_subprocesses):
-        parallel_func(arg,counter,len(parallel_args_for_subprocesses))
-        counter+=1
-"""
+# set initial parameters
+M = 1e5
+m = 1e1
+mu = 2.8e-16
+e0 = 0.5
+p0 = GetInitialP(M,e0)
+Phi_phi0 = 0.
+Phi_theta0 =0.
+Phi_r0 = 0.
 
 
-ulb = superrad.ultralight_boson.UltralightBoson(spin=1, model="relativistic")
+a=0.9 #SMBH Spin
+Y0=1. #Initial Inclincation
+qS=np.pi/4 #Sky Location Polar Angle in solar system barycenter coordinate system
+phiS=0. #Sky Location Azimuthal Angle in solar system barycenter coordinate system
+qK=1e-6 #Initial BH Spin Polar Angle in solar system barycenter coordinate system
+phiK=0. #Initial BH Spin Azimuthal Angle in solar system barycenter coordinate system
+dist=1. #Distance to source (Mpc)
+mich=False #assume LISA long baseline response approximation
+
+T=5.9 #LISA data run is 5 years. We set the max time to be longer because the proca cloud extends the inspiral time
+dt=15 #time resolution in seconds
+
+alphaval = alphavalue(M,mu)
 
 
 
-DataDir = DataDirectory
+use_gpu = False
 
-tmparr = np.linspace(1,9,9,dtype=np.int64) #strange floating point error when doing just np.arange(1,10,0.1) for np.linspace(1,10,91). Causes issues when saving numbers to filenames
-tmparr1 = np.linspace(1,9,81, dtype=np.float64)
-SMBHMasses = sorted([int(i) for i in np.kron(tmparr,[1e5, 1e6,1e7])]) #solar masses
-SMBHSpins = [int(100*i)/100 for i in np.linspace(0.6,0.9,10)]
-SecondaryMass = 10 #solar masses
-e0list = [0.1,0.2,0.3,0.4,0.5,0.6,0.7]
-ProcaMasses = [round(i,22) for i in np.kron(tmparr1, [1e-16,1e-17,1e-18,1e-19])] #eV   #again avoiding floating point errors
+# keyword arguments for inspiral generator (RunKerrGenericPn5Inspiral)
+insp_kwargs = {
+    "npoints": 110,  # we want a densely sampled trajectory
+    "max_init_len": int(1e3),  # all of the trajectories will be well under len = 1000
+    "dense_output":True
+}
 
-maxlen = len(SMBHMasses)*len(SMBHSpins)*len(ProcaMasses)*len(e0list)
-counter=1
-for bh in SMBHMasses:
-    for a in SMBHSpins:
-        for pm in ProcaMasses:
-            for e0 in e0list:
-                alphaval = alphavalue(bh, pm)
+# keyword arguments for summation generator (AAKSummation)
+sum_kwargs = {
+    "use_gpu": use_gpu,  # GPU is availabel for this type of summation
+    "pad_output": False,
+}
 
-                if alphaval>BHSpinAlphaCutoff(a) or alphaval<0.02:
-                    continue
+def innerprod4(td,w1,w2):
+    wv1fft = sp.fft.fft(w1)
+    wv2fft = sp.fft.fft(w2)
+    freqs = sp.fft.fftfreq(len(td), d=float(td[1]-td[0]))
+    wv1fft = wv1fft[1:]
+    wv2fft = wv2fft[1:]
+    freqs = freqs[1:]
+    lisasens = LisaSensitivity(np.abs(freqs))
+    t1 = sp.fft.ifft(wv1fft/lisasens)
+    t2 = sp.fft.ifft(np.conjugate(wv2fft))
+    conv = sp.signal.convolve(t1,t2,method="fft", mode="full")
+    convlen = int(len(conv))+1
+    #plt.plot(conv)
+    #plt.scatter([convlen/2], [conv[int(convlen/2)]])
+    if np.all(w1==w2):
+        return 2*np.real(conv[int(convlen/2)])
+    return 2*np.real(conv)
 
-                p0 = GetInitialP(bh,e0)
-
-                print("On iteration {0} out of {1}\n\t BHMass: {2}\n\tBHSpin: {3}\n\tPMass: {4}\n\te0: {5}\n\tp0: {6}\n\tT: {7}".format(counter, maxlen, bh, a, pm,e0,p0,T))
-                unmoddedwvcl = EMRIWaveform(inspiral_kwargs=inspiral_kwargs.copy(), sum_kwargs=sum_kwargs.copy(), use_gpu=False)
-                moddedwvcl = EMRIWithProcaWaveform(inspiral_kwargs=inspiral_kwargs.copy(), sum_kwargs=sum_kwargs.copy(), use_gpu=False)
-
-                ProcaSolution.__init__(moddedwvcl,bh, a, pm, BosonSpin=1, CloudModel="relativistic", units="physical",UltralightBoson=ulb)
-                Kerr.__init__(moddedwvcl,BHSpin=a)
-
-
-                if e0<1e-6:
-                    warnings.warn("Eccentricity below safe threshold for FEW. Functions behave poorly for e<1e-6")
-                    e0=1e-6 #Certain functions in FEW are not well-behaved below this value
-
-                OrbitalConstantsChange = moddedwvcl.ChangeInOrbitalConstants(SecondaryMass=10, SMBHMass=bh)
-                asymptoticBosonCloudEFlux = OrbitalConstantsChange["E"] #Dimensionfull Flux. Mass Ratio prefactor comes from derivative of orbital energy wrt spacetime mass and factor of mass of the geodesic. Takes into account effective mass seen by secondary BH during its orbit
-                asymptoticBosonCloudLFlux = OrbitalConstantsChange["L"]
+WithoutProcaInspiralKwargs = insp_kwargs.copy()
+WithoutProcaSumKwargs=sum_kwargs.copy()
+withoutprocagen = EMRIWaveform(inspiral_kwargs=WithoutProcaInspiralKwargs, sum_kwargs=WithoutProcaSumKwargs, use_gpu=False)
+ulb = superrad.ultralight_boson.UltralightBoson(spin=1,model="relativistic")
+withprocagen = EMRIWithProcaWaveform(inspiral_kwargs=insp_kwargs.copy(),sum_kwargs=sum_kwargs.copy())
+print(r"alpha = {0}".format(alphaval))
+print("initial p = {0}".format(p0))
 
 
-                moddedwvcl.inspiralkwargs["DeltaEFlux"] = asymptoticBosonCloudEFlux
-                moddedwvcl.inspiralkwargs["DeltaLFlux"] = asymptoticBosonCloudLFlux
-                moddedwvcl.inspiralkwargs["FluxName"] = "analytic"
 
-                unmoddedtraj = unmoddedwvcl.inspiral_generator(bh,10,a,p0,e0,1.,T=T, dt=dt, Phi_phi0=0, Phi_theta0=0, Phi_r0=0, **unmoddedwvcl.inspiralkwargs)
+fai = []
+for i in np.linspace(1.e-16,4.5e-16,30):
+    print(alphavalue(M,i))
+    print("wv1")
+    wv1 = withoutprocagen(M, m, a, p0, e0, Y0, qS, phiS, qK, phiK, dist,Phi_phi0=Phi_phi0, Phi_theta0=Phi_theta0, Phi_r0=Phi_r0, mich=mich, dt=dt, T=T)
+    print('wv2')
+    wv2 = withprocagen(M,m,i,a,p0,e0,Y0,T=T,qS=qS,phiS=phiS,qK=qK,phiK=phiK,dist=dist,mich=mich, UltralightBoson=ulb)
 
-                moddedtraj = moddedwvcl.inspiral_generator(bh,10,a,p0,e0,1.,T=T, dt=dt, Phi_phi0=0, Phi_theta0=0, Phi_r0=0, **moddedwvcl.inspiralkwargs)
-                counter+=1
+    if len(wv1)<len(wv2):
+        wv1 = np.pad(wv1, (0,len(wv2)-len(wv1)))
+    elif len(wv2)<len(wv1):
+        wv2= np.pad(wv2, (0,len(wv1)-len(wv2)))
+
+    minlen = min([len(wv1), len(wv2)])
+    td = np.arange(minlen)*dt
+    #wv1 = wv1[:minlen]
+    #wv2 = wv2[:minlen]
+    print("Faithfulness")
+    fai.append([alphavalue(M,i),
+        Faithfulness(td,wv1,wv2)]
+    )
+    print("Proca mass: "+str(i)+"\n\tfaithfulness: "+str(fai[-1]))
+fai = np.asarray(fai)
+
+print(fai)
+
+plt.plot(np.array(fai)[:,0],np.array(fai)[:,1])
+plt.show()
