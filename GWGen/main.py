@@ -60,7 +60,7 @@ except (ImportError, ModuleNotFoundError) as e:
     usingcupy=False
 
 #data directory relative to local parent GWGen
-DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/Data/"
+DataDirectory = os.path.abspath(os.path.dirname(__file__)) + "/../Data/"
 #NCPUs = 3
 #DataDirectory = "/remote/pi213f/fell/DataStore/ProcaAroundKerrGW/GWGenOutput/"
 #NCPUs = 32
@@ -78,7 +78,7 @@ spin=1
 x0=1. #Initial Inclincation
 qS=np.pi/4 #Sky Location Polar Angle in solar system barycenter coordinate system
 phiS=0. #Sky Location Azimuthal Angle in solar system barycenter coordinate system
-qK=1e-6 #Initial BH Spin Polar Angle in solar system barycenter coordinate system
+qK=np.pi/4 #Initial BH Spin Polar Angle in solar system barycenter coordinate system
 phiK=0. #Initial BH Spin Azimuthal Angle in solar system barycenter coordinate system
 dist=1. #Distance to source (Mpc)
 mich=False #assume LISA long baseline response approximation
@@ -180,6 +180,9 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
     totalphasedifference = np.max(moddedphase)-np.max(unmoddedphase)
     totalorbitsdifference = totalphasedifference/((2*np.pi)**2)
 
+
+
+
     ####Mismatch
     print(prepend_print_string+"Calculating mismatch", file=stdout_file)
     #truncate waveforms to be same length
@@ -192,6 +195,7 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
 
     mismatch = get_mismatch(unmoddedwv, moddedwv,use_gpu=False)
     print(prepend_print_string+"Mismatch = {0}".format(mismatch), file=stdout_file)
+
     ####Faithfulness
     time = np.arange(minlen)*dt
     faith_dir = Faithfulness(time, moddedwv, unmoddedwv,use_gpu=False,data=True)
@@ -207,7 +211,19 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
             "PROCAMASS":PROCAMASS,
             "p0":p0,
             "e0":e0,
+            "x0":x0,
             "BHSpin":BHSpin,
+            "qS":qS,
+            "qK":qK,
+            "phiS":phiS,
+            "phiK":phiK,
+            "dist":dist,
+            "T":T,
+            "h1h1":faith_dir["h1h1"],
+            "h2h2":faith_dir["h2h2"],
+            "h1h2":faith_dir["h1h2"],
+            "UnmodifiedWaveformTime":len(unmoddedwv)*dt/YRSID_SI,
+            "ModifiedWaveformTime":len(moddedwv)*dt/YRSID_SI,
             "Trajectory Exit Reason": moddedwvcl.inspiral_generator.exit_reason,
             "unmodded final position": unmoddedtraj["p"][-1],
             "modded final position": moddedtraj["p"][-1],
@@ -330,9 +346,9 @@ if __name__=='__main__':
     ProcaMasses = sorted([round(i,22) for i in np.kron(tmparr1, [1e-16,1e-17,1e-18,1e-19])]) #eV   #again avoiding floating point errors
 
     subProcaMasses = sorted([round(i,22) for i in np.append(np.append(np.linspace(0.25e-17,5e-17,int((5-0.25)/0.125)),np.linspace(0.25e-18,5e-18,int((5-0.25)/0.125))),np.linspace(0.25e-16,5e-16,int((5-0.25)/0.125)))])
-    subSMBHMasses = [1e5,1e6,1e7]
-    subSMBHSpins = [0.9]
-    sube0list = [0.2]
+    subSMBHMasses = [1e7,1e5,1e6]
+    subSMBHSpins = [0.9,0.6,0.75]
+    sube0list = [0.2,0.4,0.6]
     #make sure output directory tree is built
     if not os.path.exists(DataDir+"Plots/"):
         os.mkdir(DataDir+"Plots/")

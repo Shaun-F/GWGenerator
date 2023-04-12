@@ -36,6 +36,32 @@ number_rege = re.compile("\d+")
 bhspin_rege = re.compile("BHSpin_\d+_\d+")
 
 
+#LISA response functions (Arxiv: http://arxiv.org/abs/gr-qc/0310125   equation 15)
+
+F1plus = lambda theta, phi, psi: (1/2)*(1 + np.cos(theta)**2)*np.cos(2*phi)*np.cos(2*psi) - np.cos(theta)*np.sin(2*phi)*np.sin(2*psi)
+F1cross = lambda theta, phi, psi: (1/2)*(1 + np.cos(theta)**2)*np.cos(2*phi)*np.sin(2*psi) + np.cos(theta)*np.sin(2*phi)*np.cos(2*psi)
+
+F2plus = lambda theta, phi, psi: (1/2)*(1 + np.cos(theta)**2)*np.sin(2*phi)*np.cos(2*psi) + np.cos(theta)*np.cos(2*phi)*np.sin(2*psi)
+F2cross = lambda theta, phi, psi: (1/2)*(1 + np.cos(theta)**2)*np.sin(2*phi)*np.sin(2*psi) - np.cos(theta)*np.cos(2*phi)*np.cos(2*psi)
+
+def detector_response(complex_strain,viewingangles = [0,0,0]):
+    wvplus, wvcross = complex_strain.real, complex_strain.imag
+    theta, phi, psi = viewingangles
+
+    F1plus_response = F1plus(theta, phi, psi)
+    F1cross_response = F1cross(theta, phi, psi)
+    F2plus_response = F2plus(theta, phi, psi)
+    F2corss_response = F2cross(theta, phi, psi)
+
+    response_1 = np.sqrt(3)/2 * (F1plus_response*wvplus + F1cross_response*wvcross)
+    response_2 = np.sqrt(3)/2 * (F2plus_response*wvplus + F2corss_response*wvcross)
+
+    return {"h1":response_1, "h2":response_2}
+
+
+
+
+
 def ProcaDataNameGenerator(bhspin, alpha, mode, overtone):
     bhspin_fraction = fractions.Fraction.from_float(bhspin).limit_denominator(1000)
     alpha_fraction = fractions.Fraction.from_float(alpha).limit_denominator(1000)
@@ -162,10 +188,13 @@ def ConvertToCCompatibleArray(arr,newdtype=None):
         ret = np.require(arr, dtype=newdtype, requirements=["C", "O", "A", "E"])
     return ret
 
-def WaveformInnerProduct(timedomain, h1,h2, use_gpu=False, maximize=False,Tmaximize=False):
+def WaveformInnerProduct(timedomain, h1,h2, use_gpu=False, maximize=False, viewingangle = [0,0,0]):
     """
     complex waveforms h1 and h2 are in time-domain with time domain in units of seconds. Compute inner product defined in
     """
+
+    assert h1.dtype=="complex" and h2.dtype=="complex", "Error: Input waveforms must be complex strain amplitudes, h = h_plus + i*h_cross"
+
     if use_gpu:
         xp = cp
         if isinstance(h1,np.ndarray):
@@ -197,69 +226,132 @@ def WaveformInnerProduct(timedomain, h1,h2, use_gpu=False, maximize=False,Tmaxim
     if len(timedomain)!=len(h1) or len(timedomain)!=len(h2):
         raise RuntimeError("time domain has different length than the waveforms")
 
-    if not use_gpu:
-        pyfftw.config.NUM_THREADS = multiprocessing.cpu_count()
-        pyfftw.interfaces.cache.enable()
+    #maximize over coalescence http://arxiv.org/abs/1603.02444
+    #sets phase of last element to zero, in accord with above paper
+    if maximize:
 
-        with sp.fft.set_backend(pyfftw.interfaces.scipy_fft):
-            h1_InFreq = sp.fft.fft(h1)
-            h2_InFreq = sp.fft.fft(h2)
+        N_angles = 5
+        sub_maxes = []
+        for i in range(N_angles):
+            h2 = h2*np.exp(1j* (i/N_angles) * 2 * np.pi) # Binary MUST be viewed face-on for this phase shift to work
+
+            responses_h1 = detector_response(h1, viewingangles = viewingangle)
+            responses_h2 = detector_response(h2, viewingangles = viewingangle)
+            h1resp1, h1resp2 = responses_h1["h1"], responses_h1["h2"]
+            h2resp1, h2resp2 = responses_h2["h1"], responses_h2["h2"]
+
+            if not use_gpu:
+                pyfftw.config.NUM_THREADS = multiprocessing.cpu_count()
+                pyfftw.interfaces.cache.enable()
+
+                with sp.fft.set_backend(pyfftw.interfaces.scipy_fft):
+                    h1resp1_f = sp.fft.fft(h1resp1)
+                    h1resp2_f = sp.fft.fft(h1resp2)
+                    h2resp1_f = sp.fft.fft(h2resp1)
+                    h2resp2_f = sp.fft.fft(h2resp2)
+                    timelength = len(timedomain)
+                    DeltaT = timedomain[1]-timedomain[0]
+                    frequency_range = sp.fft.fftfreq(int(timelength), d=float(DeltaT))
+            else:
+                h1resp1_f = xp.fft.fft(h1resp1)
+                h1resp2_f = xp.fft.fft(h1resp2)
+                h2resp1_f = xp.fft.fft(h2resp1)
+                h2resp2_f = xp.fft.fft(h2resp2)
+                timelength = len(timedomain)
+                DeltaT = timedomain[1]-timedomain[0]
+                frequency_range = xp.fft.fftfreq(int(timelength), d=float(DeltaT))
+
+
+
+            #drop zero frequency
+            frequency_domain = frequency_range[1:]
+            h1resp1_f = np.delete(h1resp1_f,0)
+            h1resp2_f = np.delete(h1resp2_f,0)
+            h2resp1_f = np.delete(h2resp1_f,0)
+            h2resp2_f = np.delete(h2resp2_f,0)
+            h2resp1_fstar = xp.conjugate(h2resp1_f)
+            h2resp2_fstar = xp.conjugate(h2resp2_f)
+            PowerSpectralDensity = LisaSensitivity(np.abs(frequency_domain))
+
+
+            Factor1 = xp.fft.ifft(h1resp1_f/PowerSpectralDensity)
+            Factor2 = xp.fft.ifft(xp.conjugate(h2resp1_f))
+            if use_gpu:
+                Factor1 = Factor1.get()
+                Factor2 = Factor2.get()
+            convolution_responses1 = sp.signal.convolve(Factor1, Factor2, method="fft", mode="full")
+
+            Factor3 = xp.fft.ifft(h1resp2_f/PowerSpectralDensity)
+            Factor4 = xp.fft.ifft(xp.conjugate(h2resp2_f))
+            if use_gpu:
+                Factor3 = Factor3.get()
+                Factor4 = Factor4.get()
+            convolution_responses2 = sp.signal.convolve(Factor3, Factor4, method="fft", mode="full")
+            sub_maxes.append(np.real(max(convolution_responses1 + convolution_responses2)))
+        absolute_max = max(sub_maxes)
+        return absolute_max
+
+
+
+    else:
+
+        responses_h1 = detector_response(h1, viewingangles = viewingangle)
+        responses_h2 = detector_response(h2, viewingangles = viewingangle)
+        h1resp1, h1resp2 = responses_h1["h1"], responses_h1["h2"]
+        h2resp1, h2resp2 = responses_h2["h1"], responses_h2["h2"]
+
+        if not use_gpu:
+            pyfftw.config.NUM_THREADS = multiprocessing.cpu_count()
+            pyfftw.interfaces.cache.enable()
+
+            with sp.fft.set_backend(pyfftw.interfaces.scipy_fft):
+                h1resp1_f = sp.fft.fft(h1resp1)
+                h1resp2_f = sp.fft.fft(h1resp2)
+                h2resp1_f = sp.fft.fft(h2resp1)
+                h2resp2_f = sp.fft.fft(h2resp2)
+                timelength = len(timedomain)
+                DeltaT = timedomain[1]-timedomain[0]
+                frequency_range = sp.fft.fftfreq(int(timelength), d=float(DeltaT))
+        else:
+            h1resp1_f = xp.fft.fft(h1resp1)
+            h1resp2_f = xp.fft.fft(h1resp2)
+            h2resp1_f = xp.fft.fft(h2resp1)
+            h2resp2_f = xp.fft.fft(h2resp2)
             timelength = len(timedomain)
             DeltaT = timedomain[1]-timedomain[0]
-            frequency_range = sp.fft.fftfreq(int(timelength), d=float(DeltaT))
-    else:
-        h1_InFreq = xp.fft.fft(h1)
-        h2_InFreq = xp.fft.fft(h2)
-        timelength = len(timedomain)
-        DeltaT = timedomain[1]-timedomain[0]
-        frequency_range = xp.fft.fftfreq(int(timelength), d=float(DeltaT))
+            frequency_range = xp.fft.fftfreq(int(timelength), d=float(DeltaT))
 
-    #Ignore zero frequency
-    frequency_domain = frequency_range[1:]
-    h1f = h1_InFreq[1:]
-    h2f = h2_InFreq[1:]
-    h2fstar = xp.conjugate(h2f)
-    PowerSpectralDensity = LisaSensitivity(np.abs(frequency_domain))
 
-    if maximize:
-        #maximize over coalescence phase and coalescence time
-        subresult = []
-        Factor1 = xp.fft.ifft(h1f/PowerSpectralDensity)
-        Factor2 = xp.fft.ifft(h2fstar)
+
+        #drop zero frequency
+        frequency_domain = frequency_range[1:]
+        h1resp1_f = np.delete(h1resp1_f,0)
+        h1resp2_f = np.delete(h1resp2_f,0)
+        h2resp1_f = np.delete(h2resp1_f,0)
+        h2resp2_f = np.delete(h2resp2_f,0)
+        h2resp1_fstar = xp.conjugate(h2resp1_f)
+        h2resp2_fstar = xp.conjugate(h2resp2_f)
+        PowerSpectralDensity = LisaSensitivity(np.abs(frequency_domain))
+
+
+
+        Factor1 = xp.fft.ifft(h1resp1_f/PowerSpectralDensity)
+        Factor2 = xp.fft.ifft(xp.conjugate(h2resp1_f))
         if use_gpu:
-            convolution = sp.signal.convolve(Factor1.get(), Factor2.get(), method="fft", mode="full")
-        else:
-            convolution = sp.signal.convolve(Factor1, Factor2, method="fft", mode="full")
-        for theta in np.linspace(0,2*np.pi,15):
-            resultarray = 2*np.real(convolution*np.exp(1j*theta))
-            maxinx = np.argmax(resultarray)
-            maxval = resultarray[maxinx]
-            subresult.append(maxval)
-        ret = max(subresult)
+            Factor1 = Factor1.get()
+            Factor2 = Factor2.get()
+        convolution_responses1 = sp.signal.convolve(Factor1, Factor2, method="fft", mode="full")
 
-    elif Tmaximize:
-        Factor1 = xp.fft.ifft(h1f/PowerSpectralDensity)
-        Factor2 = xp.fft.ifft(h2fstar)
+        Factor3 = xp.fft.ifft(h1resp2_f/PowerSpectralDensity)
+        Factor4 = xp.fft.ifft(xp.conjugate(h2resp2_f))
         if use_gpu:
-            convolution = sp.signal.convolve(Factor1.get(), Factor2.get(), method="fft", mode="full")
-        else:
-            convolution = sp.signal.convolve(Factor1, Factor2, method="fft", mode="full")
+            Factor3 = Factor3.get()
+            Factor4 = Factor4.get()
+        convolution_responses2 = sp.signal.convolve(Factor3, Factor4, method="fft", mode="valid")
+        fullconv = convolution_responses1 + convolution_responses2
+        res = fullconv[int(len(fullconv)/2)]
 
-        resultarray = 2*np.real(convolution)
-        ret = max(resultarray)
-    else:
-        #dont perform maximization and instead take simple inner product
-        Factor1 = xp.fft.ifft(h1f/PowerSpectralDensity)
-        Factor2 = xp.fft.ifft(h2fstar)
-        if use_gpu:
-            convolution = sp.signal.convolve(Factor1.get(), Factor2.get(), method="fft", mode="full")
-        else:
-            convolution = sp.signal.convolve(Factor1, Factor2, method="fft", mode="full")
-        convolutionlength = int(len(convolution))+1
-
-        resultarray = 2*np.real(convolution)
-
-        ret = resultarray[int(convolutionlength/2)]
+        return np.real(res)
 
     del convolution, h1,h2,h2_InFreq,h1_InFreq,timelength,DeltaT,frequency_range,frequency_domain,h1f,h2f,h2fstar,PowerSpectralDensity
     if use_gpu:
@@ -295,7 +387,8 @@ def Faithfulness(timedomain, h1, h2,use_gpu=False, data=False):
         cp.get_default_pinned_memory_pool().free_all_blocks()
 
     if data:
-        return {"h1h1":h1h1, "h2h2":h2h2, "h1h2":h1h2,"faithfulness":ret}
+        retdir = {"h1h1":h1h1, "h2h2":h2h2, "h1h2":h1h2,"faithfulness":ret}
+        return retdir
     else:
         return ret
 
@@ -706,4 +799,30 @@ def WaveformInnerProduct(timedomain, h1,h2, fmin=0.0001, fmax=1,use_gpu=False, m
     return ret
 
 
+"""
+
+
+
+
+
+
+
+
+
+"""
+if maximize:
+    #maximize over coalescence phase and coalescence time
+    subresult = []
+    Factor1 = xp.fft.ifft(h1f/PowerSpectralDensity)
+    Factor2 = xp.fft.ifft(h2fstar)
+    if use_gpu:
+        convolution = sp.signal.convolve(Factor1.get(), Factor2.get(), method="fft", mode="full")
+    else:
+        convolution = sp.signal.convolve(Factor1, Factor2, method="fft", mode="full")
+    for theta in np.linspace(0,2*np.pi,15):
+        resultarray = np.real(convolution*np.exp(1j*theta))
+        maxinx = np.argmax(resultarray)
+        maxval = resultarray[maxinx]
+        subresult.append(maxval)
+    ret = max(subresult)
 """
