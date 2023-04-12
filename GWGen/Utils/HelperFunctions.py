@@ -312,9 +312,9 @@ def WaveformInnerProduct(timedomain, h1,h2, use_gpu=False, maximize=False, viewi
                 if use_gpu:
                     Factor1 = Factor1.get()
                     Factor2 = Factor2.get()
-                convolution_responses = np.asarray([sp.signal.convolve(Factor1[i], Factor2[i], method="fft", mode="valid").real for i in [0,1]])
-
-                fullconv = convolution_responses.sum()
+                convolutions = sp.signal.convolve(Factor1, Factor2, method="fft", mode="full")[[0,-1]].real
+                combined_convolutions = np.sum(convolutions,axis=0)
+                fullconv = np.max(combined_convolutions)
                 res = fullconv
 
         return np.real(res)
