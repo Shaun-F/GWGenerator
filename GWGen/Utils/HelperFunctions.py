@@ -1,4 +1,5 @@
 import time
+import os
 import fractions
 import numpy as np
 import scipy as sp
@@ -234,60 +235,44 @@ def WaveformInnerProduct(timedomain, h1,h2, use_gpu=False, maximize=False, viewi
         sub_maxes = []
         for i in range(N_angles):
             h2 = h2*np.exp(1j* (i/N_angles) * 2 * np.pi) # Binary MUST be viewed face-on for this phase shift to work
+            h1_responses = list(detector_response(h1, viewingangles = viewingangle).values())
+            h2_responses = list(detector_response(h2, viewingangles = viewingangle).values())
 
-            responses_h1 = detector_response(h1, viewingangles = viewingangle)
-            responses_h2 = detector_response(h2, viewingangles = viewingangle)
-            h1resp1, h1resp2 = responses_h1["h1"], responses_h1["h2"]
-            h2resp1, h2resp2 = responses_h2["h1"], responses_h2["h2"]
+            pyfftw.config.NUM_THREADS = multiprocessing.cpu_count()
+            pyfftw.interfaces.cache.enable()
+            with sp.fft.set_backend(pyfftw.interfaces.scipy_fft):
+                with sp.fft.set_workers(os.cpu_count() + 2):
+                    if not use_gpu:
 
-            if not use_gpu:
-                pyfftw.config.NUM_THREADS = multiprocessing.cpu_count()
-                pyfftw.interfaces.cache.enable()
+                        h1resp_f = sp.fft.fft(h1_responses)[:,1:] #drop zero frequency
+                        h2resp_f = sp.fft.fft(h2_responses)[:,1:]
+                        h2resp_f_star = np.conjugate(h2resp_f)
+                        timelength = len(timedomain)
+                        DeltaT = timedomain[1]-timedomain[0]
+                        frequency_range = sp.fft.fftfreq(int(timelength), d=float(DeltaT))[1:]
+                    else:
+                        h1resp_f = xp.fft.fft(h1_responses)[:,1:] #drop zero frequency
+                        h2resp_f = xp.fft.fft(h2_resonses)[:,1:]
+                        h2resp_f_star = np.conjugate(h2resp_f)
+                        timelength = len(timedomain)
+                        DeltaT = timedomain[1]-timedomain[0]
+                        frequency_range = xp.fft.fftfreq(int(timelength), d=float(DeltaT))[1:]
 
-                with sp.fft.set_backend(pyfftw.interfaces.scipy_fft):
-                    h1resp1_f = sp.fft.fft(h1resp1)
-                    h1resp2_f = sp.fft.fft(h1resp2)
-                    h2resp1_f = sp.fft.fft(h2resp1)
-                    h2resp2_f = sp.fft.fft(h2resp2)
-                    timelength = len(timedomain)
-                    DeltaT = timedomain[1]-timedomain[0]
-                    frequency_range = sp.fft.fftfreq(int(timelength), d=float(DeltaT))
-            else:
-                h1resp1_f = xp.fft.fft(h1resp1)
-                h1resp2_f = xp.fft.fft(h1resp2)
-                h2resp1_f = xp.fft.fft(h2resp1)
-                h2resp2_f = xp.fft.fft(h2resp2)
-                timelength = len(timedomain)
-                DeltaT = timedomain[1]-timedomain[0]
-                frequency_range = xp.fft.fftfreq(int(timelength), d=float(DeltaT))
+                    PowerSpectralDensity = LisaSensitivity(np.abs(frequency_range))
 
 
 
-            #drop zero frequency
-            frequency_domain = frequency_range[1:]
-            h1resp1_f = np.delete(h1resp1_f,0)
-            h1resp2_f = np.delete(h1resp2_f,0)
-            h2resp1_f = np.delete(h2resp1_f,0)
-            h2resp2_f = np.delete(h2resp2_f,0)
-            h2resp1_fstar = xp.conjugate(h2resp1_f)
-            h2resp2_fstar = xp.conjugate(h2resp2_f)
-            PowerSpectralDensity = LisaSensitivity(np.abs(frequency_domain))
+                    Factor1 = xp.fft.ifft(h1resp_f/PowerSpectralDensity)
+                    Factor2 = xp.fft.ifft(h2resp_f_star)
+                    if use_gpu:
+                        Factor1 = Factor1.get()
+                        Factor2 = Factor2.get()
 
+                    convolutions = sp.signal.convolve(Factor1, Factor2, method="fft", mode="full")[[0,-1]].real
+                    combined_convolutions = np.sum(convolutions, axis=0)
+                    submax = max(combined_convolutions)
+                    sub_maxes.append(submax)
 
-            Factor1 = xp.fft.ifft(h1resp1_f/PowerSpectralDensity)
-            Factor2 = xp.fft.ifft(xp.conjugate(h2resp1_f))
-            if use_gpu:
-                Factor1 = Factor1.get()
-                Factor2 = Factor2.get()
-            convolution_responses1 = sp.signal.convolve(Factor1, Factor2, method="fft", mode="full")
-
-            Factor3 = xp.fft.ifft(h1resp2_f/PowerSpectralDensity)
-            Factor4 = xp.fft.ifft(xp.conjugate(h2resp2_f))
-            if use_gpu:
-                Factor3 = Factor3.get()
-                Factor4 = Factor4.get()
-            convolution_responses2 = sp.signal.convolve(Factor3, Factor4, method="fft", mode="full")
-            sub_maxes.append(np.real(max(convolution_responses1 + convolution_responses2)))
         absolute_max = max(sub_maxes)
         return absolute_max
 
@@ -295,61 +280,42 @@ def WaveformInnerProduct(timedomain, h1,h2, use_gpu=False, maximize=False, viewi
 
     else:
 
-        responses_h1 = detector_response(h1, viewingangles = viewingangle)
-        responses_h2 = detector_response(h2, viewingangles = viewingangle)
-        h1resp1, h1resp2 = responses_h1["h1"], responses_h1["h2"]
-        h2resp1, h2resp2 = responses_h2["h1"], responses_h2["h2"]
+        h1_responses = list(detector_response(h1, viewingangles = viewingangle).values())
+        h2_responses = list(detector_response(h2, viewingangles = viewingangle).values())
 
-        if not use_gpu:
-            pyfftw.config.NUM_THREADS = multiprocessing.cpu_count()
-            pyfftw.interfaces.cache.enable()
+        pyfftw.config.NUM_THREADS = multiprocessing.cpu_count()
+        pyfftw.interfaces.cache.enable()
+        with sp.fft.set_backend(pyfftw.interfaces.scipy_fft):
+            with sp.fft.set_workers(os.cpu_count() + 2):
+                if not use_gpu:
 
-            with sp.fft.set_backend(pyfftw.interfaces.scipy_fft):
-                h1resp1_f = sp.fft.fft(h1resp1)
-                h1resp2_f = sp.fft.fft(h1resp2)
-                h2resp1_f = sp.fft.fft(h2resp1)
-                h2resp2_f = sp.fft.fft(h2resp2)
-                timelength = len(timedomain)
-                DeltaT = timedomain[1]-timedomain[0]
-                frequency_range = sp.fft.fftfreq(int(timelength), d=float(DeltaT))
-        else:
-            h1resp1_f = xp.fft.fft(h1resp1)
-            h1resp2_f = xp.fft.fft(h1resp2)
-            h2resp1_f = xp.fft.fft(h2resp1)
-            h2resp2_f = xp.fft.fft(h2resp2)
-            timelength = len(timedomain)
-            DeltaT = timedomain[1]-timedomain[0]
-            frequency_range = xp.fft.fftfreq(int(timelength), d=float(DeltaT))
+                    h1resp_f = sp.fft.fft(h1_responses)[:,1:] #drop zero frequency
+                    h2resp_f = sp.fft.fft(h2_responses)[:,1:]
+                    h2resp_f_star = np.conjugate(h2resp_f)
+                    timelength = len(timedomain)
+                    DeltaT = timedomain[1]-timedomain[0]
+                    frequency_range = sp.fft.fftfreq(int(timelength), d=float(DeltaT))[1:]
+                else:
+                    h1resp_f = xp.fft.fft(h1_responses)[:,1:] #drop zero frequency
+                    h2resp_f = xp.fft.fft(h2_resonses)[:,1:]
+                    h2resp_f_star = np.conjugate(h2resp_f)
+                    timelength = len(timedomain)
+                    DeltaT = timedomain[1]-timedomain[0]
+                    frequency_range = xp.fft.fftfreq(int(timelength), d=float(DeltaT))[1:]
 
-
-
-        #drop zero frequency
-        frequency_domain = frequency_range[1:]
-        h1resp1_f = np.delete(h1resp1_f,0)
-        h1resp2_f = np.delete(h1resp2_f,0)
-        h2resp1_f = np.delete(h2resp1_f,0)
-        h2resp2_f = np.delete(h2resp2_f,0)
-        h2resp1_fstar = xp.conjugate(h2resp1_f)
-        h2resp2_fstar = xp.conjugate(h2resp2_f)
-        PowerSpectralDensity = LisaSensitivity(np.abs(frequency_domain))
+                PowerSpectralDensity = LisaSensitivity(np.abs(frequency_range))
 
 
 
-        Factor1 = xp.fft.ifft(h1resp1_f/PowerSpectralDensity)
-        Factor2 = xp.fft.ifft(xp.conjugate(h2resp1_f))
-        if use_gpu:
-            Factor1 = Factor1.get()
-            Factor2 = Factor2.get()
-        convolution_responses1 = sp.signal.convolve(Factor1, Factor2, method="fft", mode="full")
+                Factor1 = xp.fft.ifft(h1resp_f/PowerSpectralDensity)
+                Factor2 = xp.fft.ifft(h2resp_f_star)
+                if use_gpu:
+                    Factor1 = Factor1.get()
+                    Factor2 = Factor2.get()
+                convolution_responses = np.asarray([sp.signal.convolve(Factor1[i], Factor2[i], method="fft", mode="valid").real for i in [0,1]])
 
-        Factor3 = xp.fft.ifft(h1resp2_f/PowerSpectralDensity)
-        Factor4 = xp.fft.ifft(xp.conjugate(h2resp2_f))
-        if use_gpu:
-            Factor3 = Factor3.get()
-            Factor4 = Factor4.get()
-        convolution_responses2 = sp.signal.convolve(Factor3, Factor4, method="fft", mode="valid")
-        fullconv = convolution_responses1 + convolution_responses2
-        res = fullconv[int(len(fullconv)/2)]
+                fullconv = convolution_responses.sum()
+                res = fullconv
 
         return np.real(res)
 
@@ -361,7 +327,7 @@ def WaveformInnerProduct(timedomain, h1,h2, use_gpu=False, maximize=False, viewi
 
 
 #Naive implementaion of faithfulness (without maximization over time and phase offsets)
-def Faithfulness(timedomain, h1, h2,use_gpu=False, data=False):
+def Faithfulness(timedomain, h1, h2,use_gpu=False, data=False, viewingangle = [0,0,0]):
     """
     time domain must be in units of seconds
     """
@@ -377,9 +343,9 @@ def Faithfulness(timedomain, h1, h2,use_gpu=False, data=False):
     assert len(timedomain)==len(h1), "time domain has different length than the waveforms. time domain length: {0} waveform 1 length: {1} waveform 2 length: {2}".format(len(timedomain), len(h1), len(h2))
 
 
-    h1h2 = WaveformInnerProduct(timedomain, h1, h2,use_gpu=use_gpu, maximize=True)
-    h1h1 = WaveformInnerProduct(timedomain, h1, h1,use_gpu=use_gpu)
-    h2h2 = WaveformInnerProduct(timedomain, h2, h2,use_gpu=use_gpu)
+    h1h2 = WaveformInnerProduct(timedomain, h1, h2,use_gpu=use_gpu, maximize=True, viewingangle = viewingangle)
+    h1h1 = WaveformInnerProduct(timedomain, h1, h1,use_gpu=use_gpu, viewingangle = viewingangle)
+    h2h2 = WaveformInnerProduct(timedomain, h2, h2,use_gpu=use_gpu, viewingangle = viewingangle)
     ret = h1h2/np.sqrt(h1h1*h2h2)
 
     if use_gpu:
