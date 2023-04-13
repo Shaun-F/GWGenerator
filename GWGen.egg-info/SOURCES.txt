@@ -296,7 +296,6 @@ GWGen/ProcaData/BHSpin_43_50_Alpha_1_50_Mode_1_Overtone_0.npz
 GWGen/ProcaData/BHSpin_43_50_Alpha_1_5_Mode_1_Overtone_0.npz
 GWGen/ProcaData/BHSpin_43_50_Alpha_21_100_Mode_1_Overtone_0.npz
 GWGen/ProcaData/BHSpin_43_50_Alpha_23_100_Mode_1_Overtone_0.npz
-GWGen/ProcaData/BHSpin_43_50_Alpha_27_100_Mode_1_Overtone_0.npz
 GWGen/ProcaData/BHSpin_43_50_Alpha_29_100_Mode_1_Overtone_0.npz
 GWGen/ProcaData/BHSpin_43_50_Alpha_2_25_Mode_1_Overtone_0.npz
 GWGen/ProcaData/BHSpin_43_50_Alpha_3_100_Mode_1_Overtone_0.npz
@@ -395,7 +394,6 @@ GWGen/ProcaData/BHSpin_9_10_Alpha_7_50_Mode_1_Overtone_0.npz
 GWGen/ProcaData/BHSpin_9_10_Alpha_8_25_Mode_1_Overtone_0.npz
 GWGen/ProcaData/BHSpin_9_10_Alpha_9_100_Mode_1_Overtone_0.npz
 GWGen/ProcaData/BHSpin_9_10_Alpha_9_50_Mode_1_Overtone_0.npz
-GWGen/ProcaData/__init__.py
 GWGen/UndressedFluxes/Fluxes.py
 GWGen/UndressedFluxes/__init__.py
 GWGen/Utils/BlackHoleEvolution.py
