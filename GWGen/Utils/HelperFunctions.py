@@ -280,8 +280,8 @@ def WaveformInnerProduct(timedomain, h1,h2, use_gpu=False, maximize=False, viewi
 
     else:
 
-        h1_responses = list(detector_response(h1, viewingangles = viewingangle).values())
-        h2_responses = list(detector_response(h2, viewingangles = viewingangle).values())
+        h1_responses = np.array(list(detector_response(h1, viewingangles = viewingangle).values()))
+        h2_responses = np.array(list(detector_response(h2, viewingangles = viewingangle).values()))
 
         pyfftw.config.NUM_THREADS = multiprocessing.cpu_count()
         pyfftw.interfaces.cache.enable()
