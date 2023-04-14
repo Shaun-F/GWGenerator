@@ -12,3 +12,7 @@ GWGen/error.*
 Rank*.dat
 dist/
 debugging/
+GWGen/NumericalData
+Analytic_Flux
+GWGen.*/
+Preliminaries/
