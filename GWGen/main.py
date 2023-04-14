@@ -198,7 +198,7 @@ def process(BHMASS, BHSpin,PROCAMASS,e0, plot=False,alphauppercutoff=0.335, alph
 
     ####Faithfulness
     time = np.arange(minlen)*dt
-    faith_dir = Faithfulness(time, moddedwv, unmoddedwv,use_gpu=False,data=True, viewingangle = [qS,phiS,0]))
+    faith_dir = Faithfulness(time, moddedwv, unmoddedwv,use_gpu=False,data=True, viewingangle = [qS,phiS,0])
     faith = faith_dir["faithfulness"]
     snr2 = faith_dir["h1h2"]
     print(prepend_print_string+"Faithfulness = {0}".format(faith), file=stdout_file)
