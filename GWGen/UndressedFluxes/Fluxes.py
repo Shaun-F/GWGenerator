@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import os
-from GWGen.NumericalData import *
 import pyAnalyticFluxes as Fluxes
 
 class FluxFunction():

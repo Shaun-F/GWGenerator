@@ -61,7 +61,6 @@ setup(
                 "GWGen.WFGenerator",
                 "GWGen.Utils",
                 "GWGen.UndressedFluxes",
-                "GWGen.NumericalData",
                 "GWGen.DressedFluxes",
                 "GWGen.ProcaData"
                 ],

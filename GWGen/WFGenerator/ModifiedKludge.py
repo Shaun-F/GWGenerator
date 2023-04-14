@@ -1,5 +1,4 @@
 from .Kludge import *
-from ..NumericalData import *
 from ..DressedFluxes import *
 from ..UndressedFluxes import *
 from few.waveform import AAKWaveformBase
