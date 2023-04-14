@@ -11,3 +11,4 @@ GWGen/output.*
 GWGen/error.*
 Rank*.dat
 dist/
+debugging/
