@@ -68,16 +68,16 @@ class ProcaSolution():
 
 	def ChangeInOrbitalConstants(self, SecondaryMass=1, SMBHMass=1):
 		MassRatio = SecondaryMass/SMBHMass
-		fractionalEnergyFlux = self.FractionalGWEFlux() #anonymous function in (t,p)
-		fractionalAngularMomentumFlux = self.FractionalGWLFlux() #anonymous function in (t,p)
+		fractionalEnergyFlux = self.FractionalGWEFlux() #anonymous function in (t,p,e)
+		fractionalAngularMomentumFlux = self.FractionalGWLFlux() #anonymous function in (t,p,e)
 		deltaEdeltaM = self.Kerr.dEdM() #anonymous function in (e,p)
 		deltaEdeltaa = self.Kerr.dEda() #anonymous function in (e,p)
 		deltaLdeltaM = self.Kerr.dLdM() #anonymous function in (e,p)
 		deltaLdeltaa = self.Kerr.dLda() #anonymous function in (e,p)
 		#Secondary Mass prefactor comes from expression for energy and angular momentum (converting specific constants to full constants)
 		#SMBH Mass inverse prefactor comes from full expression for derivatives of constants of motion
-		DeltaOrbitalEnergy = lambda t,e,p: MassRatio*(deltaEdeltaM(e,p)*fractionalEnergyFlux(t,p) + deltaEdeltaa(e,p)*fractionalAngularMomentumFlux(t,p))
-		DeltaOrbitalAngularMomentum = lambda t,e,p: MassRatio*(deltaLdeltaM(e,p)*fractionalEnergyFlux(t,p) + deltaLdeltaa(e,p)*fractionalAngularMomentumFlux(t,p))
+		DeltaOrbitalEnergy = lambda t,e,p: MassRatio*(deltaEdeltaM(e,p)*fractionalEnergyFlux(t,p,e) + deltaEdeltaa(e,p)*fractionalAngularMomentumFlux(t,p,e))
+		DeltaOrbitalAngularMomentum = lambda t,e,p: MassRatio*(deltaLdeltaM(e,p)*fractionalEnergyFlux(t,p,e) + deltaLdeltaa(e,p)*fractionalAngularMomentumFlux(t,p,e))
 
 		res = {"E": lambda t,e,p: DeltaOrbitalEnergy(t,e,p),"L": lambda t,e,p: DeltaOrbitalAngularMomentum(t,e,p)}
 		return res
@@ -85,7 +85,8 @@ class ProcaSolution():
 
 	def FractionalGWEFlux(self):
 		FractionalFactor = lambda p:self.FractionalEnergyDensity(p)**2
-		FractionalEnDen = lambda t,p: FractionalFactor(p)*self.BosonCloudGWEFlux(t)
+		semiminor_axis = lambda p,e: p/np.sqrt(1-e**2)
+		FractionalEnDen = lambda t,p,e: FractionalFactor(semiminor_axis(p,e))*self.BosonCloudGWEFlux(t)
 
 		return FractionalEnDen
 
@@ -93,7 +94,7 @@ class ProcaSolution():
 		fracenden = self.FractionalGWEFlux()
 		factor = lambda t: self.BosonWaveform.azimuthal_num()/(self.BosonWaveform.freq_gw(t))
 
-		ret = lambda t,p: fracenden(t,p)*factor(t)
+		ret = lambda t,p,e: fracenden(t,p,e)*factor(t)
 		return ret
 
 	def FractionalEnergyDensity(self, r):
