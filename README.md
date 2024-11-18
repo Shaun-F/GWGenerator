@@ -1,5 +1,5 @@
 # GWGenerator
-
+This code was created and used in [this work](https://journals.aps.org/prd/abstract/10.1103/PhysRevD.108.083010)
 ## Installation 
 
 1) First, follow the installation instruction for the FEW package (https://bhptoolkit.org/FastEMRIWaveforms/html/index.html) exactly.
